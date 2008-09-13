@@ -66,9 +66,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean attrOnNewLine;
     private boolean checkMe = true;
     private boolean closeStream = true;
+    private boolean dtdSpecified;
     private boolean hasContent;
     private boolean hasIndentedContent;
     private boolean inCommentedStart;
+    private boolean xsltSpecified;
 
     /**
      * Creates a WAX that writes to stdout.
@@ -315,12 +317,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public PrologWAX dtd(String filePath) {
+        if (dtdSpecified) {
+            throw new IllegalStateException("can't specify more than one DTD");
+        }
+
         if (checkMe) {
             if (state != State.IN_PROLOG) badState("dtd");
             XMLUtil.verifyURI(filePath);
         }
 
         dtdFilePath = filePath;
+        dtdSpecified = true;
         return this;
     }
 
@@ -592,7 +599,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
                 // EMMA incorrectly says this isn't called.
                 badState("pi");
             }
-            XMLUtil.verifyNMToken(target);
+            
+            // Special handling for this processing instruction
+            // since starting with "xml" is reserved.
+            if (!target.equals("xml-stylesheet")) XMLUtil.verifyNMToken(target);
         }
         
         hasContent = hasIndentedContent = true;
@@ -933,6 +943,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public PrologWAX xslt(String filePath) {
+        if (xsltSpecified) {
+            throw new IllegalStateException("can't specify more than one XSLT");
+        }
+
         if (checkMe) {
             // EMMA incorrectly says this isn't called.
             if (state != State.IN_PROLOG) badState("xslt");
@@ -940,6 +954,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             XMLUtil.verifyURI(filePath);
         }
 
+        xsltSpecified = true;
         return processingInstruction("xml-stylesheet",
             "type=\"text/xsl\" href=\"" + filePath + "\"");
     }

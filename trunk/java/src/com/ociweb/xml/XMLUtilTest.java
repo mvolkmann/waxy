@@ -71,6 +71,11 @@ public class XMLUtilTest {
     public void testIsNMToken() {
         assertTrue(XMLUtil.isNMToken("a1"));
         assertTrue(!XMLUtil.isNMToken("1a"));
+
+        // Name tokens cannot begin with "XML" in any case.
+        assertTrue(!XMLUtil.isNMToken("xmlFoo"));
+        assertTrue(!XMLUtil.isNMToken("XMLFoo"));
+        assertTrue(!XMLUtil.isNMToken("xMLFoo"));
     }
 
     @Test
