@@ -45,6 +45,16 @@ public interface StartTagWAX extends ElementWAX {
         boolean newLine, String prefix, String name, Object value);
 
     /**
+     * @see WAX#commentedStart(String)
+     */
+    StartTagWAX commentedStart(String name);
+
+    /**
+     * @see WAX#commentedStart(String, String)
+     */
+    StartTagWAX commentedStart(String prefix, String name);
+
+    /**
      * @see WAX#namespace(String)
      */
     StartTagWAX namespace(String uri);
