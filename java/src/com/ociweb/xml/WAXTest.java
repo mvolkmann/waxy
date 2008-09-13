@@ -119,6 +119,14 @@ public class WAXTest {
         wax.dtd("root.dtd"); // can't specify DTD after root element
     }
 
+    @Test(expected=IllegalStateException.class)
+    public void testBadDTDMultiple() throws IOException {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.dtd("one.dtd");
+        wax.dtd("two.dtd"); // can't specify two DTDs
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadElementName() {
         StringWriter sw = new StringWriter();
@@ -226,6 +234,14 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.start("root");
         wax.xslt("root.xslt"); // can't write pi after root element
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadXSLTMultiple() throws IOException {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.xslt("one.xslt");
+        wax.xslt("two.xslt"); // can't specify two XSLTs
     }
 
     @Test
@@ -627,5 +643,20 @@ public class WAXTest {
         String xml = "<?xml version=\"1.2\" encoding=\""
             + encoding + "\"?>\n<root/>";
         assertEquals(xml, baos.toString(encoding));
+    }
+
+    @Test
+    public void testXSLT() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.xslt("root.xslt");
+        wax.start("root");
+        wax.close();
+
+        String xml =
+            "<?xml-stylesheet type=\"text/xsl\" href=\"root.xslt\"?>\n" +
+            "<root/>";
+
+        assertEquals(xml, sw.toString());
     }
 }

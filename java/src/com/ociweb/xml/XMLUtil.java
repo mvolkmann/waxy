@@ -92,6 +92,10 @@ public class XMLUtil {
      */
     public static boolean isNMToken(String text) {
         if (text == null) return false;
+
+        // Names that start with "XML" in any case are reserved.
+        if (text.toLowerCase().startsWith("xml")) return false;
+
         return NMTOKEN_PATTERN.matcher(text).matches();
     }
 
