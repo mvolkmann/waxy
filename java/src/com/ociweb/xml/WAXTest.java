@@ -288,6 +288,26 @@ public class WAXTest {
     }
 
     @Test
+    public void testCommentedStart() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+
+        wax.start("root")
+           .commentedStart("child")
+           .child("grandchild", "some text")
+           .close();
+
+        String xml =
+            "<root>\n" +
+            "  <!--child>\n" +
+            "    <grandchild>some text</grandchild>\n" +
+            "  </child-->\n" +
+            "</root>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testDTD() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);

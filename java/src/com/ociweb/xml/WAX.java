@@ -67,6 +67,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean closeStream = true;
     private boolean hasContent;
     private boolean hasIndentedContent;
+    private boolean inCommentedStart;
 
     /**
      * Creates a WAX that writes to stdout.
@@ -279,6 +280,30 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         return this;
     }
+    
+    /**
+     * Writes a commented start tag for a given element name,
+     * but doesn't terminate it.
+     * @param name the element name
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX commentedStart(String name) {
+        return commentedStart(null, name);
+    }
+
+    /**
+     * Writes a commented start tag for a given element name,
+     * but doesn't terminate it.
+     * @param prefix the namespace prefix to used on the element
+     * @param name the element name
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX commentedStart(String prefix, String name) {
+        inCommentedStart = true;
+        start(prefix, name);
+        inCommentedStart = false;
+        return this;
+    }
 
     /**
      * Writes a DOCTYPE that associates a DTD with the XML document.
@@ -319,11 +344,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         // are no longer in scope.
         prefixesStack.pop();
 
+        // Check for hypen at beginning of element name
+        // which indicates that the commentedStart method was used.
+        boolean wasCommentedStart = name.charAt(0) == '-';
+
         if (hasContent) {
             if (hasIndentedContent) writeIndent();
-            write("</" + name + ">");
+            write("</");
+            write(wasCommentedStart ? name.substring(1) : name);
+            write(wasCommentedStart ? "-->" : ">");
         } else {
-            write("/>");
+            write(wasCommentedStart ? "/-->" : "/>");
         }
 
         hasContent = hasIndentedContent = true; // new setting for parent
@@ -648,6 +679,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes the start tag for a given element name, but doesn't terminate it.
+     * @param prefix the namespace prefix to used on the element
      * @param name the element name
      * @return the calling object to support chaining
      */
@@ -680,9 +712,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         boolean hasPrefix = prefix != null && prefix.length() > 0;
         String qName = hasPrefix ? prefix + ':' + name : name;
 
-        write('<' + qName);
-
-        parentStack.push(qName);
+        if (inCommentedStart) {
+            write("<!--" + qName);
+            // Add a "marker" to the element name on the stack
+            // so the end method knows to terminate the comment.
+            parentStack.push('-' + qName);
+        } else {
+            write('<' + qName);
+            parentStack.push(qName);
+        }
 
         // No namespace prefixes have been associated with this element yet.
         prefixesStack.push(null);
