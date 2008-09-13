@@ -1,0 +1,143 @@
+<project name="WAX" default="test">
+
+  <property name="classes.dir" value="build/classes"/>
+  <property name="coverage.dir" value="build/coverage"/>
+  <property name="coverage.classes.dir" value="${coverage.dir}/classes"/>
+  <property name="test" value="*"/>
+  <property name="test.dir" value="build/test"/>
+  <property name="test.classpath.id" value="classpath"/>
+
+  <property file="build.properties"/>
+
+  <import file="${coverage.tool}.xml"/>
+
+  <path id="classpath">
+    <pathelement location="${classes.dir}"/>
+    <pathelement location="${junit.jar}"/>
+  </path>
+
+  <target name="browse" description="opens a file using a web browser">
+    <exec os="Darwin" executable="open">
+      <arg line="-a /Applications/Safari.app ${file.path}"/>
+    </exec>
+    <exec os="Mac OS X" executable="open">
+      <arg line="-a /Applications/Safari.app ${file.path}"/>
+    </exec>
+    <exec os="Windows" executable="cmd.exe">
+      <arg line="/c start ${file.path}"/>
+    </exec>
+  </target>
+
+  <target name="cddemo" depends="compile"
+    description="runs the CD Demo application">
+    <java classname="CDDemo" classpathref="classpath" fork="true"/>
+  </target>
+
+  <target name="clean" depends="clean.test"
+    description="deletes all generated files">
+    <delete dir="build"/>
+    <delete dir="doc/api"/>
+  </target>
+
+  <target name="clean.test" description="deletes all generated files">
+    <delete dir="${test.dir}"/>
+  </target>
+
+  <target name="compile" depends="init"
+    description="compiles source files">
+    <javac srcdir="src" destdir="${classes.dir}"
+      classpathref="classpath" deprecation="on" debug="on"/>
+  </target>
+
+  <target name="init">
+    <mkdir dir="${classes.dir}"/>
+  </target>
+
+  <target name="javadoc" depends="compile"
+    description="generates javadoc from all .java files">
+    <delete dir="doc/api"/>
+    <mkdir dir="doc/api"/>
+    <javadoc destdir="doc/api" classpathref="classpath">
+      <fileset dir="src">
+        <include name="com/ociweb/xml/*.java"/>
+        <exclude name="**/*Test.java"/>
+      </fileset>
+    </javadoc>    
+    <copy todir="/Users/Mark/Documents/VolkmannWebSite/programming/WAX/doc/api">
+      <fileset dir="doc/api"/>
+    </copy>
+  </target>
+
+  <target name="jar" depends="compile"
+    description="creates a distributable JAR file">
+    <zip destfile="build/${ant.project.name}_${version}.jar">
+      <!--basedir="${classes.dir}"-->
+      <fileset dir="${classes.dir}">
+        <exclude name="*.class"/>
+        <exclude name="**/*Test.class"/>
+      </fileset>
+    </zip>
+  </target>
+
+  <target name="jar14" depends="jar"
+    description="creates a distributable JAR file for Java 1.4">
+    <taskdef name="retroweaver" 
+      classname="net.sourceforge.retroweaver.ant.RetroWeaverTask"> 
+      <classpath> 
+        <fileset dir="${retroweaver.dir}/lib" includes="**/*"/> 
+        <fileset dir="${retroweaver.dir}/release" includes="**/*"/> 
+      </classpath>
+    </taskdef> 
+    <retroweaver
+      inputjar="build/${ant.project.name}_${version}.jar"
+      outputjar="build/${ant.project.name}14_${version}.jar"/>
+    <echo>clients also need retroweaver-rt-2.0.6.jar in classpath</echo>
+  </target>
+
+  <target name="test" depends="clean.test, compile"
+   description="runs all JUnit tests">
+    <mkdir dir="${test.dir}"/>
+    <!--echo>test.classpath.id = ${test.classpath.id}</echo-->
+
+    <junit fork="true" printsummary="true">
+      <classpath refid="${test.classpath.id}"/>
+      <batchtest todir="${test.dir}">
+        <fileset dir="src" includes="**/${test}Test.java"/>
+      </batchtest>
+      <formatter type="xml"/>
+
+      <!-- Set EMMA-specifice properties. -->
+      <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma"/>
+      <jvmarg value="-Demma.coverage.out.merge=true"/>
+
+      <!-- Set Cobertura-specifice properties. -->
+      <jvmarg value="-Dnet.sourceforge.cobertura.datafile=${cobertura.datafile}"/>
+    </junit>
+
+    <junitreport toDir="${test.dir}">
+      <fileset dir="${test.dir}"/>
+      <report format="frames" todir="${test.dir}"/>
+    </junitreport>
+
+    <antcall target="browse">
+      <param name="file.path" value="${test.dir}/index.html"/>
+    </antcall>
+  </target>
+
+  <target name="tutorial" depends="compile"
+    description="runs the application">
+    <java classname="Tutorial" classpathref="classpath" fork="true"/>
+  </target>
+
+  <target name="zip" depends="clean"
+    description="creates a zip file containing all the files in this project">
+    <zip destfile="../${ant.project.name}_src_${version}.zip">
+      <fileset dir=".">
+        <include name="**"/>
+        <exclude name="nbproject/**"/>
+        <exclude name="doc/**"/>
+      </fileset>
+    </zip>
+  </target>
+
+</project>

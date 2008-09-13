@@ -1,0 +1,50 @@
+<!-- This Ant build file is meant to be imported by another one
+     that defines compile and test targets.
+     See http://cobertura.sourceforge.net/introduction.html
+     for information about the code coverage tool Cobertura.
+--> 
+<project name="coverage">
+
+  <path id="coverage.path">
+    <pathelement location="${cobertura.dir}/cobertura.jar"/>
+    <fileset dir="${cobertura.dir}/lib" includes="*.jar"/>
+  </path>
+
+  <path id="coverage.classpath">
+    <pathelement location="${coverage.classes.dir}"/>
+    <pathelement location="${junit.jar}"/>
+    <path refid="coverage.path"/>
+  </path>
+
+  <taskdef resource="tasks.properties" classpathref="coverage.path"/>
+
+  <target name="coverage" depends="instrument"
+    description="generates coverage report based on running all the tests">
+
+    <!-- Invokes the test target with a
+         new value for the test.classpath.id value. -->
+    <antcall target="test">
+      <param name="test.classpath.id" value="coverage.classpath"/>
+    </antcall>
+
+    <cobertura-report datafile="${cobertura.datafile}"
+      srcdir="src" destdir="${coverage.dir}"/>
+
+    <antcall target="browse">
+      <param name="file.path" value="${coverage.dir}/index.html"/>
+    </antcall>
+  </target>
+
+  <target name="instrument" depends="compile"
+    description="instruments .class files for use with coverage tool">
+    <delete dir="${coverage.classes.dir}"/>
+    <mkdir dir="${coverage.classes.dir}"/>
+    <cobertura-instrument todir="${coverage.classes.dir}"
+      datafile="${cobertura.datafile}">
+      <fileset dir="${classes.dir}">
+        <include name="**/*.class"/>
+      </fileset>
+    </cobertura-instrument>
+  </target>
+
+</project>

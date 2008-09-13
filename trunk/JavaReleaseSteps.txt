@@ -1,0 +1,25 @@
+Steps to create a new WAX for Java release
+
+- change the version property in build.properties
+- open a Terminal window
+- cd Programming/XML/WAX/Java
+- run "ant zip jar javadoc"
+- copy the doc/api directory to VolkmannWebSite/programming/WAX/Java/doc
+- browse to http://code.google.com/p/waxy/
+- click the "Downloads" tab
+
+- click the "New Download" link
+- for "Summary", enter "source"
+- press the "Choose File" button
+- select the "WAX_src_{version}.zip" file in Programming/XML/WAX
+- press the "Submit File" button
+
+- click the "New Download" link
+- for "Summary", enter "binary"
+- press the "Choose File" button
+- select the "WAX_{version}.jar" file in Programming/XML/WAX/Java/build
+- press the "Submit File" button
+
+- open a Terminal window
+- cd Documents/VolkmannWebSite
+- enter "./release"
