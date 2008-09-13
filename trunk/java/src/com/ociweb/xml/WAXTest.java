@@ -1,12 +1,15 @@
 package com.ociweb.xml;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
@@ -609,5 +612,20 @@ public class WAXTest {
 
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root/>";
         assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testXMLDeclarationNonDefaultEncoding()
+    throws UnsupportedEncodingException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        String encoding = "UTF-16";
+        OutputStreamWriter osw = new OutputStreamWriter(baos, encoding);
+        WAX wax = new WAX(osw, WAX.Version.V1_2);
+        wax.setIndent(null);
+        wax.start("root").close();
+
+        String xml = "<?xml version=\"1.2\" encoding=\""
+            + encoding + "\"?>\n<root/>";
+        assertEquals(xml, baos.toString(encoding));
     }
 }
