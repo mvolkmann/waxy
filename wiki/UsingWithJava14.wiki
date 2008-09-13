@@ -1,11 +1,9 @@
-#Using WAX with Java 1.4
-
 = Introduction =
 
 WAX for Java 1.4 requires the use of Retroweaver.
 
 = Details =
 
-In addition to including WAX14_{version}.jar in the classpath,
+In addition to including WAX14__{version}.jar in the classpath,
 you also need to include retroweaver-rt-{version}.jar.
-This can be downloaded from ...
+This can be downloaded from http://retroweaver.sourceforge.net/.
