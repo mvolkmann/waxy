@@ -1,0 +1,54 @@
+<!-- This Ant build file is meant to be imported by another one
+     that defines compile and test targets. --> 
+<project name="coverage">
+
+  <path id="coverage.path" >
+    <pathelement location="${emma.lib.dir}/emma.jar" />
+    <pathelement location="${emma.lib.dir}/emma_ant.jar" />
+  </path>
+
+  <path id="coverage.classpath">
+    <pathelement location="${coverage.classes.dir}"/>
+    <pathelement location="${junit.jar}"/>
+    <path refid="coverage.path"/>
+  </path>
+
+  <taskdef resource="emma_ant.properties" classpathref="coverage.path"/>
+
+  <target name="coverage" depends="instrument"
+    description="generates coverage report based on running all the tests">
+
+    <!-- Invokes the test target with a
+         new value for the test.classpath.id value. -->
+    <antcall target="test">
+      <param name="test.classpath.id" value="coverage.classpath"/>
+    </antcall>
+
+    <emma enabled="true" >
+      <report sourcepath="src">
+        <fileset dir="${coverage.dir}">
+          <include name="*.emma"/>
+        </fileset>
+        <html outfile="${coverage.dir}/coverage.html"
+          depth="method" columns="name,class,method,block,line"/>
+      </report>
+    </emma>
+
+    <antcall target="browse">
+      <param name="file.path" value="${coverage.dir}/coverage.html"/>
+    </antcall>
+  </target>    
+
+  <target name="instrument" depends="compile"
+    description="instruments .class files for use with coverage tool">
+    <delete dir="${coverage.classes.dir}"/>
+    <mkdir dir="${coverage.classes.dir}"/>
+    <emma enabled="true">
+      <instr instrpath="${classes.dir}"
+        destdir="${coverage.classes.dir}"
+        metadatafile="${coverage.dir}/metadata.emma"
+        merge="true"/>
+    </emma>
+  </target>    
+
+</project>
