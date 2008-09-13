@@ -71,7 +71,6 @@
   <target name="jar" depends="compile"
     description="creates a distributable JAR file">
     <zip destfile="build/${ant.project.name}_${version}.jar">
-      <!--basedir="${classes.dir}"-->
       <fileset dir="${classes.dir}">
         <exclude name="*.class"/>
         <exclude name="**/*Test.class"/>
