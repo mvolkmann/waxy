@@ -60,6 +60,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private Stack<String> prefixesStack = new Stack<String>();
     private State state = State.IN_PROLOG;
     private String dtdFilePath;
+    private String encoding = XMLUtil.DEFAULT_ENCODING;
     private String indent = "  ";
     private Writer writer;
     private boolean attrOnNewLine;
@@ -106,6 +107,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public WAX(Writer writer) { this(writer, Version.UNSPECIFIED); }
     public WAX(Writer writer, Version version) {
         this.writer = writer;
+        if (writer instanceof OutputStreamWriter) {
+            encoding = ((OutputStreamWriter) writer).getEncoding();
+        }
         writeXMLDeclaration(version);
     }
 
@@ -920,7 +924,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         }
 
         write("<?xml version=\"" + versionString +
-            "\" encoding=\"" + XMLUtil.DEFAULT_ENCODING + "\"?>\n");
+            "\" encoding=\"" + encoding + "\"?>\n");
     }
 
     /**
