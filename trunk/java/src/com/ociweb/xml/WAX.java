@@ -114,9 +114,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public WAX(Writer writer, Version version) {
         this.writer = writer;
         useNonWindowsCR();
+
         if (writer instanceof OutputStreamWriter) {
             encoding = ((OutputStreamWriter) writer).getEncoding();
         }
+
+        // We could also consider using the value of
+        // the "file.encoding" system property.
+        // However, if we did that then users would have to remember to
+        // set that property back to the same value when reading the XML later.
+        // Also, many uses might expect WAX to use UTF-8 encoding
+        // regardless of the value of that property.
+
         writeXMLDeclaration(version);
     }
 
@@ -822,6 +831,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Uses \n for carriage returns which is appropriate
      * on every platform except Windows.
+     * Note that this is the default.
      */
     public void useNonWindowsCR() {
         cr = NONWINDOWS_CR;
@@ -830,6 +840,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Uses \r\n for carriage returns which is appropriate
      * only on the Windows platform.
+     * Note that this is not the default.
      */
     public void useWindowsCR() {
         cr = WINDOWS_CR;
