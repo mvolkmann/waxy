@@ -47,6 +47,8 @@
     description="compiles source files">
     <javac srcdir="src" destdir="${classes.dir}"
       classpathref="classpath" deprecation="on" debug="on"/>
+    <javac srcdir="test" destdir="${classes.dir}"
+      classpathref="classpath" deprecation="on" debug="on"/>
   </target>
 
   <target name="init">
@@ -60,7 +62,6 @@
     <javadoc destdir="doc/api" classpathref="classpath">
       <fileset dir="src">
         <include name="com/ociweb/xml/*.java"/>
-        <exclude name="**/*Test.java"/>
       </fileset>
     </javadoc>    
     <copy todir="/Users/Mark/Documents/VolkmannWebSite/programming/WAX/doc/api">
@@ -101,7 +102,7 @@
     <junit fork="true" printsummary="true">
       <classpath refid="${test.classpath.id}"/>
       <batchtest todir="${test.dir}">
-        <fileset dir="src" includes="**/${test}Test.java"/>
+        <fileset dir="test" includes="**/${test}Test.java"/>
       </batchtest>
       <formatter type="xml"/>
 

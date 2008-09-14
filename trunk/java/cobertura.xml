@@ -12,6 +12,7 @@
 
   <path id="coverage.classpath">
     <pathelement location="${coverage.classes.dir}"/>
+    <pathelement location="${classes.dir}"/>
     <pathelement location="${junit.jar}"/>
     <path refid="coverage.path"/>
   </path>
@@ -28,7 +29,10 @@
     </antcall>
 
     <cobertura-report datafile="${cobertura.datafile}"
-      srcdir="src" destdir="${coverage.dir}"/>
+      destdir="${coverage.dir}">
+      <fileset dir="src" includes="**/*.java"/>
+      <fileset dir="test" includes="**/*.java"/>
+    </cobertura-report>
 
     <antcall target="browse">
       <param name="file.path" value="${coverage.dir}/index.html"/>
