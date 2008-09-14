@@ -78,6 +78,10 @@ public class XMLUtilTest {
         assertTrue(!XMLUtil.isNMToken("xmlFoo"));
         assertTrue(!XMLUtil.isNMToken("XMLFoo"));
         assertTrue(!XMLUtil.isNMToken("xMLFoo"));
+
+        // Try some non-Latin Unicode characters.
+        String name = "\u3105\u0F20";
+        assertTrue(XMLUtil.isNMToken(name));
     }
 
     @Test
