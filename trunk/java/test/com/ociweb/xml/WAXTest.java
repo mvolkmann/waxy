@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import org.junit.Test;
@@ -612,11 +613,16 @@ public class WAXTest {
 
     @Test
     public void testNoArgCtor() {
-        //ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        //System.out = baos;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream originalSystemOut = System.out;
+        System.setOut(new PrintStream(baos));
+        try {
         WAX wax = new WAX();
         wax.start("root").close();
-        //assertEquals("<root/>", baos.toString());
+        assertEquals("<root/>", baos.toString());
+        } finally {
+            System.setOut(originalSystemOut);
+        }
     }
 
     @Test
