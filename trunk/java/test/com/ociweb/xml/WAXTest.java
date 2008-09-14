@@ -37,6 +37,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class WAXTest {
 
+    private String cr;
+
     private String getFileFirstLine(String filePath) throws IOException {
         FileReader fr = new FileReader(filePath);
         BufferedReader br = new BufferedReader(fr);
@@ -256,9 +258,15 @@ public class WAXTest {
         wax.nlText("text #3");
         wax.close();
 
-        String xml = "<root>\n" + "  text #1\n" + "  <child1>text</child1>\n"
-            + "  text #2\n" + "  <child2 a1=\"v1\"/>\n" + "  text #3\n"
-            + "</root>";
+        String cr = wax.getCR();
+        String xml =
+            "<root>" + cr +
+            "  text #1" + cr +
+            "  <child1>text</child1>" + cr +
+            "  text #2" + cr +
+            "  <child2 a1=\"v1\"/>" + cr +
+            "  text #3" + cr +
+            "</root>";
 
         assertEquals(xml, sw.toString());
     }
@@ -269,9 +277,10 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.start("root").blankLine().close();
 
+        String cr = wax.getCR();
         String xml =
-            "<root>\n" +
-            "\n" +
+            "<root>" + cr +
+            "" + cr +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -282,9 +291,10 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.start("root").cdata("1<2>3&4'5\"6").close();
 
+        String cr = wax.getCR();
         String xml =
-            "<root>\n" +
-            "  <![CDATA[1<2>3&4'5\"6]]>\n" +
+            "<root>" + cr +
+            "  <![CDATA[1<2>3&4'5\"6]]>" + cr +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -296,11 +306,12 @@ public class WAXTest {
         wax.comment("comment #1").comment("comment #2")
            .start("root").comment("comment #3").close();
 
+        String cr = wax.getCR();
         String xml =
-            "<!-- comment #1 -->\n" +
-            "<!-- comment #2 -->\n" +
-            "<root>\n" +
-            "  <!-- comment #3 -->\n" +
+            "<!-- comment #1 -->" + cr +
+            "<!-- comment #2 -->" + cr +
+            "<root>" + cr +
+            "  <!-- comment #3 -->" + cr +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -316,11 +327,12 @@ public class WAXTest {
            .child("grandchild", "some text")
            .close();
 
+        String cr = wax.getCR();
         String xml =
-            "<root>\n" +
-            "  <!--child>\n" +
-            "    <grandchild>some text</grandchild>\n" +
-            "  </child-->\n" +
+            "<root>" + cr +
+            "  <!--child>" + cr +
+            "    <grandchild>some text</grandchild>" + cr +
+            "  </child-->" + cr +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -334,8 +346,9 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
+        String cr = wax.getCR();
         String xml =
-            "<!DOCTYPE root SYSTEM \"http://www.ociweb.com/xml/root.dtd\">\n" +
+            "<!DOCTYPE root SYSTEM \"http://www.ociweb.com/xml/root.dtd\">" + cr +
             "<root/>";
 
         assertEquals(xml, sw.toString());
@@ -416,10 +429,14 @@ public class WAXTest {
     public void testIndentByNum() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(2);
+        wax.setIndent(1);
         wax.start("root").child("child", "text").close();
 
-        String xml = "<root>\n" + "  <child>text</child>\n" + "</root>";
+        String cr = wax.getCR();
+        String xml =
+            "<root>" + cr +
+            " <child>text</child>" + cr +
+            "</root>";
         assertEquals(xml, sw.toString());
     }
 
@@ -427,10 +444,36 @@ public class WAXTest {
     public void testIndentByString() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent("  ");
+
+        wax.setIndent(" "); // 1 space
         wax.start("root").child("child", "text").close();
 
-        String xml = "<root>\n" + "  <child>text</child>\n" + "</root>";
+        String cr = wax.getCR();
+        String xml =
+            "<root>" + cr +
+            " <child>text</child>" + cr +
+            "</root>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testIndentByStringWeird() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+
+        // Can set indent to anything if "trust me" is true.
+        wax.setTrustMe(true);
+        String indent = "abc";
+        wax.setIndent(indent); // weird indentation characters
+        wax.setTrustMe(false);
+
+        wax.start("root").child("child", "text").close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<root>" + cr +
+            indent + "<child>text</child>" + cr +
+            "</root>";
         assertEquals(xml, sw.toString());
     }
 
@@ -488,8 +531,9 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
+        String cr = wax.getCR();
         String xml =
-            "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>\n" +
+            "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>" + cr +
             "<root/>";
         assertEquals(xml, sw.toString());
     }
@@ -533,12 +577,13 @@ public class WAXTest {
            .namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
            .close();
 
-        String xml = "<root\n" +
-            "  xmlns=\"http://www.ociweb.com/tns1\"\n" +
-            "  xmlns:tns2=\"http://www.ociweb.com/tns2\"\n" +
-            "  xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"\n" +
+        String cr = wax.getCR();
+        String xml = "<root" + cr +
+            "  xmlns=\"http://www.ociweb.com/tns1\"" + cr +
+            "  xmlns:tns2=\"http://www.ociweb.com/tns2\"" + cr +
+            "  xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" + cr +
             "  xsi:schemaLocation=\"" +
-            "http://www.ociweb.com/tns1 tns1.xsd\n" +
+            "http://www.ociweb.com/tns1 tns1.xsd" + cr +
             "    http://www.ociweb.com/tns2 tns2.xsd" +
             "\"/>";
         assertEquals(xml, sw.toString());
@@ -599,6 +644,34 @@ public class WAXTest {
     }
 
     @Test
+    public void testUseNonWindowsCR() {
+        WAX wax = new WAX();
+        wax.useNonWindowsCR();
+        assertEquals("\n", wax.getCR());
+
+        // Most of the other tests verify that
+        // this CR is actually used in the output.
+    }
+
+    @Test
+    public void testUseWindowsCR() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.useWindowsCR();
+        wax.start("root")
+           .child("child", "text")
+           .close();
+
+        String cr = wax.getCR();
+        assertEquals("\r\n", cr);
+
+        String xml = "<root>" + cr +
+            "  <child>text</child>" + cr +
+            "</root>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testWriteFile() throws IOException {
         String filePath = "build/temp.xml";
         WAX wax = new WAX(filePath);
@@ -626,7 +699,10 @@ public class WAXTest {
         wax.setIndent(null);
         wax.start("root").close();
 
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root/>";
+        String cr = wax.getCR();
+        String xml =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + cr +
+            "<root/>";
         assertEquals(xml, sw.toString());
     }
 
@@ -640,8 +716,10 @@ public class WAXTest {
         wax.setIndent(null);
         wax.start("root").close();
 
-        String xml = "<?xml version=\"1.2\" encoding=\""
-            + encoding + "\"?>\n<root/>";
+        String cr = wax.getCR();
+        String xml =
+            "<?xml version=\"1.2\" encoding=\"" + encoding + "\"?>" + cr +
+            "<root/>";
         assertEquals(xml, baos.toString(encoding));
     }
 
@@ -653,8 +731,9 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
+        String cr = wax.getCR();
         String xml =
-            "<?xml-stylesheet type=\"text/xsl\" href=\"root.xslt\"?>\n" +
+            "<?xml-stylesheet type=\"text/xsl\" href=\"root.xslt\"?>" + cr +
             "<root/>";
 
         assertEquals(xml, sw.toString());

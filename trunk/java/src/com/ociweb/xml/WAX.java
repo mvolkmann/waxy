@@ -36,6 +36,9 @@ import java.util.*;
  */
 public class WAX implements PrologOrElementWAX, StartTagWAX {
 
+    public static final String NONWINDOWS_CR = "\n";
+    public static final String WINDOWS_CR = "\r\n";
+
     /**
      * The current state of XML output is used to verify that methods
      * in this class aren't called in an illogical order.
@@ -59,6 +62,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private Stack<String> parentStack = new Stack<String>();
     private Stack<String> prefixesStack = new Stack<String>();
     private State state = State.IN_PROLOG;
+    private String cr;
     private String dtdFilePath;
     private String encoding = XMLUtil.DEFAULT_ENCODING;
     private String indent = "  ";
@@ -109,6 +113,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public WAX(Writer writer) { this(writer, Version.UNSPECIFIED); }
     public WAX(Writer writer, Version version) {
         this.writer = writer;
+        useNonWindowsCR();
         if (writer instanceof OutputStreamWriter) {
             encoding = ((OutputStreamWriter) writer).getEncoding();
         }
@@ -282,7 +287,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (parentStack.size() > 0) writeIndent();
 
         write("<!-- " + text + " -->");
-        if (willIndent() && parentStack.size() == 0) write('\n');
+        if (willIndent() && parentStack.size() == 0) write(cr);
 
         return this;
     }
@@ -396,6 +401,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public PrologWAX externalEntityDef(String name, String filePath) {
         return entityDef(name + " SYSTEM", filePath);
+    }
+
+    /**
+     * Gets the carriage return characters currently being used.
+     * @return the carriage return characters
+     */
+    public String getCR() {
+        return cr;
     }
 
     /**
@@ -610,36 +623,38 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (parentStack.size() > 0) writeIndent();
 
         write("<?" + target + ' ' + data + "?>");
-        if (willIndent() && parentStack.size() == 0) write('\n');
+        if (willIndent() && parentStack.size() == 0) write(cr);
 
         return this;
     }
 
     /**
      * Sets the indentation characters to use.
-     * The only valid values are
+     * Unless "trust me" is set to true, the only valid values are
      * a single tab, one or more spaces, an empty string, or null.
      * Passing "" causes elements to be output on separate lines,
      * but not indented.
      * Passing null causes all output to be on a single line.
      */
     public void setIndent(String indent) {
-        boolean valid =
-            indent == null || indent.length() == 0 || "\t".equals(indent);
-        
-        if (!valid) {
-            // It can only be valid now if every character is a space.
-            valid = true; // assume
-            for (int i = 0; i < indent.length(); ++i) {
-                if (indent.charAt(i) != ' ') {
-                    valid = false;
-                    break;
+        if (checkMe) {
+            boolean valid =
+                indent == null || indent.length() == 0 || "\t".equals(indent);
+            
+            if (!valid) {
+                // It can only be valid now if every character is a space.
+                valid = true; // assume
+                for (int i = 0; i < indent.length(); ++i) {
+                    if (indent.charAt(i) != ' ') {
+                        valid = false;
+                        break;
+                    }
                 }
             }
-        }
-        
-        if (!valid) {
-            throw new IllegalArgumentException("invalid indent value");
+            
+            if (!valid || (indent != null && indent.length() > 4)) {
+                throw new IllegalArgumentException("invalid indent value");
+            }
         }
         
         this.indent = indent;
@@ -656,7 +671,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
                 "can't indent a negative number of spaces");
         }
 
-        if (numSpaces > 4) {
+        if (checkMe && numSpaces > 4) {
             throw new IllegalArgumentException(
                 numSpaces + " is an unreasonable indentation");
         }
@@ -791,10 +806,26 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             if (escape) text = XMLUtil.escape(text);
             write(text);
         } else if (newLine) {
-            write('\n');
+            write(cr);
         }
 
         return this;
+    }
+
+    /**
+     * Uses \n for carriage returns which is appropriate
+     * on every platform except Windows.
+     */
+    public void useNonWindowsCR() {
+        cr = NONWINDOWS_CR;
+    }
+
+    /**
+     * Uses \r\n for carriage returns which is appropriate
+     * only on the Windows platform.
+     */
+    public void useWindowsCR() {
+        cr = WINDOWS_CR;
     }
 
     /**
@@ -852,18 +883,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             write(" [");
 
             for (String entityDef : entityDefs) {
-                if (willIndent()) write('\n' + indent);
+                if (willIndent()) write(cr + indent);
                 write("<!ENTITY " + entityDef + '>');
             }
 
-            if (willIndent()) write('\n');
+            if (willIndent()) write(cr);
             write(']');
 
             entityDefs.clear();
         }
 
         write('>');
-        if (willIndent()) write('\n');
+        if (willIndent()) write(cr);
     }
 
     /**
@@ -873,7 +904,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private void writeIndent() {
         if (!willIndent()) return;
 
-        write('\n');
+        write(cr);
         int size = parentStack.size();
         for (int i = 0; i < size; ++i) write(indent);
     }
@@ -895,7 +926,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             // If not the first pair output ...
             if (schemaLocation.length() > 0) {
                 if (willIndent()) {
-                    schemaLocation += '\n';
+                    schemaLocation += cr;
                     int size = parentStack.size();
                     for (int i = 0; i <= size; ++i) {
                         schemaLocation += indent;
@@ -934,7 +965,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         }
 
         write("<?xml version=\"" + versionString +
-            "\" encoding=\"" + encoding + "\"?>\n");
+            "\" encoding=\"" + encoding + "\"?>" + cr);
     }
 
     /**
