@@ -69,6 +69,8 @@ public class XMLUtilTest {
 
     @Test
     public void testIsNMToken() {
+        assertTrue(!XMLUtil.isNMToken(null));
+
         assertTrue(XMLUtil.isNMToken("a1"));
         assertTrue(!XMLUtil.isNMToken("1a"));
 
@@ -90,5 +92,10 @@ public class XMLUtilTest {
         assertTrue(XMLUtil.isVersion("1.1"));
         assertTrue(XMLUtil.isVersion("1.2"));
         assertTrue(!XMLUtil.isVersion("1.3"));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testVerifyVersion() {
+        XMLUtil.verifyVersion("2.0");
     }
 }
