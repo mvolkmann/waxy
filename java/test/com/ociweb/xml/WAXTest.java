@@ -451,7 +451,7 @@ public class WAXTest {
     public void testEmpty() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").close();
 
         assertEquals("<root/>", sw.toString());
@@ -461,7 +461,7 @@ public class WAXTest {
     public void testEntityDef() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.entityDef("name", "value").start("root").close();
 
         String xml = "<!DOCTYPE root [<!ENTITY name \"value\">]><root/>";
@@ -472,7 +472,7 @@ public class WAXTest {
     public void testExternalEntityDef() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.externalEntityDef("name", "value").start("root").close();
 
         String xml = "<!DOCTYPE root [<!ENTITY name SYSTEM \"value\">]><root/>";
@@ -483,7 +483,7 @@ public class WAXTest {
     public void testEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").text("abc<def>ghi'jkl\"mno&pqr").close();
 
         String xml =
@@ -495,7 +495,7 @@ public class WAXTest {
     public void testExtraEnd() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").end().end().close();
     }
 
@@ -511,7 +511,7 @@ public class WAXTest {
         wax.setIndent("\t");
         assertEquals("\t", wax.getIndent());
 
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         assertEquals(null, wax.getIndent());
 
         wax.setIndent("");
@@ -574,7 +574,7 @@ public class WAXTest {
     public void testNamespace() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root")
            .namespace("http://www.ociweb.com/tns1")
            .namespace("tns2", "http://www.ociweb.com/tns2")
@@ -623,11 +623,18 @@ public class WAXTest {
     public void testNoIndent() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").child("child", "text").close();
 
         String xml = "<root><child>text</child></root>";
         assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testNoIndentOrCRs() {
+        WAX wax = new WAX();
+        wax.noIndentsOrCRs();
+        assertEquals(null, wax.getIndent());
     }
 
     @Test(expected=IllegalStateException.class)
@@ -657,7 +664,7 @@ public class WAXTest {
     public void testProcessingInstructionAfterPrologue() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root");
         wax.processingInstruction("target", "data");
         wax.close();
@@ -670,7 +677,7 @@ public class WAXTest {
     public void testPrefix() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("foo", "root")
            .attr("bar", "baz")
            // Note that the namespace is defined after it is used,
@@ -708,7 +715,7 @@ public class WAXTest {
     public void testSchemasWithoutIndent() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root")
            .namespace(null, "http://www.ociweb.com/tns1", "tns1.xsd")
            .namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
@@ -729,7 +736,7 @@ public class WAXTest {
     public void testText() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").text("text").close();
 
         assertEquals("<root>text</root>", sw.toString());
@@ -750,7 +757,7 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.setTrustMe(true);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         // Since error checking is turned off,
         // invalid element names and unescaped text are allowed.
         wax.start("123").text("<>&'\"").close();
@@ -790,7 +797,7 @@ public class WAXTest {
     public void testWriteFile() throws IOException {
         String filePath = "build/temp.xml";
         WAX wax = new WAX(filePath);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").text("text").close();
         assertEquals("<root>text</root>", getFileFirstLine(filePath));
         new File(filePath).delete();
@@ -801,7 +808,7 @@ public class WAXTest {
         String filePath = "build/temp.xml";
         FileOutputStream fos = new FileOutputStream(filePath);
         WAX wax = new WAX(fos);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").text("text").close();
         assertEquals("<root>text</root>", getFileFirstLine(filePath));
         new File(filePath).delete();
@@ -811,7 +818,7 @@ public class WAXTest {
     public void testXMLDeclaration() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw, WAX.Version.V1_0);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").close();
 
         String cr = wax.getCR();
@@ -828,7 +835,7 @@ public class WAXTest {
         String encoding = "UTF-16";
         OutputStreamWriter osw = new OutputStreamWriter(baos, encoding);
         WAX wax = new WAX(osw, WAX.Version.V1_2);
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("root").close();
 
         String cr = wax.getCR();
