@@ -601,7 +601,7 @@ public class WAXTest {
 
     @Test
     public void testNewInstanceString() {
-        PrologWAX pw = WAX.newInstance("filepath.xml");
+        PrologWAX pw = WAX.newInstance("build/temp.xml");
     }
 
     @Test
