@@ -9,6 +9,7 @@
 
   <path id="coverage.classpath">
     <pathelement location="${coverage.classes.dir}"/>
+    <pathelement location="${classes.dir}"/>
     <pathelement location="${junit.jar}"/>
     <path refid="coverage.path"/>
   </path>
