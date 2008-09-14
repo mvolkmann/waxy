@@ -680,6 +680,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
+     * Don't output indent output or write carriage returns.
+     * Write out the XML on a single line.
+     */
+    public void noIndentsOrCRs() {
+        setIndent(null);
+    }
+
+    /**
      * Gets whether "trust me" mode is enabled.
      * When disabled (the default),
      * proper order of method calls is verified,
