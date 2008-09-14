@@ -478,7 +478,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * Writes a namespace declaration in the start tag of the current element.
      * To define the default namespace, use the namespace method
      * that takes a single argument.
-     * @param prefix the namespace prefix
+     * @param prefix the namespace prefix (null or "" for default namespace)
      * @param uri the namespace URI
      * @return the calling object to support chaining
      */
