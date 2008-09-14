@@ -608,12 +608,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         String target, String data) {
 
         if (checkMe) {
-            if (state == State.AFTER_ROOT) {
-                // EMMA incorrectly says this isn't called.
-                badState("pi");
-            }
-            
-            // Special handling for this processing instruction
+            // Note that processing instructions can go anywhere
+            // except inside element start tags and attribute values.
+
+            // Provide special handling for the
+            // "xml-stylesheet" processing instruction
             // since starting with "xml" is reserved.
             if (!target.equals("xml-stylesheet")) XMLUtil.verifyNMToken(target);
         }

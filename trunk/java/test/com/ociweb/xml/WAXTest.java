@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -51,12 +52,44 @@ public class WAXTest {
     public void testAttributes() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setIndent(null);
-        wax.start("root").attr("a1", "v1").attr("a2", 2).close();
+        wax.start("root")
+           .namespace("foo", "http://www.ociweb.com/foo")
+           .attr("a1", "v1")
+           .attr("a2", 2)
+           .attr("foo", "a3", "bar")
+           .attr(true, "foo", "a4", "baz")
+           .close();
 
-        assertEquals("<root a1=\"v1\" a2=\"2\"/>", sw.toString());
+        String cr = wax.getCR();
+        String xml =
+            "<root" + cr +
+            "  xmlns:foo=\"http://www.ociweb.com/foo\"" + cr +
+            "  a1=\"v1\"" + cr +
+            "  a2=\"2\"" + cr +
+            "  foo:a3=\"bar\"" + cr +
+            "  foo:a4=\"baz\"/>";
+        assertEquals(xml, sw.toString());
     }
     
+    public void testBadAttributeTimingAllowed() {
+        WAX wax = new WAX();
+        wax.setTrustMe(true);
+        wax.start("root");
+        wax.text("text");
+        // Can call "attr" after calling "text" if "trust me" is true.
+        wax.attr("a1", "v1");
+        // This test passes if no exception is thrown.
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadAttributeTimingCaught() {
+        WAX wax = new WAX();
+        wax.start("root");
+        wax.text("text");
+        // Can't call "attr" after calling "text".
+        wax.attr("a1", "v1");
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadAttributeName() {
         StringWriter sw = new StringWriter();
@@ -89,13 +122,25 @@ public class WAXTest {
     }
 
     @Test(expected=IllegalStateException.class)
-    public void testBadCloseAlreadyClosed() throws IOException {
+    public void testBadCloseAlreadyClosedByWAX() throws IOException {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root");
         wax.close();
         wax.close(); // already closed
     }
+
+    /*
+    @Test(expected=RuntimeException.class)
+    public void testBadCloseAlreadyClosedByCaller() throws IOException {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        sw.close();
+        // Note that the Writer doesn't throw an exception in the next line!
+        wax.close(); // the Writer is already closed
+    }
+    */
 
     @Test(expected=IllegalStateException.class)
     public void testBadCloseThenWrite() throws IOException {
@@ -143,6 +188,14 @@ public class WAXTest {
         wax.end(); // haven't called start yet
     }
 
+    @Test(expected=IllegalStateException.class)
+    public void testBadEntityDef() {
+        WAX wax = new WAX();
+        // Can't define and entity after the root element start tag.
+        wax.start("root");
+        wax.entityDef("name", "value");
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadIndentBadChars() {
         StringWriter sw = new StringWriter();
@@ -169,6 +222,13 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.setIndent(5); // must be <= 4
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadNamespaceInElementContent() {
+        WAX wax = new WAX();
+        wax.start("root").text("text");
+        wax.namespace("tns", "http://www.ociweb.com/tns");
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -207,7 +267,17 @@ public class WAXTest {
     }
 
     @Test(expected=IllegalStateException.class)
-    public void testBadText() {
+    public void testBadTextAfterRootEnd() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.end();
+        // Can't output more text after root element is terminated.
+        wax.text("text");
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadTextInProlog() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.text("text"); // haven't called start yet
@@ -318,7 +388,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testCommentedStart() {
+    public void testCommentedStartWithContent() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
 
@@ -335,6 +405,29 @@ public class WAXTest {
             "  </child-->" + cr +
             "</root>";
 
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCommentedStartWithoutContent() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+
+        wax.start("root")
+           .commentedStart("child1")
+           .end()
+           .child("child2", "some text")
+           .close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<root>" + cr +
+            "  <!--child1/-->" + cr +
+            "  <child2>some text</child2>" + cr +
+            "</root>";
+
+        System.out.println("expected:\n" + xml);
+        System.out.println("actual:\n" + sw);
         assertEquals(xml, sw.toString());
     }
 
@@ -493,6 +586,28 @@ public class WAXTest {
             " xmlns:tns2=\"http://www.ociweb.com/tns2\"" +
             " xmlns:tns3=\"http://www.ociweb.com/tns3\"/>";
         assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testNewInstanceDefault() {
+        PrologWAX pw = WAX.newInstance();
+    }
+
+    @Test
+    public void testNewInstanceOutputStream() {
+        OutputStream os = System.out;
+        PrologWAX pw = WAX.newInstance(os);
+    }
+
+    @Test
+    public void testNewInstanceString() {
+        PrologWAX pw = WAX.newInstance("filepath.xml");
+    }
+
+    @Test
+    public void testNewInstanceWriter() {
+        StringWriter sw = new StringWriter();
+        PrologWAX pw = WAX.newInstance(sw);
     }
 
     @Test
