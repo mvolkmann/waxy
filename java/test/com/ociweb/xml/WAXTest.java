@@ -39,8 +39,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class WAXTest {
 
-    private String cr;
-
     private String getFileFirstLine(String filePath) throws IOException {
         FileReader fr = new FileReader(filePath);
         BufferedReader br = new BufferedReader(fr);
