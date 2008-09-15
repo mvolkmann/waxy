@@ -34,8 +34,8 @@ public class XMLUtilTest {
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testBadNMToken() {
-        XMLUtil.verifyNMToken("1a");
+    public void testBadName() {
+        XMLUtil.verifyName("1a");
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -68,20 +68,20 @@ public class XMLUtilTest {
     }
 
     @Test
-    public void testIsNMToken() {
-        assertTrue(!XMLUtil.isNMToken(null));
+    public void testIsName() {
+        assertTrue(!XMLUtil.isName(null));
 
-        assertTrue(XMLUtil.isNMToken("a1"));
-        assertTrue(!XMLUtil.isNMToken("1a"));
+        assertTrue(XMLUtil.isName("a1"));
+        assertTrue(!XMLUtil.isName("1a"));
 
         // Name tokens cannot begin with "XML" in any case.
-        assertTrue(!XMLUtil.isNMToken("xmlFoo"));
-        assertTrue(!XMLUtil.isNMToken("XMLFoo"));
-        assertTrue(!XMLUtil.isNMToken("xMLFoo"));
+        assertTrue(!XMLUtil.isName("xmlFoo"));
+        assertTrue(!XMLUtil.isName("XMLFoo"));
+        assertTrue(!XMLUtil.isName("xMLFoo"));
 
         // Try some non-Latin Unicode characters.
         String name = "\u3105\u0F20";
-        assertTrue(XMLUtil.isNMToken(name));
+        assertTrue(XMLUtil.isName(name));
     }
 
     @Test
