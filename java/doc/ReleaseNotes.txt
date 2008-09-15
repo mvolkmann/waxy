@@ -1,0 +1,4 @@
+WAX for Java Release Notes
+
+Version 0.9.7
+- addressed the following issues: 2, 7, 8, 10, 11, 13, 14, 15
