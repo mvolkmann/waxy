@@ -168,11 +168,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             }
 
             if (prefix != null) {
-                XMLUtil.verifyNMToken(prefix);
+                XMLUtil.verifyName(prefix);
                 pendingPrefixes.add(prefix);
             }
 
-            XMLUtil.verifyNMToken(name);
+            XMLUtil.verifyName(name);
         }
 
         boolean hasPrefix = prefix != null && prefix.length() > 0;
@@ -516,7 +516,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
                 badState("namespace");
             }
 
-            if (hasPrefix) XMLUtil.verifyNMToken(prefix);
+            if (hasPrefix) XMLUtil.verifyName(prefix);
             XMLUtil.verifyURI(uri);
             if (schemaPath != null) XMLUtil.verifyURI(schemaPath);
         }
@@ -623,7 +623,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             // Provide special handling for the
             // "xml-stylesheet" processing instruction
             // since starting with "xml" is reserved.
-            if (!target.equals("xml-stylesheet")) XMLUtil.verifyNMToken(target);
+            if (!target.equals("xml-stylesheet")) XMLUtil.verifyName(target);
         }
         
         hasContent = hasIndentedContent = true;
@@ -701,7 +701,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * When disabled (the default),
      * proper order of method calls is verified,
      * method parameter values are verified,
-     * element and attribute names are verified to be NMTokens,
+     * element and attribute names are verified to be Names,
      * and reserved characters in element/attribute text
      * are replaced by built-in entity references.
      * The main reason to enable "trust me" mode is for performance
@@ -739,10 +739,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
                 badState("start");
             }
             if (prefix != null) {
-                XMLUtil.verifyNMToken(prefix);
+                XMLUtil.verifyName(prefix);
                 pendingPrefixes.add(prefix);
             }
-            XMLUtil.verifyNMToken(name);
+            XMLUtil.verifyName(name);
         }
 
         // If this is the root element ...

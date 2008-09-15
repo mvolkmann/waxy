@@ -198,7 +198,7 @@ public class XMLUtil {
      * @param text the text
      * @return true if a name token; false otherwise
      */
-    public static boolean isNMToken(String text) {
+    public static boolean isName(String text) {
         if (text == null) return false;
 
         // Names that start with "XML" in any case are reserved.
@@ -253,8 +253,8 @@ public class XMLUtil {
      * @param text the text
      * @throws IllegalArgumentException if it isn't valid
      */
-    public static void verifyNMToken(String text) {
-        if (!isNMToken(text)) {
+    public static void verifyName(String text) {
+        if (!isName(text)) {
             throw new IllegalArgumentException(
                 '"' + text + "\" is an invalid NMTOKEN");
         }
