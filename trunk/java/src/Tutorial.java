@@ -49,7 +49,7 @@ public class Tutorial {
 
         out("Without indentation, on a single line:");
         wax = new WAX();
-        wax.setIndent(null);
+        wax.noIndentsOrCRs();
         wax.start("car").child("model", "Prius").close();
         // <car><model>Prius</model></car>
 
@@ -130,7 +130,7 @@ public class Tutorial {
         out("Associate an XML Schema:");
         wax = new WAX();
         wax.start("car").attr("year", 2008)
-           .namespace(null, "http://www.ociweb.com/cars", "car.xsd")
+           .namespace("", "http://www.ociweb.com/cars", "car.xsd")
            .child("model", "Prius").close();
         // <car year="2008"
         //   xmlns="http://www.ociweb.com/cars"
@@ -142,7 +142,7 @@ public class Tutorial {
         out("Associate multiple XML Schemas:");
         wax = new WAX();
         wax.start("car").attr("year", 2008)
-           .namespace(null, "http://www.ociweb.com/cars", "car.xsd")
+           .namespace("", "http://www.ociweb.com/cars", "car.xsd")
            .namespace("m", "http://www.ociweb.com/model", "model.xsd")
            .child("m", "model", "Prius").close();
         // <car year="2008"
