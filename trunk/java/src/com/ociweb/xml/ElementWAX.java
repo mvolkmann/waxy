@@ -59,11 +59,6 @@ public interface ElementWAX extends CommonWAX {
     ElementWAX end();
 
     /**
-     * @see WAX#nlText(String)
-     */
-    ElementWAX nlText(String text);
-
-    /**
      * @see WAX#text(String)
      */
     ElementWAX text(String text);
@@ -71,5 +66,5 @@ public interface ElementWAX extends CommonWAX {
     /**
      * @see WAX#text(String, boolean, boolean)
      */
-    ElementWAX text(String text, boolean newLine, boolean escape);
+    ElementWAX text(String text, boolean newLine);
 }

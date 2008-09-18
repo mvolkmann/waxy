@@ -320,11 +320,11 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root");
-        wax.nlText("text #1");
+        wax.text("text #1", true);
         wax.child("child1", "text");
-        wax.nlText("text #2");
+        wax.text("text #2", true);
         wax.start("child2").attr("a1", "v1").end();
-        wax.nlText("text #3");
+        wax.text("text #3", true);
         wax.close();
 
         String cr = wax.getCR();
@@ -761,8 +761,9 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.setTrustMe(true);
+        wax.setEscape(false);
         wax.noIndentsOrCRs();
-        // Since error checking is turned off,
+        // Since error checking and escaping are turned off,
         // invalid element names and unescaped text are allowed.
         wax.start("123").text("<>&'\"").close();
 

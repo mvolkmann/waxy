@@ -71,6 +71,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean checkMe = true;
     private boolean closeStream = true;
     private boolean dtdSpecified;
+    private boolean escape = true;
     private boolean hasContent;
     private boolean hasIndentedContent;
     private boolean inCommentedStart;
@@ -204,7 +205,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX blankLine() {
-        return nlText("");
+        return text("", true);
     }
 
     /**
@@ -221,7 +222,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             }
         }
 
-        return text("<![CDATA[" + text + "]]>", true, false);
+        boolean savedEscape = escape;
+        setEscape(false);
+        text("<![CDATA[" + text + "]]>", true);
+        setEscape(savedEscape);
+        return this;
     }
     
     /**
@@ -421,6 +426,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
+     * Determines whether attribute values and element text
+     * is currently being automatically escaped.
+     * @return true if being automatically escaped; false otherwise
+     */
+    public boolean getEscape() {
+        return escape;
+    }
+
+    /**
      * Gets the indentation characters being used.
      * @return the indentation characters
      */
@@ -599,15 +613,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Writes text preceded by a newline.
-     * @param text the text
-     * @return the calling object to support chaining
-     */
-    public ElementWAX nlText(String text) {
-        return text(text, true, checkMe);
-    }
-
-    /**
      * Writes a processing instruction.
      * @param target the processing instruction target
      * @param data the processing instruction data
@@ -633,6 +638,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         write("<?" + target + ' ' + data + "?>");
         if (willIndent() && parentStack.size() == 0) write(cr);
 
+        return this;
+    }
+
+    /**
+     * Sets whether attribute values and element text
+     * should be automatically escaped.
+     * This defaults to true.
+     * @return true if being automatically escaped; false otherwise
+     */
+    public WAX setEscape(boolean escape) {
+        this.escape = escape;
         return this;
     }
 
@@ -794,18 +810,16 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX text(String text) {
-        return text(text, false, checkMe);
+        return text(text, false);
     }
 
     /**
      * Writes text inside the content of the current element.
      * @param text the text
      * @param newLine true to output the text on a new line; false otherwise
-     * @param escape true to escape special characters in the text;
-     *               false to avoid checking for them
      * @return the calling object to support chaining
      */
-    public ElementWAX text(String text, boolean newLine, boolean escape) {
+    public ElementWAX text(String text, boolean newLine) {
         if (checkMe) {
             if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
                 // EMMA incorrectly says this isn't called.
