@@ -170,9 +170,9 @@ public class Tutorial {
         wax.entityDef("oci", "Object Computing, Inc.")
            .externalEntityDef("moreData", url + "moreData.xml")
            .start("root")
-           .text("The author works at &oci; in St. Louis, Missouri.",
-               true, false) // turning escaping off for entity reference
-           .text("&moreData;", true, false)
+           .setEscape(false) // turn escaping off for entity references
+           .text("The author works at &oci; in St. Louis, Missouri.", true)
+           .text("&moreData;", true)
            .close();
         //<!DOCTYPE root [
         //  <!ENTITY oci "Object Computing, Inc.">
