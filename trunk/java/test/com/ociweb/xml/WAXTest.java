@@ -515,18 +515,39 @@ public class WAXTest {
     }
 
     @Test
-    public void testDTD() {
+    public void testDTDPublic() {
+        // Testing with the ids for the strict form of XHTML.
+        String publicId = "-//W3C//DTD XHTML 1.0 Strict//EN";
+        String systemId = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
+
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.dtd("http://www.ociweb.com/xml/root.dtd");
+        wax.dtd(publicId, systemId);
         wax.start("root");
         wax.close();
 
         String cr = wax.getCR();
         String xml =
-            "<!DOCTYPE root SYSTEM \"http://www.ociweb.com/xml/root.dtd\">" + cr +
+            "<!DOCTYPE root PUBLIC \"" + publicId + "\" \"" +
+            systemId  + "\">" + cr +
             "<root/>";
+        assertEquals(xml, sw.toString());
+    }
 
+    @Test
+    public void testDTDSystem() {
+        String systemId = "http://www.ociweb.com/xml/root.dtd";
+
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.dtd(systemId);
+        wax.start("root");
+        wax.close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<!DOCTYPE root SYSTEM \"" + systemId  + "\">" + cr +
+            "<root/>";
         assertEquals(xml, sw.toString());
     }
 
