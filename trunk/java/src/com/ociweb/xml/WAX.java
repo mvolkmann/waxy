@@ -388,6 +388,21 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX end() {
+        return end(false);
+    }
+
+    /**
+     * Terminates the current element.
+     * It does so in the shorthand way (/&gt;)
+     * if the element has no content AND false is passed.
+     * Otherwise it does so in the long way (&lt;/name&gt;).
+     * The verbose option is useful in cases like the HTML script tag
+     * which cannot be terminated in the shorthand way
+     * even though it has no content.
+     * @param verbose true to not consider shorthand way; false to consider it
+     * @return the calling object to support chaining
+     */
+    public ElementWAX end(boolean verbose) {
         if (checkMe) {
             if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
                 // EMMA incorrectly says this isn't called.
@@ -409,7 +424,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         // which indicates that the commentedStart method was used.
         boolean wasCommentedStart = name.charAt(0) == '-';
 
-        if (hasContent) {
+        if (hasContent || verbose) {
+            if (verbose) write(">");
             if (hasIndentedContent) writeIndent();
             write("</");
             write(wasCommentedStart ? name.substring(1) : name);
@@ -787,7 +803,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public StartTagWAX start(String prefix, String name) {
         hasContent = hasIndentedContent = true;
         terminateStart();
-        hasContent = false;
+        hasContent = hasIndentedContent = false;
 
         if (checkMe) {
             if (state == State.AFTER_ROOT) {
