@@ -89,6 +89,7 @@ public class WAXTest {
         assertEquals(xml, sw.toString());
     }
     
+    @Test
     public void testBadAttributeTimingAllowed() {
         WAX wax = new WAX();
         wax.setTrustMe(true);
@@ -214,6 +215,14 @@ public class WAXTest {
         wax.entityDef("name", "value");
     }
 
+    @Test(expected=IllegalStateException.class)
+    public void testBadExtraEnd() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root").end().end().close();
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadIndentBadChars() {
         StringWriter sw = new StringWriter();
@@ -271,6 +280,13 @@ public class WAXTest {
            .close();
     }
 
+    @Test(expected=IllegalStateException.class)
+    public void testBadNoRoot() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.close();
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadPrefix() {
         StringWriter sw = new StringWriter();
@@ -299,6 +315,16 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.text("text"); // haven't called start yet
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testBadTrustMeFalse() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(false);
+        // Since error checking is turned on,
+        // element names must be valid and text is escaped.
+        wax.start("123").text("<>&'\"").close();
     }
 
     @Test(expected=IllegalStateException.class)
@@ -496,8 +522,6 @@ public class WAXTest {
             "  <child2>some text</child2>" + cr +
             "</root>";
 
-        System.out.println("expected:\n" + xml);
-        System.out.println("actual:\n" + sw);
         assertEquals(xml, sw.toString());
     }
 
@@ -525,6 +549,15 @@ public class WAXTest {
         wax.start("root").close();
 
         assertEquals("<root/>", sw.toString());
+    }
+
+    @Test
+    public void testEndVerbose() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").end(true).close();
+        String xml = "<root></root>";
+        assertEquals(xml, sw.toString());
     }
 
     @Test
@@ -559,14 +592,6 @@ public class WAXTest {
         String xml =
             "<root>abc&lt;def&gt;ghi&apos;jkl&quot;mno&amp;pqr</root>";
         assertEquals(xml, sw.toString());
-    }
-
-    @Test(expected=IllegalStateException.class)
-    public void testExtraEnd() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
-        wax.start("root").end().end().close();
     }
 
     @Test
@@ -712,13 +737,6 @@ public class WAXTest {
         assertEquals(null, wax.getIndent());
     }
 
-    @Test(expected=IllegalStateException.class)
-    public void testNoRoot() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.close();
-    }
-
     @Test
     public void testProcessingInstructionInPrologue() {
         StringWriter sw = new StringWriter();
@@ -815,16 +833,6 @@ public class WAXTest {
         wax.start("root").text("text").close();
 
         assertEquals("<root>text</root>", sw.toString());
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testTrustMeFalse() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.setTrustMe(false);
-        // Since error checking is turned on,
-        // element names must be valid and text is escaped.
-        wax.start("123").text("<>&'\"").close();
     }
 
     @Test
