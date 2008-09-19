@@ -50,8 +50,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         IN_PROLOG, IN_START_TAG, IN_ELEMENT, AFTER_ROOT
     }
 
-    public enum Version { UNSPECIFIED, V1_0, V1_1, V1_2 };
-
     private List<String> pendingPrefixes = new ArrayList<String>();
 
     // Using a TreeMap so keys are kept in sorted order.
@@ -75,6 +73,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean hasContent;
     private boolean hasIndentedContent;
     private boolean inCommentedStart;
+    private boolean outputStarted;
     private boolean xsltSpecified;
 
     /**
@@ -654,7 +653,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         String target, String data) {
 
         if (checkMe) {
-            // Note that processing instructions can go anywhere
+            // Processing instructions can go anywhere
             // except inside element start tags and attribute values.
 
             // Provide special handling for the
@@ -877,18 +876,26 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Uses \n for carriage returns which is appropriate
      * on every platform except Windows.
-     * Note that this is the default.
+     * This is the default.
      */
     public void useNonWindowsCR() {
+        if (outputStarted) {
+            throw new IllegalStateException(
+                "can't change CR characters after output has started");
+        }
         cr = NONWINDOWS_CR;
     }
 
     /**
      * Uses \r\n for carriage returns which is appropriate
      * only on the Windows platform.
-     * Note that this is not the default.
+     * This is not the default.
      */
     public void useWindowsCR() {
+        if (outputStarted) {
+            throw new IllegalStateException(
+                "can't change CR characters after output has started");
+        }
         cr = WINDOWS_CR;
     }
 
@@ -928,6 +935,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         try {
             writer.write(obj.toString());
+            outputStarted = true;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1011,7 +1019,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes an XML declaration.
-     * Note that regardless of indentation,
+     * Regardless of indentation,
      * a newline is always written after this.
      * @param version the XML version
      */

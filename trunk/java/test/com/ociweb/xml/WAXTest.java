@@ -301,6 +301,22 @@ public class WAXTest {
         wax.text("text"); // haven't called start yet
     }
 
+    @Test(expected=IllegalStateException.class)
+    public void testBadUseNonWindowsCR() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.useNonWindowsCR(); // can't call after output has started
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadUseWindowsCR() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.useWindowsCR(); // can't call after output has started
+    }
+
     @Test(expected=RuntimeException.class)
     public void testBadWrite() throws IOException {
         String filePath = "build/temp.xml";
@@ -877,7 +893,7 @@ public class WAXTest {
     @Test
     public void testXMLDeclaration() {
         StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw, WAX.Version.V1_0);
+        WAX wax = new WAX(sw, Version.V1_0);
         wax.noIndentsOrCRs();
         wax.start("root").close();
 
@@ -894,7 +910,7 @@ public class WAXTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         String encoding = "UTF-16";
         OutputStreamWriter osw = new OutputStreamWriter(baos, encoding);
-        WAX wax = new WAX(osw, WAX.Version.V1_2);
+        WAX wax = new WAX(osw, Version.V1_2);
         wax.noIndentsOrCRs();
         wax.start("root").close();
 

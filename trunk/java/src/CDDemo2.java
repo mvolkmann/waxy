@@ -1,6 +1,7 @@
 import com.ociweb.xml.ElementWAX;
 import com.ociweb.xml.PrologWAX;
 import com.ociweb.xml.StartTagWAX;
+import com.ociweb.xml.Version;
 import com.ociweb.xml.WAX;
 
 public class CDDemo2 {
@@ -8,7 +9,7 @@ public class CDDemo2 {
     public static void main(String[] args) {
         // Write to stdout with an XML declaration that specifies version 1.0.
         // If the version is omitted then no XML declaration will be written.
-        PrologWAX pw = (PrologWAX) new WAX(WAX.Version.V1_0);
+        PrologWAX pw = (PrologWAX) new WAX(Version.V1_0);
 
         pw.dtd("http://www.ociweb.com/xml/music.dtd");
         pw.xslt("artist.xslt");

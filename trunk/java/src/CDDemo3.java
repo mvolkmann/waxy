@@ -1,3 +1,4 @@
+import com.ociweb.xml.Version;
 import com.ociweb.xml.WAX;
 
 public class CDDemo3 {
@@ -5,7 +6,7 @@ public class CDDemo3 {
     public static void main(String[] args) {
         // Write to stdout with an XML declaration that specifies version 1.0.
         // If the version is omitted then no XML declaration will be written.
-        WAX wax = new WAX(WAX.Version.V1_0);
+        WAX wax = new WAX(Version.V1_0);
 
         wax.xslt("artist.xslt");
         wax.dtd("http://www.ociweb.com/xml/music.dtd");
