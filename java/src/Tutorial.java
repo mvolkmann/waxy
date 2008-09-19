@@ -1,3 +1,4 @@
+import com.ociweb.xml.Version;
 import com.ociweb.xml.WAX;
 
 /**
@@ -69,7 +70,7 @@ public class Tutorial {
         // </car>
 
         out("XML declaration:");
-        wax = new WAX(WAX.Version.V1_0);
+        wax = new WAX(Version.V1_0);
         wax.start("car").attr("year", 2008)
            .child("model", "Prius").close();
         // <?xml version="1.0" encoding="UTF-8"?>
