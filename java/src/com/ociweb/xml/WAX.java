@@ -302,6 +302,16 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public PrologOrElementWAX comment(String text) {
+        return comment(text, false);
+    }
+
+    /**
+     * Writes a comment (&lt;!-- text --&gt;).
+     * @param text the comment text (cannot contain "--")
+     * @param newLine true to output the text on a new line; false otherwise
+     * @return the calling object to support chaining
+     */
+    public PrologOrElementWAX comment(String text, boolean newLine) {
         // Comments can be output in any state.
 
         if (checkMe) XMLUtil.verifyComment(text);
@@ -310,7 +320,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         terminateStart();
         if (parentStack.size() > 0) writeIndent();
 
-        write("<!-- " + text + " -->");
+        if (newLine) {
+            write("<!--");
+            writeIndent();
+            write(indent);
+            write(text);
+            writeIndent();
+            write("-->");
+        } else {
+            write("<!-- " + text + " -->");
+        }
+
         if (willIndent() && parentStack.size() == 0) write(cr);
 
         return this;
