@@ -355,16 +355,28 @@ public class WAXTest {
     }
     
     @Test
-    public void testCDATA() {
+    public void testCDATAWithNewLines() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").cdata("1<2>3&4'5\"6").close();
+        wax.start("root").cdata("1<2>3&4'5\"6", true).close();
 
         String cr = wax.getCR();
         String xml =
             "<root>" + cr +
             "  <![CDATA[1<2>3&4'5\"6]]>" + cr +
             "</root>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCDATAWithoutNewLines() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").cdata("1<2>3&4'5\"6").close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<root><![CDATA[1<2>3&4'5\"6]]></root>";
         assertEquals(xml, sw.toString());
     }
 
