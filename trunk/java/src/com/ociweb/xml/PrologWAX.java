@@ -30,7 +30,12 @@ public interface PrologWAX extends CommonWAX {
     /**
      * @see WAX#dtd(String)
      */
-    PrologWAX dtd(String filePath);
+    PrologWAX dtd(String systemId);
+
+    /**
+     * @see WAX#dtd(String, String)
+     */
+    PrologWAX dtd(String publicId, String systemId);
 
     /**
      * @see WAX#entityDef(String, String)
