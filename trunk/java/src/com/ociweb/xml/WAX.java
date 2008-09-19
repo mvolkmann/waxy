@@ -214,6 +214,16 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX cdata(String text) {
+        return cdata(text, false);
+    }
+
+    /**
+     * Writes a CDATA section in the content of the current element.
+     * @param text the text
+     * @param newLine true to output the text on a new line; false otherwise
+     * @return the calling object to support chaining
+     */
+    public ElementWAX cdata(String text, boolean newLine) {
         if (checkMe) {
             if (state == State.IN_PROLOG ||
                 state == State.AFTER_ROOT) {
@@ -224,7 +234,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         boolean savedEscape = escape;
         setEscape(false);
-        text("<![CDATA[" + text + "]]>", true);
+        text("<![CDATA[" + text + "]]>", newLine);
         setEscape(savedEscape);
         return this;
     }

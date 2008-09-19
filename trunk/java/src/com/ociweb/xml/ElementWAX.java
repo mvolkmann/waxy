@@ -39,6 +39,11 @@ public interface ElementWAX extends CommonWAX {
     ElementWAX cdata(String text);
 
     /**
+     * @see WAX#cdata(String, boolean)
+     */
+    ElementWAX cdata(String text, boolean newLine);
+
+    /**
      * @see WAX#child(String, String)
      */
     ElementWAX child(String name, String text);

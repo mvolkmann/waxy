@@ -55,11 +55,6 @@ public interface StartTagWAX extends ElementWAX {
     StartTagWAX commentedStart(String prefix, String name);
 
     /**
-     * @see WAX#escape(boolean)
-     */
-    StartTagWAX setEscape(boolean escape);
-
-    /**
      * @see WAX#namespace(String)
      */
     StartTagWAX namespace(String uri);
@@ -73,4 +68,9 @@ public interface StartTagWAX extends ElementWAX {
      * @see WAX#namespace(String, String, String)
      */
     StartTagWAX namespace(String prefix, String uri, String schemaPath);
+
+    /**
+     * @see WAX#escape(boolean)
+     */
+    StartTagWAX setEscape(boolean escape);
 }
