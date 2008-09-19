@@ -89,17 +89,6 @@ public class WAXTest {
         assertEquals(xml, sw.toString());
     }
     
-    @Test
-    public void testBadAttributeTimingAllowed() {
-        WAX wax = new WAX();
-        wax.setTrustMe(true);
-        wax.start("root");
-        wax.text("text");
-        // Can call "attr" after calling "text" if "trust me" is true.
-        wax.attr("a1", "v1");
-        // This test passes if no exception is thrown.
-    }
-
     @Test(expected=IllegalStateException.class)
     public void testBadAttributeTimingCaught() {
         WAX wax = new WAX();
@@ -591,6 +580,20 @@ public class WAXTest {
 
         String xml =
             "<root>abc&lt;def&gt;ghi&apos;jkl&quot;mno&amp;pqr</root>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testEscapeOffAndOn() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root")
+           .setEscape(false).text("<")
+           .setEscape(true).text("<")
+           .close();
+
+        String xml = "<root><&lt;</root>";
         assertEquals(xml, sw.toString());
     }
 

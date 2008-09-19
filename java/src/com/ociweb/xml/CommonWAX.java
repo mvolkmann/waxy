@@ -43,6 +43,11 @@ public interface CommonWAX {
     PrologOrElementWAX processingInstruction(String target, String data);
 
     /**
+     * @see WAX#escape(boolean)
+     */
+    StartTagWAX setEscape(boolean escape);
+
+    /**
      * @see WAX#start(String)
      */
     StartTagWAX start(String name);
