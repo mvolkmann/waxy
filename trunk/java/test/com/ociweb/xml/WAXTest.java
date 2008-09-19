@@ -381,7 +381,31 @@ public class WAXTest {
     }
 
     @Test
-    public void testComment() {
+    public void testCommentWithNewLines() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.comment("comment #1", true).comment("comment #2", true)
+           .start("root").comment("comment #3", true).close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<!--" + cr +
+            "  comment #1" + cr +
+            "-->" + cr +
+            "<!--" + cr +
+            "  comment #2" + cr +
+            "-->" + cr +
+            "<root>" + cr +
+            "  <!--" + cr +
+            "    comment #3" + cr +
+            "  -->" + cr +
+            "</root>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCommentWithoutNewLines() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.comment("comment #1").comment("comment #2")
