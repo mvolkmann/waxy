@@ -48,6 +48,25 @@ public class WAXTest {
     }
 
     @Test
+    public void testAttributeWithEscape() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").attr("a", "1<2").close();
+        String xml = "<root a=\"1&lt;2\"/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testAttributeWithoutEscape() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setEscape(false);
+        wax.start("root").attr("a", "1<2").close();
+        String xml = "<root a=\"1<2\"/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testAttributes() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);

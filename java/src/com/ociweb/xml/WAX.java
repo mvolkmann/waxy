@@ -184,6 +184,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         } else {
             write(' ');
         }
+
+        if (escape) value = XMLUtil.escape(value);
         
         write(qName + "=\"" + value + "\"");
 

@@ -159,10 +159,12 @@ public class XMLUtil {
 
     /**
      * Escapes special characters in XML text.
-     * @param text the original text
+     * @param value an Object whose toString value is to be escaped
      * @return the escaped text
      */
-    public static String escape(String text) {
+    public static String escape(Object value) {
+        String text = value.toString();
+
         // Escape special characters in text.
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < text.length(); ++i) {
