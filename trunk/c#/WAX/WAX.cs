@@ -96,7 +96,7 @@ namespace WAXNamespace
         }
 
         public WAX(Stream stream, Version version)
-            : this(makeWriter(stream), version)
+            : this(MakeWriter(stream), version)
         {
         }
 
@@ -110,7 +110,7 @@ namespace WAXNamespace
         }
 
         public WAX(string filePath, Version version)
-            : this(makeWriter(filePath), version)
+            : this(MakeWriter(filePath), version)
         {
         }
 
@@ -127,7 +127,7 @@ namespace WAXNamespace
 
         public WAX(TextWriter writer, Version version) {
             this.writer = writer;
-            writeXMLDeclaration(version);
+            WriteXMLDeclaration(version);
         }
 
         /**
@@ -136,8 +136,8 @@ namespace WAXNamespace
          * @param value the attribute value
          * @return the calling object to support chaining
          */
-        public StartTagWAX attr(string name, Object value) {
-            return attr(null, name, value);
+        public StartTagWAX Attr(string name, Object value) {
+            return Attr(null, name, value);
         }
 
         /**
@@ -147,8 +147,8 @@ namespace WAXNamespace
          * @param value the attribute value
          * @return the calling object to support chaining
          */
-        public StartTagWAX attr(string prefix, string name, Object value) {
-            return attr(attrOnNewLine, prefix, name, value);
+        public StartTagWAX Attr(string prefix, string name, Object value) {
+            return Attr(attrOnNewLine, prefix, name, value);
         }
 
         /**
@@ -159,33 +159,33 @@ namespace WAXNamespace
          * @param value the attribute value
          * @return the calling object to support chaining
          */
-        public StartTagWAX attr(
+        public StartTagWAX Attr(
             bool newLine, string prefix, string name, Object value) {
 
             if (checkMe) {
                 if (state != State.IN_START_TAG) {
                     // EMMA incorrectly says this isn't called.
-                    badState("attr");
+                    BadState("attr");
                 }
 
                 if (prefix != null) {
-                    XMLUtil.verifyNMToken(prefix);
+                    XMLUtil.VerifyNMToken(prefix);
                     pendingPrefixes.Add(prefix);
                 }
 
-                XMLUtil.verifyNMToken(name);
+                XMLUtil.VerifyNMToken(name);
             }
 
             bool hasPrefix = prefix != null && prefix.Length > 0;
             string qName = hasPrefix ? prefix + ':' + name : name;
 
             if (newLine) {
-                writeIndent();
+                WriteIndent();
             } else {
-                write(' ');
+                Write(' ');
             }
             
-            write(qName + "=\"" + value + "\"");
+            Write(qName + "=\"" + value + "\"");
 
             return this;
         }
@@ -195,7 +195,7 @@ namespace WAXNamespace
          * the method that was called and the current state that was invalid.
          * @param methodName the method name
          */
-        private void badState(string methodName) {
+        private void BadState(string methodName) {
             throw new InvalidOperationException(
                 "can't call " + methodName + " when state is " + state);
         }
@@ -204,8 +204,8 @@ namespace WAXNamespace
          * Writes a blank line to increase readability of the XML.
          * @return the calling object to support chaining
          */
-        public ElementWAX blankLine() {
-            return nlText("");
+        public ElementWAX BlankLine() {
+            return NlText("");
         }
 
         /**
@@ -213,12 +213,12 @@ namespace WAXNamespace
          * @param text the text
          * @return the calling object to support chaining
          */
-        public ElementWAX cdata(string text) {
+        public ElementWAX CData(string text) {
             if (checkMe) {
                 if (state == State.IN_PROLOG ||
                     state == State.AFTER_ROOT) {
                     // EMMA incorrectly says this isn't called.
-                    badState("cdata");
+                    BadState("cdata");
                 }
             }
 
@@ -227,30 +227,30 @@ namespace WAXNamespace
         
         /**
          * A convenience method that is a shortcut for
-         * start(name).Text(text).end().
+         * Start(name).Text(text).End().
          * @param name the child element name
          * @param text the child element text content
          * @return the calling object to support chaining
          */
-        public ElementWAX child(string name, string text) {
-            return child(null, name, text);
+        public ElementWAX Child(string name, string text) {
+            return Child(null, name, text);
         }
 
         /**
          * A convenience method that is a shortcut for
-         * start(prefix, name).Text(text).end().
+         * Start(prefix, name).Text(text).End().
          * @param prefix the namespace prefix of the child element
          * @param name the child element name
          * @param text the child element text content
          * @return the calling object to support chaining
          */
-        public ElementWAX child(string prefix, string name, string text) {
+        public ElementWAX Child(string prefix, string name, string text) {
             if (checkMe && state == State.AFTER_ROOT) {
                 // EMMA incorrectly says this isn't called.
-                badState("child");
+                BadState("child");
             }
 
-            return start(prefix, name).Text(text).end();
+            return Start(prefix, name).Text(text).End();
         }
 
         /**
@@ -263,10 +263,10 @@ namespace WAXNamespace
 
             // Verify that a root element has been written.
             // EMMA incorrectly says this isn't called.
-            if (checkMe && state == State.IN_PROLOG) badState("close");
+            if (checkMe && state == State.IN_PROLOG) BadState("close");
 
             // End all the unended elements.
-            while (parentStack.Count > 0) end();
+            while (parentStack.Count > 0) End();
 
             try {
                 if (closeStream) {
@@ -287,17 +287,17 @@ namespace WAXNamespace
          * @param text the comment text (cannot contain "--")
          * @return the calling object to support chaining
          */
-        public PrologOrElementWAX comment(string text) {
+        public PrologOrElementWAX Comment(string text) {
             // Comments can be output in any state.
 
-            if (checkMe) XMLUtil.verifyComment(text);
+            if (checkMe) XMLUtil.VerifyComment(text);
             
             hasContent = hasIndentedContent = true;
-            terminateStart();
-            if (parentStack.Count > 0) writeIndent();
+            TerminateStart();
+            if (parentStack.Count > 0) WriteIndent();
 
-            write("<!-- " + text + " -->");
-            if (willIndent() && parentStack.Count == 0) write('\n');
+            Write("<!-- " + text + " -->");
+            if (WillIndent() && parentStack.Count == 0) Write('\n');
 
             return this;
         }
@@ -307,10 +307,10 @@ namespace WAXNamespace
          * @param filePath the path to the DTD
          * @return the calling object to support chaining
          */
-        public PrologWAX dtd(string filePath) {
+        public PrologWAX Dtd(string filePath) {
             if (checkMe) {
-                if (state != State.IN_PROLOG) badState("dtd");
-                XMLUtil.verifyURI(filePath);
+                if (state != State.IN_PROLOG) BadState("dtd");
+                XMLUtil.VerifyURI(filePath);
             }
 
             dtdFilePath = filePath;
@@ -323,17 +323,17 @@ namespace WAXNamespace
          * and in the long way (&lt;/name&gt;) if it does.
          * @return the calling object to support chaining
          */
-        public ElementWAX end() {
+        public ElementWAX End() {
             if (checkMe) {
                 if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
                     // EMMA incorrectly says this isn't called.
-                    badState("end");
+                    BadState("end");
                 }
 
-                verifyPrefixes();
+                VerifyPrefixes();
             }
 
-            writeSchemaLocations();
+            WriteSchemaLocations();
 
             string name = parentStack.Pop();
 
@@ -342,10 +342,10 @@ namespace WAXNamespace
             prefixesStack.Pop();
 
             if (hasContent) {
-                if (hasIndentedContent) writeIndent();
-                write("</" + name + ">");
+                if (hasIndentedContent) WriteIndent();
+                Write("</" + name + ">");
             } else {
-                write("/>");
+                Write("/>");
             }
 
             hasContent = hasIndentedContent = true; // new setting for parent
@@ -362,8 +362,8 @@ namespace WAXNamespace
          * @param value
          * @return the calling object to support chaining
          */
-        public PrologWAX entityDef(string name, string value) {
-            if (checkMe && state != State.IN_PROLOG) badState("entity");
+        public PrologWAX EntityDef(string name, string value) {
+            if (checkMe && state != State.IN_PROLOG) BadState("entity");
             entityDefs.Add(name + " \"" + value + '"');
             return this;
         }
@@ -374,15 +374,16 @@ namespace WAXNamespace
          * @param filePath the filePath
          * @return the calling object to support chaining
          */
-        public PrologWAX externalEntityDef(string name, string filePath) {
-            return entityDef(name + " SYSTEM", filePath);
+        public PrologWAX ExternalEntityDef(string name, string filePath) {
+            return EntityDef(name + " SYSTEM", filePath);
         }
 
+        // TODO: Make this a property:
         /**
          * Gets the indentation characters being used.
          * @return the indentation characters
          */
-        public string getIndent() {
+        public string GetIndent() {
             return indent;
         }
 
@@ -391,7 +392,7 @@ namespace WAXNamespace
          * @param prefix the namespace prefix
          * @return true if it is in scope; false otherwise
          */
-        private bool isInScopePrefix(string prefix) {
+        private bool IsInScopePrefix(string prefix) {
             foreach (string prefixes in prefixesStack) {
                 if (prefixes == null) continue;
 
@@ -411,12 +412,13 @@ namespace WAXNamespace
             return false;
         }
 
+        // TODO: Make this a property:
         /**
          * Gets whether "trust me" mode is enabled.
          * @see #setTrustMe
          * @return true if error checking is disabled; false if enabled
          */
-        public bool isTrustMe() {
+        public bool IsTrustMe() {
             return !checkMe;
         }
 
@@ -425,7 +427,7 @@ namespace WAXNamespace
          * @param filePath the file path
          * @return the TextWriter
          */
-        private static TextWriter makeWriter(string filePath) {
+        private static TextWriter MakeWriter(string filePath) {
             try {
                 Stream outputStream = File.OpenWrite(filePath);
                 return new StreamWriter(outputStream);
@@ -439,7 +441,7 @@ namespace WAXNamespace
          * @param stream
          * @return the TextWriter
          */
-        private static TextWriter makeWriter(Stream stream)
+        private static TextWriter MakeWriter(Stream stream)
         {
             try
             {
@@ -491,29 +493,29 @@ namespace WAXNamespace
             if (checkMe) {
                 if (state != State.IN_START_TAG) {
                     // EMMA incorrectly says this isn't called.
-                    badState("namespace");
+                    BadState("namespace");
                 }
 
-                if (hasPrefix) XMLUtil.verifyNMToken(prefix);
-                XMLUtil.verifyURI(uri);
-//TODO:                if (schemaPath != null) XMLUtil.verifyURI(schemaPath);
+                if (hasPrefix) XMLUtil.VerifyNMToken(prefix);
+                XMLUtil.VerifyURI(uri);
+//TODO:                if (schemaPath != null) XMLUtil.VerifyURI(schemaPath);
             }
 
             // Verify that the prefix isn't already defined in the current scope.
-            if (isInScopePrefix(prefix)) {
+            if (IsInScopePrefix(prefix)) {
                 throw new ArgumentException(
                     "The namespace prefix \"" + prefix + "\" is already in scope.");
             }
 
-            if (willIndent()) {
-                writeIndent();
+            if (WillIndent()) {
+                WriteIndent();
             } else {
-                write(' ');
+                Write(' ');
             }
             
-            write("xmlns");
-            if (hasPrefix) write(':' + prefix);
-            write("=\"" + uri + "\"");
+            Write("xmlns");
+            if (hasPrefix) Write(':' + prefix);
+            Write("=\"" + uri + "\"");
             
             if (schemaPath != null) {
                 namespaceURIToSchemaPathMap[uri] = schemaPath;
@@ -539,10 +541,11 @@ namespace WAXNamespace
          * to be one that is valid for the initial ouptut.
          * @return a specific interface that WAX implements.
          */
-        public static PrologWAX newInstance() {
+        public static PrologWAX NewInstance() {
             return new WAX();
         }
 
+        // TODO: Change to match constructors.
         /**
          * Creates a new WAX object that writes to a given OutputStream and
          * returns it as an interface type that restricts the first method call
@@ -550,7 +553,7 @@ namespace WAXNamespace
          * @param os the OutputStream
          * @return a specific interface that WAX implements.
          */
-        //public static PrologWAX newInstance(OutputStream os) {
+        //public static PrologWAX NewInstance(OutputStream os) {
         //    return new WAX(os);
         //}
 
@@ -561,7 +564,7 @@ namespace WAXNamespace
          * @param filePath the file path
          * @return a specific interface that WAX implements.
          */
-        public static PrologWAX newInstance(string filePath) {
+        public static PrologWAX NewInstance(string filePath) {
             return new WAX(filePath);
         }
 
@@ -572,7 +575,7 @@ namespace WAXNamespace
          * @param writer the TextWriter
          * @return a specific interface that WAX implements.
          */
-        public static PrologWAX newInstance(TextWriter writer) {
+        public static PrologWAX NewInstance(TextWriter writer) {
             return new WAX(writer);
         }
 
@@ -581,7 +584,7 @@ namespace WAXNamespace
          * @param text the text
          * @return the calling object to support chaining
          */
-        public ElementWAX nlText(string text) {
+        public ElementWAX NlText(string text) {
             return Text(text, true, checkMe);
         }
 
@@ -591,27 +594,28 @@ namespace WAXNamespace
          * @param data the processing instruction data
          * @return the calling object to support chaining
          */
-        public PrologOrElementWAX processingInstruction(
+        public PrologOrElementWAX ProcessingInstruction(
             string target, string data) {
 
             if (checkMe) {
                 if (state == State.AFTER_ROOT) {
                     // EMMA incorrectly says this isn't called.
-                    badState("pi");
+                    BadState("pi");
                 }
-                XMLUtil.verifyNMToken(target);
+                XMLUtil.VerifyNMToken(target);
             }
             
             hasContent = hasIndentedContent = true;
-            terminateStart();
-            if (parentStack.Count > 0) writeIndent();
+            TerminateStart();
+            if (parentStack.Count > 0) WriteIndent();
 
-            write("<?" + target + ' ' + data + "?>");
-            if (willIndent() && parentStack.Count == 0) write('\n');
+            Write("<?" + target + ' ' + data + "?>");
+            if (WillIndent() && parentStack.Count == 0) Write('\n');
 
             return this;
         }
 
+        // TODO: Make this a property:
         /**
          * Sets the indentation characters to use.
          * The only valid values are
@@ -620,7 +624,7 @@ namespace WAXNamespace
          * but not indented.
          * Passing null causes all output to be on a single line.
          */
-        public void setIndent(string indent) {
+        public void SetIndent(string indent) {
             bool valid =
                 indent == null || indent.Length == 0 || "\t".Equals(indent);
             
@@ -648,7 +652,7 @@ namespace WAXNamespace
          * The number must be >= 0 and <= 4.
          * @param numSpaces the number of spaces
          */
-        public void setIndent(int numSpaces) {
+        public void SetIndent(int numSpaces) {
             if (numSpaces < 0) {
                 throw new ArgumentException(
                     "can't indent a negative number of spaces");
@@ -663,6 +667,7 @@ namespace WAXNamespace
             for (int i = 0; i < numSpaces; i++) indent += ' ';
         }
 
+        // TODO: Make this a property:
         /**
          * Gets whether "trust me" mode is enabled.
          * When disabled (the default),
@@ -676,7 +681,7 @@ namespace WAXNamespace
          * @see #isTrustMe
          * @param trustMe true to disable error checking; false to enable it
          */
-        public void setTrustMe(bool trustMe) {
+        public void SetTrustMe(bool trustMe) {
             this.checkMe = !trustMe;
         }
 
@@ -685,8 +690,8 @@ namespace WAXNamespace
          * @param name the element name
          * @return the calling object to support chaining
          */
-        public StartTagWAX start(string name) {
-            return start(null, name);
+        public StartTagWAX Start(string name) {
+            return Start(null, name);
         }
 
         /**
@@ -694,36 +699,36 @@ namespace WAXNamespace
          * @param name the element name
          * @return the calling object to support chaining
          */
-        public StartTagWAX start(string prefix, string name) {
+        public StartTagWAX Start(string prefix, string name) {
             hasContent = hasIndentedContent = true;
-            terminateStart();
+            TerminateStart();
             hasContent = false;
 
             if (checkMe) {
                 if (state == State.AFTER_ROOT) {
                     // EMMA incorrectly says this isn't called.
-                    badState("start");
+                    BadState("start");
                 }
                 if (prefix != null) {
-                    XMLUtil.verifyNMToken(prefix);
+                    XMLUtil.VerifyNMToken(prefix);
                     pendingPrefixes.Add(prefix);
                 }
-                XMLUtil.verifyNMToken(name);
+                XMLUtil.VerifyNMToken(name);
             }
 
             // If this is the root element ...
-            if (state == State.IN_PROLOG) writeDocType(name);
+            if (state == State.IN_PROLOG) WriteDocType(name);
 
             // Can't add to pendingPrefixes until
             // previous start tag has been terminated.
             if (checkMe && prefix != null) pendingPrefixes.Add(prefix);
 
-            if (parentStack.Count > 0) writeIndent();
+            if (parentStack.Count > 0) WriteIndent();
 
             bool hasPrefix = prefix != null && prefix.Length > 0;
             string qName = hasPrefix ? prefix + ':' + name : name;
 
-            write('<' + qName);
+            Write('<' + qName);
 
             parentStack.Push(qName);
 
@@ -739,11 +744,11 @@ namespace WAXNamespace
          * Closes the start tag, with &gt; or /&gt;, that had been kept open
          * waiting for more namespace declarations and attributes.
          */
-        private void terminateStart() {
-            if (checkMe) verifyPrefixes();
+        private void TerminateStart() {
+            if (checkMe) VerifyPrefixes();
             if (state != State.IN_START_TAG) return;
-            writeSchemaLocations();
-            write('>');
+            WriteSchemaLocations();
+            Write('>');
             attrOnNewLine = false; // reset
             state = State.IN_ELEMENT;
         }
@@ -769,20 +774,20 @@ namespace WAXNamespace
             if (checkMe) {
                 if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
                     // EMMA incorrectly says this isn't called.
-                    badState("text");
+                    BadState("text");
                 }
             }
 
             hasContent = true;
             hasIndentedContent = newLine;
-            terminateStart();
+            TerminateStart();
 
             if (text != null && text.Length > 0) {
-                if (newLine) writeIndent();
-                if (escape) text = XMLUtil.escape(text);
-                write(text);
+                if (newLine) WriteIndent();
+                if (escape) text = XMLUtil.Escape(text);
+                Write(text);
             } else if (newLine) {
-                write('\n');
+                Write('\n');
             }
 
             return this;
@@ -792,9 +797,9 @@ namespace WAXNamespace
          * Verifies that all the pending namespace prefix are currently in scope.
          * @throws ArgumentException if any aren't in scope
          */
-        private void verifyPrefixes() {
+        private void VerifyPrefixes() {
             foreach (string prefix in pendingPrefixes) {
-                if (!isInScopePrefix(prefix)) {
+                if (!IsInScopePrefix(prefix)) {
                     throw new ArgumentException(
                         "The namespace prefix \"" + prefix + "\" isn't in scope.");
                 }
@@ -807,7 +812,7 @@ namespace WAXNamespace
          * Determines whether XML should be indented.
          * @return true if XML should be indented; false otherwise.
          */
-        private bool willIndent() {
+        private bool WillIndent() {
             return indent != null;
         }
 
@@ -815,7 +820,7 @@ namespace WAXNamespace
          * Writes the tostring value of an Object to the stream.
          * @param obj the Object
          */
-        private void write(Object obj) {
+        private void Write(Object obj) {
             if (writer == null) {
                 // EMMA flags this as uncovered, but I can't make this happen.
                 throw new InvalidOperationException(
@@ -833,41 +838,41 @@ namespace WAXNamespace
          * Writes a DOCTYPE.
          * @param rootElementName the root element name
          */
-        private void writeDocType(string rootElementName) {
+        private void WriteDocType(string rootElementName) {
             if (dtdFilePath == null && entityDefs.Count == 0) return;
 
-            write("<!DOCTYPE " + rootElementName);
-            if (dtdFilePath != null) write(" SYSTEM \"" + dtdFilePath + '"');
+            Write("<!DOCTYPE " + rootElementName);
+            if (dtdFilePath != null) Write(" SYSTEM \"" + dtdFilePath + '"');
 
             if (entityDefs.Count > 0) {
-                write(" [");
+                Write(" [");
 
                 foreach (string entityDef in entityDefs)
                 {
-                    if (willIndent()) write('\n' + indent);
-                    write("<!ENTITY " + entityDef + '>');
+                    if (WillIndent()) Write('\n' + indent);
+                    Write("<!ENTITY " + entityDef + '>');
                 }
 
-                if (willIndent()) write('\n');
-                write(']');
+                if (WillIndent()) Write('\n');
+                Write(']');
 
                 entityDefs.Clear();
             }
 
-            write('>');
-            if (willIndent()) write('\n');
+            Write('>');
+            if (WillIndent()) Write('\n');
         }
 
         /**
          * Writes the proper amount of indentation
          * given the current nesting of elements.
          */
-        private void writeIndent() {
-            if (!willIndent()) return;
+        private void WriteIndent() {
+            if (!WillIndent()) return;
 
-            write('\n');
+            Write('\n');
             int size = parentStack.Count;
-            for (int i = 0; i < size; ++i) write(indent);
+            for (int i = 0; i < size; ++i) Write(indent);
         }
 
         /**
@@ -875,7 +880,7 @@ namespace WAXNamespace
          * and writes the schemaLocation attribute
          * which associates namespace URIs with schema locations.
          */
-        private void writeSchemaLocations() {
+        private void WriteSchemaLocations() {
             if (namespaceURIToSchemaPathMap.Count == 0) return;
 
             // Write the attributes needed to associate XML Schemas
@@ -887,7 +892,7 @@ namespace WAXNamespace
                 
                 // If not the first pair output ...
                 if (schemaLocation.Length > 0) {
-                    if (willIndent()) {
+                    if (WillIndent()) {
                         schemaLocation += '\n';
                         int size = parentStack.Count;
                         for (int i = 0; i <= size; ++i) {
@@ -902,7 +907,7 @@ namespace WAXNamespace
             }
             
             Namespace("xsi", XMLUtil.XMLSCHEMA_INSTANCE_NS);
-            attr(willIndent(), "xsi", "schemaLocation", schemaLocation);
+            Attr(WillIndent(), "xsi", "schemaLocation", schemaLocation);
             attrOnNewLine = true; // for the next attribute
             namespaceURIToSchemaPathMap.Clear();
         }
@@ -913,7 +918,7 @@ namespace WAXNamespace
          * a newline is always written after this.
          * @param version the XML version
          */
-        private void writeXMLDeclaration(Version version) {
+        private void WriteXMLDeclaration(Version version) {
             if (version == Version.UNSPECIFIED) return;
 
             string versionstring =
@@ -926,7 +931,7 @@ namespace WAXNamespace
                 throw new ArgumentException("unsupported XML version");
             }
 
-            write("<?xml version=\"" + versionstring +
+            Write("<?xml version=\"" + versionstring +
                 "\" encoding=\"" + XMLUtil.DEFAULT_ENCODING + "\"?>\n");
         }
 
@@ -935,15 +940,15 @@ namespace WAXNamespace
          * @param filePath the path to the XSLT stylesheet
          * @return the calling object to support chaining
          */
-        public PrologWAX xslt(string filePath) {
+        public PrologWAX Xslt(string filePath) {
             if (checkMe) {
                 // EMMA incorrectly says this isn't called.
-                if (state != State.IN_PROLOG) badState("xslt");
+                if (state != State.IN_PROLOG) BadState("xslt");
 
-                XMLUtil.verifyURI(filePath);
+                XMLUtil.VerifyURI(filePath);
             }
 
-            return processingInstruction("xml-stylesheet",
+            return ProcessingInstruction("xml-stylesheet",
                 "type=\"text/xsl\" href=\"" + filePath + "\"");
         }
     }

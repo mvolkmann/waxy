@@ -32,20 +32,20 @@ namespace WAXNamespace
     public interface PrologWAX : CommonWAX {
 
         /**
-         * @see WAX#dtd(string)
+         * @see WAX#Dtd(string)
          */
-        PrologWAX dtd(string filePath);
+        PrologWAX Dtd(string filePath);
 
         /**
-         * @see WAX#entityDef(string, string)
+         * @see WAX#EntityDef(string, string)
          */
-        PrologWAX entityDef(string name, string value);
+        PrologWAX EntityDef(string name, string value);
 
         /**
-         * @see WAX#externalEntityDef(string, string)
+         * @see WAX#ExternalEntityDef(string, string)
          */
-        PrologWAX externalEntityDef(string name, string filePath);
+        PrologWAX ExternalEntityDef(string name, string filePath);
 
-        PrologWAX xslt(string filePath);
+        PrologWAX Xslt(string filePath);
     }
 }

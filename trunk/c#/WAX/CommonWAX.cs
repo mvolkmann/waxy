@@ -33,23 +33,23 @@ namespace WAXNamespace
     {
 
         /**
-         * @see WAX#comment(string)
+         * @see WAX#Comment(string)
          */
-        PrologOrElementWAX comment(string text);
+        PrologOrElementWAX Comment(string text);
 
         /**
-         * @see WAX#processingInstruction(string, string)
+         * @see WAX#ProcessingInstruction(string, string)
          */
-        PrologOrElementWAX processingInstruction(string target, string data);
+        PrologOrElementWAX ProcessingInstruction(string target, string data);
 
         /**
-         * @see WAX#start(string)
+         * @see WAX#Start(string)
          */
-        StartTagWAX start(string name);
+        StartTagWAX Start(string name);
 
         /**
-         * @see WAX#start(string, string)
+         * @see WAX#Start(string, string)
          */
-        StartTagWAX start(string prefix, string name);
+        StartTagWAX Start(string prefix, string name);
     }
 }

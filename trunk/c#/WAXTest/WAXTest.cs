@@ -45,8 +45,8 @@ namespace WaxTest
         public void testAttributes() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root").attr("a1", "v1").attr("a2", 2).Close();
+            wax.SetIndent(null);
+            wax.Start("root").Attr("a1", "v1").Attr("a2", 2).Close();
 
             Assert.AreEqual("<root a1=\"v1\" a2=\"2\"/>", sw.ToString());
         }
@@ -56,12 +56,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root").attr("1a", "value").Close();
+                wax.Start("root").Attr("1a", "value").Close();
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("\"1a\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
@@ -71,12 +72,13 @@ namespace WaxTest
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 // Can't call cdata while in prologue section.
-                wax.cdata("text").Close();
+                wax.CData("text").Close();
 
                 Assert.Fail("Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call cdata when state is IN_PROLOG", ex.Message);
             }
         }
 
@@ -85,14 +87,15 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root");
-                wax.end();
-                wax.child("child", "text"); // can't call child after root is closed
+                wax.Start("root");
+                wax.End();
+                wax.Child("child", "text"); // can't call child after root is closed
 
                 Assert.Fail("Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call child when state is AFTER_ROOT", ex.Message);
             }
         }
 
@@ -107,6 +110,7 @@ namespace WaxTest
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call close when state is IN_PROLOG", ex.Message);
             }
         }
 
@@ -115,7 +119,7 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root");
+                wax.Start("root");
                 wax.Close();
                 wax.Close(); // already closed
 
@@ -123,6 +127,7 @@ namespace WaxTest
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("already closed", ex.Message);
             }
         }
 
@@ -131,14 +136,15 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root");
+                wax.Start("root");
                 wax.Close();
-                wax.start("more"); // already closed
+                wax.Start("more"); // already closed
 
                 Assert.Fail("Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call start when state is AFTER_ROOT", ex.Message);
             }
         }
 
@@ -147,12 +153,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root").comment("foo--bar").Close();
+                wax.Start("root").Comment("foo--bar").Close();
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("\"foo--bar\" is an invalid comment", ex.Message);
             }
         }
 
@@ -161,13 +168,14 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root");
-                wax.dtd("root.dtd"); // can't specify DTD after root element
+                wax.Start("root");
+                wax.Dtd("root.dtd"); // can't specify DTD after root element
 
                 Assert.Fail("Expecting IOException (in Exception)");
             }
             catch (Exception ex)
             {
+                Assert.AreEqual("can't call dtd when state is IN_START_TAG", ex.Message);
             }
         }
 
@@ -176,12 +184,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("1root").Close();
+                wax.Start("1root").Close();
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("\"1root\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
@@ -190,12 +199,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.end(); // haven't called start yet
+                wax.End(); // haven't called start yet
 
                 Assert.Fail("Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call end when state is IN_PROLOG", ex.Message);
             }
         }
 
@@ -204,12 +214,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.setIndent("abc"); // must be null, "", spaces or a single tab
+                wax.SetIndent("abc"); // must be null, "", spaces or a single tab
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("invalid indent value", ex.Message);
             }
         }
 
@@ -218,12 +229,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.setIndent(-1); // must be >= 0
+                wax.SetIndent(-1); // must be >= 0
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("can't indent a negative number of spaces", ex.Message);
             }
         }
 
@@ -232,12 +244,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.setIndent("\t\t"); // more than one tab
+                wax.SetIndent("\t\t"); // more than one tab
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("invalid indent value", ex.Message);
             }
         }
 
@@ -246,12 +259,13 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.setIndent(5); // must be <= 4
+                wax.SetIndent(5); // must be <= 4
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("5 is an unreasonable indentation", ex.Message);
             }
         }
 
@@ -261,7 +275,7 @@ namespace WaxTest
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 // Can't define same namespace prefix more than once in the same scope.
-                wax.start("root")
+                wax.Start("root")
                    .Namespace("tns", "http://www.ociweb.com/tns")
                    .Namespace("tns", "http://www.ociweb.com/tns")
                    .Close();
@@ -270,6 +284,7 @@ namespace WaxTest
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("The namespace prefix \"tns\" is already in scope.", ex.Message);
             }
         }
 
@@ -279,7 +294,7 @@ namespace WaxTest
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 // Can't define default namespace more than once in the same scope.
-                wax.start("root")
+                wax.Start("root")
                    .Namespace("http://www.ociweb.com/tns1")
                    .Namespace("http://www.ociweb.com/tns2")
                    .Close();
@@ -288,6 +303,7 @@ namespace WaxTest
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("The namespace prefix \"\" is already in scope.", ex.Message);
             }
         }
 
@@ -296,18 +312,19 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root");
-                wax.start("parent");
+                wax.Start("root");
+                wax.Start("parent");
                 wax.Namespace("foo", "http://www.ociweb.com/foo");
-                wax.child("foo", "child1", "one");
-                wax.end();
-                wax.child("foo", "child2", "two");
+                wax.Child("foo", "child1", "one");
+                wax.End();
+                wax.Child("foo", "child2", "two");
                 wax.Close();
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("The namespace prefix \"foo\" isn't in scope.", ex.Message);
             }
         }
 
@@ -322,6 +339,7 @@ namespace WaxTest
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call text when state is IN_PROLOG", ex.Message);
             }
         }
 
@@ -331,13 +349,14 @@ namespace WaxTest
                 string filePath = "/tmp/temp.xml";
                 FileStream fs = File.OpenWrite(filePath);
                 WAX wax = new WAX(fs);
-                wax.start("root");
+                wax.Start("root");
                 fs.Close(); // closed the Writer instead of allowing WAX to do it
                 File.Delete(filePath);
                 wax.Close(); // attempting to write more after the Writer was closed
 
                 Assert.Fail("Expecting IOException (in Exception)");
             } catch (Exception ex) {
+                Assert.AreEqual("Cannot access a closed file.", ex.Message);
             }
         }
 
@@ -351,6 +370,9 @@ namespace WaxTest
             }
             catch (Exception ex)
             {
+                // TODO: Fix this test, and its assertion:
+                Assert.IsTrue(ex.Message.StartsWith("Access to the path '"));
+                Assert.IsTrue(ex.Message.EndsWith("' is denied."));
             }
         }
 
@@ -359,13 +381,14 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.start("root");
-                wax.xslt("root.xslt"); // can't write pi after root element
+                wax.Start("root");
+                wax.Xslt("root.xslt"); // can't write pi after root element
 
                 Assert.Fail("Expecting IOException (in Exception)");
             }
             catch (Exception ex)
             {
+                Assert.AreEqual("can't call xslt when state is IN_START_TAG", ex.Message);
             }
         }
 
@@ -373,12 +396,12 @@ namespace WaxTest
         public void testBig() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.start("root");
-            wax.nlText("text #1");
-            wax.child("child1", "text");
-            wax.nlText("text #2");
-            wax.start("child2").attr("a1", "v1").end();
-            wax.nlText("text #3");
+            wax.Start("root");
+            wax.NlText("text #1");
+            wax.Child("child1", "text");
+            wax.NlText("text #2");
+            wax.Start("child2").Attr("a1", "v1").End();
+            wax.NlText("text #3");
             wax.Close();
 
             string xml = "<root>\n" + "  text #1\n" + "  <child1>text</child1>\n"
@@ -392,7 +415,7 @@ namespace WaxTest
         public void testBlankLine() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.start("root").blankLine().Close();
+            wax.Start("root").BlankLine().Close();
 
             string xml =
                 "<root>\n" +
@@ -405,7 +428,7 @@ namespace WaxTest
         public void testCDATA() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.start("root").cdata("1<2>3&4'5\"6").Close();
+            wax.Start("root").CData("1<2>3&4'5\"6").Close();
 
             string xml =
                 "<root>\n" +
@@ -418,8 +441,8 @@ namespace WaxTest
         public void testComment() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.comment("comment #1").comment("comment #2")
-               .start("root").comment("comment #3").Close();
+            wax.Comment("comment #1").Comment("comment #2")
+               .Start("root").Comment("comment #3").Close();
 
             string xml =
                 "<!-- comment #1 -->\n" +
@@ -435,8 +458,8 @@ namespace WaxTest
         public void testDTD() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.dtd("http://www.ociweb.com/xml/root.dtd");
-            wax.start("root");
+            wax.Dtd("http://www.ociweb.com/xml/root.dtd");
+            wax.Start("root");
             wax.Close();
 
             string xml =
@@ -450,8 +473,8 @@ namespace WaxTest
         public void testEmpty() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Close();
 
             Assert.AreEqual("<root/>", sw.ToString());
         }
@@ -460,8 +483,8 @@ namespace WaxTest
         public void testEntityDef() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.entityDef("name", "value").start("root").Close();
+            wax.SetIndent(null);
+            wax.EntityDef("name", "value").Start("root").Close();
 
             string xml = "<!DOCTYPE root [<!ENTITY name \"value\">]><root/>";
             Assert.AreEqual(xml, sw.ToString());
@@ -471,8 +494,8 @@ namespace WaxTest
         public void testExternalEntityDef() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.externalEntityDef("name", "value").start("root").Close();
+            wax.SetIndent(null);
+            wax.ExternalEntityDef("name", "value").Start("root").Close();
 
             string xml = "<!DOCTYPE root [<!ENTITY name SYSTEM \"value\">]><root/>";
             Assert.AreEqual(xml, sw.ToString());
@@ -482,8 +505,8 @@ namespace WaxTest
         public void testEscape() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root").Text("abc<def>ghi'jkl\"mno&pqr").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Text("abc<def>ghi'jkl\"mno&pqr").Close();
 
             string xml =
                 "<root>abc&lt;def&gt;ghi&apos;jkl&quot;mno&amp;pqr</root>";
@@ -495,13 +518,14 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.setIndent(null);
-                wax.start("root").end().end().Close();
+                wax.SetIndent(null);
+                wax.Start("root").End().End().Close();
 
                 Assert.Fail("Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call end when state is AFTER_ROOT", ex.Message);
             }
         }
 
@@ -509,27 +533,27 @@ namespace WaxTest
         public void testGetIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            Assert.AreEqual("  ", wax.getIndent());
+            Assert.AreEqual("  ", wax.GetIndent());
 
-            wax.setIndent("    ");
-            Assert.AreEqual("    ", wax.getIndent());
+            wax.SetIndent("    ");
+            Assert.AreEqual("    ", wax.GetIndent());
 
-            wax.setIndent("\t");
-            Assert.AreEqual("\t", wax.getIndent());
+            wax.SetIndent("\t");
+            Assert.AreEqual("\t", wax.GetIndent());
 
-            wax.setIndent(null);
-            Assert.AreEqual(null, wax.getIndent());
+            wax.SetIndent(null);
+            Assert.AreEqual(null, wax.GetIndent());
 
-            wax.setIndent("");
-            Assert.AreEqual("", wax.getIndent());
+            wax.SetIndent("");
+            Assert.AreEqual("", wax.GetIndent());
         }
 
         [Test]
         public void testIndentByNum() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(2);
-            wax.start("root").child("child", "text").Close();
+            wax.SetIndent(2);
+            wax.Start("root").Child("child", "text").Close();
 
             string xml = "<root>\n" + "  <child>text</child>\n" + "</root>";
             Assert.AreEqual(xml, sw.ToString());
@@ -539,8 +563,8 @@ namespace WaxTest
         public void testIndentBystring() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent("  ");
-            wax.start("root").child("child", "text").Close();
+            wax.SetIndent("  ");
+            wax.Start("root").Child("child", "text").Close();
 
             string xml = "<root>\n" + "  <child>text</child>\n" + "</root>";
             Assert.AreEqual(xml, sw.ToString());
@@ -550,8 +574,8 @@ namespace WaxTest
         public void testnamespace_() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root")
+            wax.SetIndent(null);
+            wax.Start("root")
                .Namespace("http://www.ociweb.com/tns1")
                .Namespace("tns2", "http://www.ociweb.com/tns2")
                .Namespace("tns3", "http://www.ociweb.com/tns3")
@@ -572,7 +596,7 @@ namespace WaxTest
             try
             {
                 WAX wax = new WAX();
-                wax.start("root").Close();
+                wax.Start("root").Close();
                 Assert.AreEqual("<root/>", sw.ToString());
             }
             finally
@@ -585,8 +609,8 @@ namespace WaxTest
         public void testNoIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root").child("child", "text").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Child("child", "text").Close();
 
             string xml = "<root><child>text</child></root>";
             Assert.AreEqual(xml, sw.ToString());
@@ -603,6 +627,7 @@ namespace WaxTest
             }
             catch (InvalidOperationException ex)
             {
+                Assert.AreEqual("can't call close when state is IN_PROLOG", ex.Message);
             }
         }
 
@@ -610,9 +635,9 @@ namespace WaxTest
         public void testProcessingInstructionInPrologue() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.processingInstruction("xml-stylesheet",
+            wax.ProcessingInstruction("xml-stylesheet",
                 "type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"");
-            wax.start("root");
+            wax.Start("root");
             wax.Close();
 
             string xml =
@@ -625,9 +650,9 @@ namespace WaxTest
         public void testProcessingInstructionAfterPrologue() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root");
-            wax.processingInstruction("target", "data");
+            wax.SetIndent(null);
+            wax.Start("root");
+            wax.ProcessingInstruction("target", "data");
             wax.Close();
 
             string xml = "<root><?target data?></root>";
@@ -638,9 +663,9 @@ namespace WaxTest
         public void testPrefix() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("foo", "root")
-               .attr("bar", "baz")
+            wax.SetIndent(null);
+            wax.Start("foo", "root")
+               .Attr("bar", "baz")
                // Note that the namespace is defined after it is used,
                // but on the same element, which should be allowed.
                .Namespace("foo", "http://www.ociweb.com/foo")
@@ -655,7 +680,7 @@ namespace WaxTest
         public void testSchemasWithIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.start("root")
+            wax.Start("root")
                .Namespace(null, "http://www.ociweb.com/tns1", "tns1.xsd")
                .Namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
                .Close();
@@ -674,8 +699,8 @@ namespace WaxTest
         public void testSchemasWithoutIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root")
+            wax.SetIndent(null);
+            wax.Start("root")
                .Namespace(null, "http://www.ociweb.com/tns1", "tns1.xsd")
                .Namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
                .Close();
@@ -695,8 +720,8 @@ namespace WaxTest
         public void testText() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setIndent(null);
-            wax.start("root").Text("text").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Text("text").Close();
 
             Assert.AreEqual("<root>text</root>", sw.ToString());
         }
@@ -706,15 +731,16 @@ namespace WaxTest
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
-                wax.setTrustMe(false);
+                wax.SetTrustMe(false);
                 // Since error checking is turned on,
                 // element names must be valid and text is escaped.
-                wax.start("123").Text("<>&'\"").Close();
+                wax.Start("123").Text("<>&'\"").Close();
 
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
+                Assert.AreEqual("\"123\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
@@ -722,11 +748,11 @@ namespace WaxTest
         public void testTrustMeTrue() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            wax.setTrustMe(true);
-            wax.setIndent(null);
+            wax.SetTrustMe(true);
+            wax.SetIndent(null);
             // Since error checking is turned off,
             // invalid element names and unescaped text are allowed.
-            wax.start("123").Text("<>&'\"").Close();
+            wax.Start("123").Text("<>&'\"").Close();
 
             Assert.AreEqual("<123><>&'\"</123>", sw.ToString());
         }
@@ -735,8 +761,8 @@ namespace WaxTest
         public void testWriteFile() /* throws IOException */ {
             string filePath = "/tmp/temp.xml";
             WAX wax = new WAX(filePath);
-            wax.setIndent(null);
-            wax.start("root").Text("text").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Text("text").Close();
             Assert.AreEqual("<root>text</root>", getFileFirstLine(filePath));
             File.Delete(filePath);
         }
@@ -746,8 +772,8 @@ namespace WaxTest
             string filePath = "/tmp/temp.xml";
             FileStream fs = File.OpenWrite(filePath);
             WAX wax = new WAX(fs);
-            wax.setIndent(null);
-            wax.start("root").Text("text").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Text("text").Close();
             Assert.AreEqual("<root>text</root>", getFileFirstLine(filePath));
             File.Delete(filePath);
         }
@@ -756,11 +782,14 @@ namespace WaxTest
         public void testXMLDeclaration() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw, WAX.Version.V1_0);
-            wax.setIndent(null);
-            wax.start("root").Close();
+            wax.SetIndent(null);
+            wax.Start("root").Close();
 
             string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root/>";
             Assert.AreEqual(xml, sw.ToString());
         }
+
+        // TODO: Tests for 'NewInstance' methods.
+        // TODO: Test for 'TerminateStart' method.
     }
 }
