@@ -161,21 +161,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public StartTagWAX attr(
         boolean newLine, String prefix, String name, Object value) {
 
-        if (checkMe) {
-            if (state != State.IN_START_TAG) {
-                // EMMA incorrectly says this isn't called.
-                badState("attr");
-            }
+        if (state != State.IN_START_TAG) badState("attr");
 
-            if (prefix != null) {
+        boolean hasPrefix = prefix != null && prefix.length() > 0;
+
+        if (checkMe) {
+            if (hasPrefix) {
                 XMLUtil.verifyName(prefix);
                 pendingPrefixes.add(prefix);
             }
-
             XMLUtil.verifyName(name);
         }
 
-        boolean hasPrefix = prefix != null && prefix.length() > 0;
         String qName = hasPrefix ? prefix + ':' + name : name;
 
         if (newLine) {
@@ -225,12 +222,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX cdata(String text, boolean newLine) {
-        if (checkMe) {
-            if (state == State.IN_PROLOG ||
-                state == State.AFTER_ROOT) {
-                // EMMA incorrectly says this isn't called.
-                badState("cdata");
-            }
+        if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
+            badState("cdata");
         }
 
         boolean savedEscape = escape;
@@ -260,11 +253,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX child(String prefix, String name, String text) {
-        if (checkMe && state == State.AFTER_ROOT) {
-            // EMMA incorrectly says this isn't called.
-            badState("child");
-        }
-
+        if (state == State.AFTER_ROOT) badState("child");
         return start(prefix, name).text(text).end();
     }
 
@@ -277,8 +266,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (writer == null) throw new IllegalStateException("already closed");
 
         // Verify that a root element has been written.
-        // EMMA incorrectly says this isn't called.
-        if (checkMe && state == State.IN_PROLOG) badState("close");
+        if (state == State.IN_PROLOG) badState("close");
 
         // End all the unended elements.
         while (parentStack.size() > 0) end();
@@ -370,11 +358,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (dtdSpecified) {
             throw new IllegalStateException("can't specify more than one DTD");
         }
-
-        if (checkMe) {
-            if (state != State.IN_PROLOG) badState("dtd");
-            XMLUtil.verifyURI(filePath);
-        }
+        if (state != State.IN_PROLOG) badState("dtd");
+        if (checkMe) XMLUtil.verifyURI(filePath);
 
         dtdFilePath = filePath;
         dtdSpecified = true;
@@ -403,14 +388,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX end(boolean verbose) {
-        if (checkMe) {
-            if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
-                // EMMA incorrectly says this isn't called.
-                badState("end");
-            }
-
-            verifyPrefixes();
+        if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
+            badState("end");
         }
+        if (checkMe) verifyPrefixes();
 
         writeSchemaLocations();
 
@@ -449,7 +430,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public PrologWAX entityDef(String name, String value) {
-        if (checkMe && state != State.IN_PROLOG) badState("entity");
+        if (state != State.IN_PROLOG) badState("entity");
         entityDefs.add(name + " \"" + value + '"');
         return this;
     }
@@ -577,15 +558,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public StartTagWAX namespace(
         String prefix, String uri, String schemaPath) {
 
+        if (state != State.IN_START_TAG) badState("namespace");
+
         if (prefix == null) prefix = "";
         boolean hasPrefix = prefix.length() > 0;
 
         if (checkMe) {
-            if (state != State.IN_START_TAG) {
-                // EMMA incorrectly says this isn't called.
-                badState("namespace");
-            }
-
             if (hasPrefix) XMLUtil.verifyName(prefix);
             XMLUtil.verifyURI(uri);
             if (schemaPath != null) XMLUtil.verifyURI(schemaPath);
@@ -770,12 +748,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Gets whether "trust me" mode is enabled.
-     * When disabled (the default),
-     * proper order of method calls is verified,
-     * method parameter values are verified,
-     * element and attribute names are verified to be Names,
-     * and reserved characters in element/attribute text
-     * are replaced by built-in entity references.
+     * When disabled (the default), the following checks are made.
+     * 1) element names, attribute names, namespace prefixes and
+     *    processing instruction targets are verified to be valid XML names
+     * 2) comments are verified to not contain "--"
+     * 3) element and attribute prefixes are verified to be in scope
+     * 4) DTD paths, namespaces, schema paths and XSLT paths
+     *    are to use valid URI syntax
+     * 5) only sensible indent values (none, two spaces, four spaces or one tab)
+     *    are allowed (can use other values if trustMe = true)
      * The main reason to enable "trust me" mode is for performance
      * which is typically good even when disabled.
      * @see #isTrustMe
@@ -805,12 +786,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         terminateStart();
         hasContent = hasIndentedContent = false;
 
+        if (state == State.AFTER_ROOT) badState("start");
+
+        boolean hasPrefix = prefix != null && prefix.length() > 0;
         if (checkMe) {
-            if (state == State.AFTER_ROOT) {
-                // EMMA incorrectly says this isn't called.
-                badState("start");
-            }
-            if (prefix != null) {
+            if (hasPrefix) {
                 XMLUtil.verifyName(prefix);
                 pendingPrefixes.add(prefix);
             }
@@ -822,11 +802,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         // Can't add to pendingPrefixes until
         // previous start tag has been terminated.
-        if (checkMe && prefix != null) pendingPrefixes.add(prefix);
+        if (checkMe && hasPrefix) {
+            pendingPrefixes.add(prefix);
+        }
 
         if (parentStack.size() > 0) writeIndent();
 
-        boolean hasPrefix = prefix != null && prefix.length() > 0;
         String qName = hasPrefix ? prefix + ':' + name : name;
 
         if (inCommentedStart) {
@@ -876,11 +857,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public ElementWAX text(String text, boolean newLine) {
-        if (checkMe) {
-            if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
-                // EMMA incorrectly says this isn't called.
-                badState("text");
-            }
+        if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
+            badState("text");
         }
 
         hasContent = true;
@@ -1074,13 +1052,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (xsltSpecified) {
             throw new IllegalStateException("can't specify more than one XSLT");
         }
-
-        if (checkMe) {
-            // EMMA incorrectly says this isn't called.
-            if (state != State.IN_PROLOG) badState("xslt");
-
-            XMLUtil.verifyURI(filePath);
-        }
+        if (state != State.IN_PROLOG) badState("xslt");
+        if (checkMe) XMLUtil.verifyURI(filePath);
 
         xsltSpecified = true;
         return processingInstruction("xml-stylesheet",
