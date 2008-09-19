@@ -61,7 +61,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private Stack<String> prefixesStack = new Stack<String>();
     private State state = State.IN_PROLOG;
     private String cr;
-    private String dtdFilePath;
+    private String doctypePublicId;
+    private String doctypeSystemId;
     private String encoding = XMLUtil.DEFAULT_ENCODING;
     private String indent = "  ";
     private Writer writer;
@@ -351,17 +352,27 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a DOCTYPE that associates a DTD with the XML document.
+     * @param systemId the file path or URL to the DTD
+     * @return the calling object to support chaining
+     */
+    public PrologWAX dtd(String systemId) {
+        return dtd(null, systemId);
+    }
+
+    /**
+     * Writes a DOCTYPE that associates a DTD with the XML document.
      * @param filePath the path to the DTD
      * @return the calling object to support chaining
      */
-    public PrologWAX dtd(String filePath) {
+    public PrologWAX dtd(String publicId, String systemId) {
         if (dtdSpecified) {
             throw new IllegalStateException("can't specify more than one DTD");
         }
         if (state != State.IN_PROLOG) badState("dtd");
-        if (checkMe) XMLUtil.verifyURI(filePath);
+        if (checkMe) XMLUtil.verifyURI(systemId);
 
-        dtdFilePath = filePath;
+        doctypePublicId = publicId;
+        doctypeSystemId = systemId;
         dtdSpecified = true;
         return this;
     }
@@ -949,10 +960,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param rootElementName the root element name
      */
     private void writeDocType(String rootElementName) {
-        if (dtdFilePath == null && entityDefs.isEmpty()) return;
+        if (doctypeSystemId == null && entityDefs.isEmpty()) return;
 
         write("<!DOCTYPE " + rootElementName);
-        if (dtdFilePath != null) write(" SYSTEM \"" + dtdFilePath + '"');
+        if (doctypePublicId != null) {
+            write(" PUBLIC \"" + doctypePublicId + "\" \"" +
+                doctypeSystemId + '"');
+        } else if (doctypeSystemId != null) {
+            write(" SYSTEM \"" + doctypeSystemId + '"');
+        }
 
         if (!entityDefs.isEmpty()) {
             write(" [");
