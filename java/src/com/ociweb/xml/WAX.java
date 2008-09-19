@@ -747,7 +747,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Gets whether "trust me" mode is enabled.
+     * Sets whether "trust me" mode is enabled.
      * When disabled (the default), the following checks are made.
      * 1) element names, attribute names, namespace prefixes and
      *    processing instruction targets are verified to be valid XML names
