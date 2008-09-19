@@ -14,7 +14,7 @@ public class CDDemo3 {
         wax.start("artist");
         wax.attr("name", "Gardot, Melody");
         // null signifies the default namespace
-        wax.namespace(null, "http://www.ociweb.com/music",
+        wax.defaultNamespace("http://www.ociweb.com/music",
             "http://www.ociweb.com/xml/music.xsd");
         wax.namespace("date", "http://www.ociweb.com/date",
             "http://www.ociweb.com/xml/date.xsd");

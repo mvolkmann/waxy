@@ -14,7 +14,7 @@ public class CDDemo {
            .start("artist")
            .attr("name", "Gardot, Melody")
            // null signifies the default namespace
-           .namespace(null, "http://www.ociweb.com/music",
+           .defaultNamespace("http://www.ociweb.com/music",
                "http://www.ociweb.com/xml/music.xsd")
            .namespace("date", "http://www.ociweb.com/date",
                "http://www.ociweb.com/xml/date.xsd")

@@ -17,7 +17,7 @@ public class CDDemo2 {
         StartTagWAX stw = pw.start("artist");
         stw.attr("name", "Gardot, Melody");
         // null signifies the default namespace
-        stw.namespace(null, "http://www.ociweb.com/music",
+        stw.defaultNamespace("http://www.ociweb.com/music",
             "http://www.ociweb.com/xml/music.xsd");
         stw.namespace("date", "http://www.ociweb.com/date",
             "http://www.ociweb.com/xml/date.xsd");
