@@ -11,7 +11,7 @@ namespace WaxTest
         public void testBadComment()
         {
             try {
-                XMLUtil.verifyComment("one -- two");
+                XMLUtil.VerifyComment("one -- two");
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
@@ -25,7 +25,7 @@ namespace WaxTest
         {
             try
             {
-                XMLUtil.verifyNMToken("1a");
+                XMLUtil.VerifyNMToken("1a");
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
@@ -39,7 +39,7 @@ namespace WaxTest
         {
             try
             {
-                XMLUtil.verifyVersion("1.3");
+                XMLUtil.VerifyVersion("1.3");
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
@@ -53,7 +53,7 @@ namespace WaxTest
         {
             try
             {
-                XMLUtil.verifyURI(":junk");
+                XMLUtil.VerifyURI(":junk");
                 Assert.Fail("Expected ArgumentException.");
             }
             catch (ArgumentException ex)
@@ -64,41 +64,41 @@ namespace WaxTest
 
         [Test]
         public void testEscape() {
-            Assert.AreEqual("&lt;", XMLUtil.escape("<"));
-            Assert.AreEqual("&gt;", XMLUtil.escape(">"));
-            Assert.AreEqual("&amp;", XMLUtil.escape("&"));
-            Assert.AreEqual("&apos;", XMLUtil.escape("'"));
-            Assert.AreEqual("&quot;", XMLUtil.escape("\""));
-            Assert.AreEqual("1&lt;2&gt;3&amp;4&apos;5&quot;6", XMLUtil.escape("1<2>3&4'5\"6"));
+            Assert.AreEqual("&lt;", XMLUtil.Escape("<"));
+            Assert.AreEqual("&gt;", XMLUtil.Escape(">"));
+            Assert.AreEqual("&amp;", XMLUtil.Escape("&"));
+            Assert.AreEqual("&apos;", XMLUtil.Escape("'"));
+            Assert.AreEqual("&quot;", XMLUtil.Escape("\""));
+            Assert.AreEqual("1&lt;2&gt;3&amp;4&apos;5&quot;6", XMLUtil.Escape("1<2>3&4'5\"6"));
         }
 
         [Test]
         public void testIsComment() {
-            Assert.IsTrue(XMLUtil.isComment("one two"));
-            Assert.IsTrue(XMLUtil.isComment("one - two"));
-            Assert.IsTrue(!XMLUtil.isComment("one -- two"));
-            Assert.IsTrue(!XMLUtil.isComment("-- one two"));
-            Assert.IsTrue(!XMLUtil.isComment("one two --"));
+            Assert.IsTrue(XMLUtil.IsComment("one two"));
+            Assert.IsTrue(XMLUtil.IsComment("one - two"));
+            Assert.IsTrue(!XMLUtil.IsComment("one -- two"));
+            Assert.IsTrue(!XMLUtil.IsComment("-- one two"));
+            Assert.IsTrue(!XMLUtil.IsComment("one two --"));
         }
 
         [Test]
         public void testIsNMToken() {
-            Assert.IsTrue(XMLUtil.isNMToken("a1"));
-            Assert.IsTrue(!XMLUtil.isNMToken("1a"));
+            Assert.IsTrue(XMLUtil.IsNMToken("a1"));
+            Assert.IsTrue(!XMLUtil.IsNMToken("1a"));
         }
 
         [Test]
         public void testIsURI() {
-            Assert.IsTrue(XMLUtil.isURI("http://www.ociweb.com/foo"));
-            Assert.IsTrue(!XMLUtil.isURI(":junk"));
+            Assert.IsTrue(XMLUtil.IsURI("http://www.ociweb.com/foo"));
+            Assert.IsTrue(!XMLUtil.IsURI(":junk"));
         }
 
         [Test]
         public void testIsVersion() {
-            Assert.IsTrue(XMLUtil.isVersion("1.0"));
-            Assert.IsTrue(XMLUtil.isVersion("1.1"));
-            Assert.IsTrue(XMLUtil.isVersion("1.2"));
-            Assert.IsTrue(!XMLUtil.isVersion("1.3"));
+            Assert.IsTrue(XMLUtil.IsVersion("1.0"));
+            Assert.IsTrue(XMLUtil.IsVersion("1.1"));
+            Assert.IsTrue(XMLUtil.IsVersion("1.2"));
+            Assert.IsTrue(!XMLUtil.IsVersion("1.3"));
         }
     }
 }

@@ -33,19 +33,19 @@ namespace WAXNamespace
     public interface StartTagWAX : ElementWAX {
 
         /**
-         * @see WAX#attr(string, Object)
+         * @see WAX#Attr(string, Object)
          */
-        StartTagWAX attr(string name, Object value);
+        StartTagWAX Attr(string name, Object value);
 
         /**
-         * @see WAX#attr(string, string, Object)
+         * @see WAX#Attr(string, string, Object)
          */
-        StartTagWAX attr(string prefix, string name, Object value);
+        StartTagWAX Attr(string prefix, string name, Object value);
 
         /**
-         * @see WAX#attr(bool, string, string, Object)
+         * @see WAX#Attr(bool, string, string, Object)
          */
-        StartTagWAX attr(
+        StartTagWAX Attr(
             bool newLine, string prefix, string name, Object value);
 
         /**

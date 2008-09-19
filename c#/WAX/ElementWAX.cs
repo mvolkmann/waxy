@@ -33,24 +33,24 @@ namespace WAXNamespace
     public interface ElementWAX : CommonWAX {
 
         /**
-         * @see WAX#blankLine()
+         * @see WAX#BlankLine()
          */
-        ElementWAX blankLine();
+        ElementWAX BlankLine();
 
         /**
-         * @see WAX#cdata(string)
+         * @see WAX#CData(string)
          */
-        ElementWAX cdata(string text);
+        ElementWAX CData(string text);
 
         /**
-         * @see WAX#child(string, string)
+         * @see WAX#Child(string, string)
          */
-        ElementWAX child(string name, string text);
+        ElementWAX Child(string name, string text);
 
         /**
-         * @see WAX#child(string, string, string)
+         * @see WAX#Child(string, string, string)
          */
-        ElementWAX child(string prefix, string name, string text);
+        ElementWAX Child(string prefix, string name, string text);
 
         /**
          * @see WAX#Close()
@@ -58,14 +58,14 @@ namespace WAXNamespace
         void Close();
 
         /**
-         * @see WAX#end()
+         * @see WAX#End()
          */
-        ElementWAX end();
+        ElementWAX End();
 
         /**
-         * @see WAX#nlText(string)
+         * @see WAX#NlText(string)
          */
-        ElementWAX nlText(string text);
+        ElementWAX NlText(string text);
 
         /**
          * @see WAX#Text(string)

@@ -55,7 +55,7 @@ namespace WAXNamespace
          * @param text the original text
          * @return the escaped text
          */
-        public static string escape(string text) {
+        public static string Escape(string text) {
             // Escape special characters in text.
             StringBuilder sb = new StringBuilder();
             // Changed looping: -- jtg
@@ -85,7 +85,7 @@ namespace WAXNamespace
          * Determines whether given text is a valid comment.
          * @param text the text
          */
-        public static bool isComment(string text) {
+        public static bool IsComment(string text) {
             return !text.Contains("--");
         }
 
@@ -94,7 +94,7 @@ namespace WAXNamespace
          * @param text the text
          * @return true if a name token; false otherwise
          */
-        public static bool isNMToken(string text) {
+        public static bool IsNMToken(string text) {
             if (text == null) return false;
             return NMTOKEN_PATTERN.IsMatch(text);
         }
@@ -104,12 +104,12 @@ namespace WAXNamespace
          * @param text the text
          * @return true if a URI; false otherwise
          */
-        public static bool isURI(string text) {
+        public static bool IsURI(string text) {
             try {
                 new Uri(text);
                 return true;
             }
-            catch (UriFormatException e)
+            catch (UriFormatException)
             {
                 return false;
             }
@@ -120,7 +120,7 @@ namespace WAXNamespace
          * @param text the text
          * @return true if a valid version; false otherwise
          */
-        public static bool isVersion(string text) {
+        public static bool IsVersion(string text) {
             return "1.0".Equals(text) || "1.1".Equals(text) || "1.2".Equals(text);
         }
 
@@ -129,8 +129,8 @@ namespace WAXNamespace
          * @param text the text
          * @throws ArgumentException if it isn't valid
          */
-        public static void verifyComment(string text) {
-            if (!isComment(text)) {
+        public static void VerifyComment(string text) {
+            if (!IsComment(text)) {
                 throw new ArgumentException(
                     '"' + text + "\" is an invalid comment");
             }
@@ -141,8 +141,8 @@ namespace WAXNamespace
          * @param text the text
          * @throws ArgumentException if it isn't valid
          */
-        public static void verifyNMToken(string text) {
-            if (!isNMToken(text)) {
+        public static void VerifyNMToken(string text) {
+            if (!IsNMToken(text)) {
                 throw new ArgumentException(
                     '"' + text + "\" is an invalid NMTOKEN");
             }
@@ -153,8 +153,8 @@ namespace WAXNamespace
          * @param text the text
          * @throws ArgumentException if it isn't valid
          */
-        public static void verifyURI(string text) {
-            if (!isURI(text)) {
+        public static void VerifyURI(string text) {
+            if (!IsURI(text)) {
                 throw new ArgumentException(
                     '"' + text + "\" is an invalid URI");
             }
@@ -165,8 +165,8 @@ namespace WAXNamespace
          * @param text the text
          * @throws ArgumentException if it isn't valid
          */
-        public static void verifyVersion(string text) {
-            if (!isVersion(text)) {
+        public static void VerifyVersion(string text) {
+            if (!IsVersion(text)) {
                 throw new ArgumentException(
                     '"' + text + "\" is an invalid XML version");
             }
