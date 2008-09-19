@@ -266,8 +266,8 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         // Can't define default namespace more than once in the same scope.
         wax.start("root")
-           .namespace("http://www.ociweb.com/tns1")
-           .namespace("http://www.ociweb.com/tns2")
+           .defaultNamespace("http://www.ociweb.com/tns1")
+           .defaultNamespace("http://www.ociweb.com/tns2")
            .close();
     }
 
@@ -646,7 +646,7 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.noIndentsOrCRs();
         wax.start("root")
-           .namespace("http://www.ociweb.com/tns1")
+           .defaultNamespace("http://www.ociweb.com/tns1")
            .namespace("tns2", "http://www.ociweb.com/tns2")
            .namespace("tns3", "http://www.ociweb.com/tns3")
            .close();
@@ -770,7 +770,7 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root")
-           .namespace(null, "http://www.ociweb.com/tns1", "tns1.xsd")
+           .defaultNamespace("http://www.ociweb.com/tns1", "tns1.xsd")
            .namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
            .close();
 
@@ -792,7 +792,7 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.noIndentsOrCRs();
         wax.start("root")
-           .namespace(null, "http://www.ociweb.com/tns1", "tns1.xsd")
+           .defaultNamespace("http://www.ociweb.com/tns1", "tns1.xsd")
            .namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
            .close();
 

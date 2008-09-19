@@ -110,7 +110,7 @@ public class Tutorial {
         out("Associate a default namespace:");
         wax = new WAX();
         wax.start("car").attr("year", 2008)
-           .namespace("http://www.ociweb.com/cars")
+           .defaultNamespace("http://www.ociweb.com/cars")
            .child("model", "Prius").close();
         // <car year="2008"
         //   xmlns="http://www.ociweb.com/cars">
@@ -131,7 +131,7 @@ public class Tutorial {
         out("Associate an XML Schema:");
         wax = new WAX();
         wax.start("car").attr("year", 2008)
-           .namespace("", "http://www.ociweb.com/cars", "car.xsd")
+           .defaultNamespace("http://www.ociweb.com/cars", "car.xsd")
            .child("model", "Prius").close();
         // <car year="2008"
         //   xmlns="http://www.ociweb.com/cars"
@@ -143,7 +143,7 @@ public class Tutorial {
         out("Associate multiple XML Schemas:");
         wax = new WAX();
         wax.start("car").attr("year", 2008)
-           .namespace("", "http://www.ociweb.com/cars", "car.xsd")
+           .defaultNamespace("http://www.ociweb.com/cars", "car.xsd")
            .namespace("m", "http://www.ociweb.com/model", "model.xsd")
            .child("m", "model", "Prius").close();
         // <car year="2008"

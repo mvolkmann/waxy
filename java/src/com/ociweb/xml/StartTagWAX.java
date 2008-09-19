@@ -55,9 +55,14 @@ public interface StartTagWAX extends ElementWAX {
     StartTagWAX commentedStart(String prefix, String name);
 
     /**
-     * @see WAX#namespace(String)
+     * @see WAX#defaultNamespace(String)
      */
-    StartTagWAX namespace(String uri);
+    StartTagWAX defaultNamespace(String uri);
+
+    /**
+     * @see WAX#defaultNamespace(String, String)
+     */
+    StartTagWAX defaultNamespace(String uri, String schemaPath);
 
     /**
      * @see WAX#namespace(String, String)
