@@ -47,5 +47,8 @@ public interface PrologWAX extends CommonWAX {
      */
     PrologWAX externalEntityDef(String name, String filePath);
 
+    /**
+     * @see WAX#xslt(String)
+     */
     PrologWAX xslt(String filePath);
 }
