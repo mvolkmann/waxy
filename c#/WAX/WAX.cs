@@ -553,9 +553,10 @@ namespace WAXNamespace
          * @param os the OutputStream
          * @return a specific interface that WAX implements.
          */
-        //public static PrologWAX NewInstance(Stream stream) {
-        //    return new WAX(stream);
-        //}
+        public static PrologWAX NewInstance(Stream stream)
+        {
+            return new WAX(stream);
+        }
 
         /**
          * Creates a new WAX object that writes to a given file path and
