@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAXLibrary", "WAX\WAXLibrary.csproj", "{84F52FE2-52C3-47E3-8122-34C14D4596D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaxTest", "WaxTest\WaxTest.csproj", "{D04F00AB-FF8B-4190-920E-03A9A970E128}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAXTest", "WAXTest\WAXTest.csproj", "{D04F00AB-FF8B-4190-920E-03A9A970E128}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
