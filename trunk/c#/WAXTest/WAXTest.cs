@@ -32,6 +32,8 @@ namespace WaxTest
     [TestFixture]
     public class WAXTest
     {
+    	private const String TEMP_XML_FILE_PATH = "/tmp/temp.xml";
+
         [Test]
         public void testAttributes() {
             StringWriter sw = new StringWriter();
@@ -337,7 +339,7 @@ namespace WaxTest
         [Test] //(expected=RuntimeException.class)
         public void testBadWrite() /* throws IOException */ {
             try {
-                string filePath = "/tmp/temp.xml";
+                string filePath = TEMP_XML_FILE_PATH;
                 FileStream fs = File.OpenWrite(filePath);
                 WAX wax = new WAX(fs);
                 wax.Start("root");
@@ -597,6 +599,23 @@ namespace WaxTest
         }
 
         [Test]
+        public void testNewInstanceNoArg()
+        {
+            TextWriter oldConsoleOut = Console.Out;
+            StringWriter sw = new StringWriter();
+            Console.SetOut(sw);
+            try
+            {
+                WAX.NewInstance().Start("root").Close();
+                Assert.AreEqual("<root/>", sw.ToString());
+            }
+            finally
+            {
+                Console.SetOut(oldConsoleOut);
+            }
+        }
+
+        [Test]
         public void testNoIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -750,7 +769,7 @@ namespace WaxTest
 
         [Test]
         public void testWriteFile() /* throws IOException */ {
-            string filePath = "/tmp/temp.xml";
+            string filePath = TEMP_XML_FILE_PATH;
             WAX wax = new WAX(filePath);
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
@@ -759,14 +778,40 @@ namespace WaxTest
         }
 
         [Test]
-        public void testWriteStream() /* throws IOException */ {
-            string filePath = "/tmp/temp.xml";
-            FileStream fs = File.OpenWrite(filePath);
-            WAX wax = new WAX(fs);
+        public void testNewInstanceFile() /* throws IOException */ {
+            string filePath = TEMP_XML_FILE_PATH;
+            WAX wax = WAX.NewInstance(filePath) as WAX;
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
             Assert.AreEqual("<root>text</root>", getFileFirstLine(filePath));
             File.Delete(filePath);
+        }
+
+        [Test]
+        public void testWriteStream() /* throws IOException */ {
+            MemoryStream ms = new MemoryStream();
+            WAX wax = new WAX(ms);
+            wax.SetIndent(null);
+            wax.Start("root").Text("text").Close();
+            Assert.AreEqual("<root>text</root>", ToString(ms));
+        }
+
+        [Test]
+        public void testNewInstanceStream() /* throws IOException */ {
+            MemoryStream ms = new MemoryStream();
+            WAX wax = WAX.NewInstance(ms) as WAX;
+            wax.SetIndent(null);
+            wax.Start("root").Text("text").Close();
+            Assert.AreEqual("<root>text</root>", ToString(ms));
+        }
+
+        [Test]
+        public void testNewInstanceWriter() /* throws IOException */ {
+            StringWriter sw = new StringWriter();
+            WAX wax = WAX.NewInstance(sw) as WAX;
+            wax.SetIndent(null);
+            wax.Start("root").Text("text").Close();
+            Assert.AreEqual("<root>text</root>", sw.ToString());
         }
 
         [Test]
@@ -789,6 +834,11 @@ namespace WaxTest
             string line = streamReader.ReadLine();
             streamReader.Close();
             return line;
+        }
+
+        private static string ToString(MemoryStream ms)
+        {
+            return new StreamReader(new MemoryStream(ms.ToArray())).ReadToEnd();
         }
 
     }
