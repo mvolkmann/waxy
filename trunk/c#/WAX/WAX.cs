@@ -547,14 +547,14 @@ namespace WAXNamespace
 
         // TODO: Change to match constructors.
         /**
-         * Creates a new WAX object that writes to a given OutputStream and
+         * Creates a new WAX object that writes to a given Stream and
          * returns it as an interface type that restricts the first method call
          * to be one that is valid for the initial ouptut.
          * @param os the OutputStream
          * @return a specific interface that WAX implements.
          */
-        //public static PrologWAX NewInstance(OutputStream os) {
-        //    return new WAX(os);
+        //public static PrologWAX NewInstance(Stream stream) {
+        //    return new WAX(stream);
         //}
 
         /**

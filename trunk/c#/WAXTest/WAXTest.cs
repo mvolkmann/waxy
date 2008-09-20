@@ -32,15 +32,6 @@ namespace WaxTest
     [TestFixture]
     public class WAXTest
     {
-
-        private string getFileFirstLine(string filePath) /* throws IOException */ {
-            Stream inputStream = File.OpenRead(filePath);
-            StreamReader streamReader = new StreamReader(inputStream);
-            string line = streamReader.ReadLine();
-            streamReader.Close();
-            return line;
-        }
-
         [Test]
         public void testAttributes() {
             StringWriter sw = new StringWriter();
@@ -791,5 +782,14 @@ namespace WaxTest
 
         // TODO: Tests for 'NewInstance' methods.
         // TODO: Test for 'TerminateStart' method.
+
+        private string getFileFirstLine(string filePath) /* throws IOException */ {
+            Stream inputStream = File.OpenRead(filePath);
+            StreamReader streamReader = new StreamReader(inputStream);
+            string line = streamReader.ReadLine();
+            streamReader.Close();
+            return line;
+        }
+
     }
 }
