@@ -69,6 +69,16 @@ public interface ElementWAX extends CommonWAX {
     ElementWAX end(boolean verbose);
 
     /**
+     * @see WAX#rawText(String)
+     */
+    ElementWAX rawText(String rawText);
+
+    /**
+     * @see WAX#rawText(String, boolean)
+     */
+    ElementWAX rawText(String rawText, boolean newLine);
+
+    /**
      * @see WAX#text(String)
      */
     ElementWAX text(String text);

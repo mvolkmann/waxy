@@ -39,10 +39,10 @@ public interface StartTagWAX extends ElementWAX {
     StartTagWAX attr(String prefix, String name, Object value);
 
     /**
-     * @see WAX#attr(boolean, String, String, Object)
+     * @see WAX#attr(String, String, Object, boolean)
      */
     StartTagWAX attr(
-        boolean newLine, String prefix, String name, Object value);
+        String prefix, String name, Object value, boolean newLine);
 
     /**
      * @see WAX#commentedStart(String)
@@ -83,4 +83,20 @@ public interface StartTagWAX extends ElementWAX {
      * @see WAX#ns(String, String, String)
      */
     StartTagWAX ns(String prefix, String uri, String schemaPath);
+
+    /**
+     * @see WAX#rawAttr(String, Object)
+     */
+    StartTagWAX rawAttr(String name, Object value);
+
+    /**
+     * @see WAX#rawAttr(String, String, Object)
+     */
+    StartTagWAX rawAttr(String prefix, String name, Object value);
+
+    /**
+     * @see WAX#rawAttr(String, String, Object, boolean)
+     */
+    StartTagWAX rawAttr(
+        String prefix, String name, Object value, boolean newLine);
 }
