@@ -705,6 +705,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
+     * Shorthand name for the processingInstruction method.
+     * @see #pi(String, String)
+     * @param target the processing instruction target
+     * @param data the processing instruction data
+     * @return the calling object to support chaining
+     */
+    public PrologOrElementWAX pi(String target, String data) {
+        return processingInstruction(target, data);
+    }
+
+    /**
      * Writes a processing instruction.
      * @param target the processing instruction target
      * @param data the processing instruction data

@@ -38,6 +38,11 @@ public interface CommonWAX {
     PrologOrElementWAX comment(String text, boolean newLine);
 
     /**
+     * @see WAX#pi(String, String)
+     */
+    PrologOrElementWAX pi(String target, String data);
+
+    /**
      * @see WAX#processingInstruction(String, String)
      */
     PrologOrElementWAX processingInstruction(String target, String data);
