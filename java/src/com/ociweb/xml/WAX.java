@@ -351,6 +351,48 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
+     * Writes a namespace declaration for the default namespace
+     * in the start tag of the current element.
+     * @param uri the namespace URI
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX defaultNamespace(String uri) {
+        return namespace("", uri);
+    }
+
+    /**
+     * Writes a namespace declaration for the default namespace
+     * in the start tag of the current element.
+     * @param uri the namespace URI
+     * @param schemaPath the path to the XML Schema
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX defaultNamespace(String uri, String schemaPath) {
+        return namespace("", uri, schemaPath);
+    }
+
+    /**
+     * Shorthand name for the defaultNamespace method.
+     * @see #defaultamespace(String)
+     * @param uri the namespace URI
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX defaultNS(String uri) {
+        return defaultNamespace(uri);
+    }
+
+    /**
+     * Shorthand name for the defaultNamespace method.
+     * @see #defaultNamespace(String, String)
+     * @param prefix the namespace prefix
+     * @param uri the namespace URI
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX defaultNS(String uri, String schemaPath) {
+        return defaultNamespace(uri, schemaPath);
+    }
+
+    /**
      * Writes a DOCTYPE that associates a DTD with the XML document.
      * @param systemId the file path or URL to the DTD
      * @return the calling object to support chaining
@@ -516,27 +558,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Writes a namespace declaration for the default namespace
-     * in the start tag of the current element.
-     * @param uri the namespace URI
-     * @return the calling object to support chaining
-     */
-    public StartTagWAX defaultNamespace(String uri) {
-        return namespace("", uri);
-    }
-
-    /**
-     * Writes a namespace declaration for the default namespace
-     * in the start tag of the current element.
-     * @param uri the namespace URI
-     * @param schemaPath the path to the XML Schema
-     * @return the calling object to support chaining
-     */
-    public StartTagWAX defaultNamespace(String uri, String schemaPath) {
-        return namespace("", uri, schemaPath);
     }
 
     /**
