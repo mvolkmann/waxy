@@ -362,7 +362,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a DOCTYPE that associates a DTD with the XML document.
-     * @param filePath the path to the DTD
+     * @param publicId the public ID of the DTD
+     * @param systemId the file path or URL to the DTD
      * @return the calling object to support chaining
      */
     public PrologWAX dtd(String publicId, String systemId) {
@@ -677,6 +678,30 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public static PrologWAX newInstance(Writer writer) {
         return new WAX(writer);
+    }
+
+    /**
+     * Shorthand name for the namespace method.
+     * @see #namespace(String, String)
+     * @param prefix the namespace prefix
+     * @param uri the namespace URI
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX ns(String prefix, String uri) {
+        return namespace(prefix, uri);
+    }
+
+    /**
+     * Shorthand name for the namespace method.
+     * @see #namespace(String, String, String)
+     * @param prefix the namespace prefix
+     * @param uri the namespace URI
+     * @param schemaPath the path to the XML Schema
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX ns(
+        String prefix, String uri, String schemaPath) {
+        return namespace(prefix, uri, schemaPath);
     }
 
     /**

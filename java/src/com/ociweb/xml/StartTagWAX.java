@@ -73,4 +73,14 @@ public interface StartTagWAX extends ElementWAX {
      * @see WAX#namespace(String, String, String)
      */
     StartTagWAX namespace(String prefix, String uri, String schemaPath);
+
+    /**
+     * @see WAX#ns(String, String)
+     */
+    StartTagWAX ns(String prefix, String uri);
+
+    /**
+     * @see WAX#ns(String, String, String)
+     */
+    StartTagWAX ns(String prefix, String uri, String schemaPath);
 }

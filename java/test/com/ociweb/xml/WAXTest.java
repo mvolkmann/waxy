@@ -700,7 +700,7 @@ public class WAXTest {
         wax.start("root")
            .defaultNamespace("http://www.ociweb.com/tns1")
            .namespace("tns2", "http://www.ociweb.com/tns2")
-           .namespace("tns3", "http://www.ociweb.com/tns3")
+           .ns("tns3", "http://www.ociweb.com/tns3")
            .close();
 
         String xml = "<root" +
@@ -860,16 +860,19 @@ public class WAXTest {
         wax.start("root")
            .defaultNamespace("http://www.ociweb.com/tns1", "tns1.xsd")
            .namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
+           .ns("tns3", "http://www.ociweb.com/tns3", "tns3.xsd")
            .close();
 
         String cr = wax.getCR();
         String xml = "<root" + cr +
             "  xmlns=\"http://www.ociweb.com/tns1\"" + cr +
             "  xmlns:tns2=\"http://www.ociweb.com/tns2\"" + cr +
+            "  xmlns:tns3=\"http://www.ociweb.com/tns3\"" + cr +
             "  xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" + cr +
             "  xsi:schemaLocation=\"" +
             "http://www.ociweb.com/tns1 tns1.xsd" + cr +
-            "    http://www.ociweb.com/tns2 tns2.xsd" +
+            "    http://www.ociweb.com/tns2 tns2.xsd" + cr +
+            "    http://www.ociweb.com/tns3 tns3.xsd" +
             "\"/>";
         assertEquals(xml, sw.toString());
     }
