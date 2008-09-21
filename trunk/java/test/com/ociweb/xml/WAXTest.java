@@ -242,7 +242,8 @@ public class WAXTest {
 
     @Test(expected=IllegalStateException.class)
     public void testBadNamespaceInElementContent() {
-        WAX wax = new WAX();
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
         wax.start("root").text("text");
         wax.namespace("tns", "http://www.ociweb.com/tns");
     }
@@ -251,7 +252,8 @@ public class WAXTest {
     public void testBadNamespaceDuplicatePrefix() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        // Can't define same namespace prefix more than once in the same scope.
+        // Can't define same namespace prefix more
+        // than once on the same element.
         wax.start("root")
            .namespace("tns", "http://www.ociweb.com/tns")
            .namespace("tns", "http://www.ociweb.com/tns")
@@ -262,7 +264,8 @@ public class WAXTest {
     public void testBadNamespaceMultipleDefault() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        // Can't define default namespace more than once in the same scope.
+        // Can't define default namespace more than once
+        // on the same element.
         wax.start("root")
            .defaultNamespace("http://www.ociweb.com/tns1")
            .defaultNamespace("http://www.ociweb.com/tns2")
@@ -704,6 +707,49 @@ public class WAXTest {
             " xmlns=\"http://www.ociweb.com/tns1\"" +
             " xmlns:tns2=\"http://www.ociweb.com/tns2\"" +
             " xmlns:tns3=\"http://www.ociweb.com/tns3\"/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testNamespaceDuplicatePrefix() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+
+        // Can define same namespace prefix more than once
+        // on different elements.
+        String prefix = "tns";
+        String uri = "http://www.ociweb.com/tns";
+        wax.start("root").namespace(prefix, uri + "1")
+           .start("child").namespace(prefix, uri + "2")
+           .close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<root xmlns:" + prefix + "=\"" + uri + "1\">" +
+            "<child xmlns:" + prefix + "=\"" + uri + "2\"/>" +
+            "</root>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testNamespaceMultipleDefault() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+
+        // Can define default namespace prefix more than once
+        // on different elements.
+        String uri = "http://www.ociweb.com/tns";
+        wax.start("root").defaultNamespace(uri + "1")
+           .start("child").defaultNamespace(uri + "2")
+           .close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<root xmlns=\"" + uri + "1\">" +
+            "<child xmlns=\"" + uri + "2\"/>" +
+            "</root>";
         assertEquals(xml, sw.toString());
     }
 
