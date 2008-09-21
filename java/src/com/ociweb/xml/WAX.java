@@ -69,6 +69,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean attrOnNewLine;
     private boolean checkMe = true;
     private boolean closeStream = true;
+    private boolean defaultNSOnCurrentElement;
     private boolean dtdSpecified;
     private boolean escape = true;
     private boolean hasContent;
@@ -573,17 +574,32 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (prefix == null) prefix = "";
         boolean hasPrefix = prefix.length() > 0;
+        String prefixesOnCurrentElement = prefixesStack.pop();
 
         if (checkMe) {
             if (hasPrefix) XMLUtil.verifyName(prefix);
             XMLUtil.verifyURI(uri);
             if (schemaPath != null) XMLUtil.verifyURI(schemaPath);
-        }
 
-        // Verify that the prefix isn't already defined in the current scope.
-        if (isInScopePrefix(prefix)) {
-            throw new IllegalArgumentException(
-                "The namespace prefix \"" + prefix + "\" is already in scope.");
+            // Verify that the prefix isn't already defined
+            // on the current element.
+            if (hasPrefix) {
+                if (prefixesOnCurrentElement != null) {
+                    StringTokenizer st =
+                        new StringTokenizer(prefixesOnCurrentElement, ",");
+                    while (st.hasMoreTokens()) {
+                        String definedPrefix = st.nextToken();
+                        if (prefix.equals(definedPrefix)) {
+                            throw new IllegalArgumentException(
+                                "The namespace prefix \"" + prefix +
+                                "\" is already defined on the current element.");
+                        }
+                    }
+                }
+            } else if (defaultNSOnCurrentElement) {
+                throw new IllegalArgumentException("The default namespace " +
+                    "is already defined on the current element.");
+            }
         }
 
         if (willIndent()) {
@@ -600,14 +616,20 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             namespaceURIToSchemaPathMap.put(uri, schemaPath);
         }
 
-        // Add this prefix to the list of those in scope for this element.
-        String prefixes = prefixesStack.pop();
-        if (prefixes == null) {
-            prefixes = prefix;
+        if (hasPrefix) {
+            // Add this prefix to the list of those in scope for this element.
+            if (prefixesOnCurrentElement == null) {
+                prefixesOnCurrentElement = prefix;
+            } else {
+                prefixesOnCurrentElement += ',' + prefix;
+            }
         } else {
-            prefixes += ',' + prefix;
+            defaultNSOnCurrentElement = true;
         }
-        prefixesStack.push(prefixes);
+
+        // Note that the entry for the current element was popped off
+        // near the beginning of this method, so we're pushing it back on.
+        prefixesStack.push(prefixesOnCurrentElement);
 
         attrOnNewLine = true; // for the next attribute
 
@@ -831,6 +853,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             parentStack.push(qName);
         }
 
+        defaultNSOnCurrentElement = false;
+        
         // No namespace prefixes have been associated with this element yet.
         prefixesStack.push(null);
 
