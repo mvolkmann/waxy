@@ -60,8 +60,7 @@ public class WAXTest {
     public void testAttributeWithoutEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.setEscape(false);
-        wax.start("root").attr("a", "1<2").close();
+        wax.start("root").rawAttr("a", "1<2").close();
         String xml = "<root a=\"1<2\"/>";
         assertEquals(xml, sw.toString());
     }
@@ -75,7 +74,7 @@ public class WAXTest {
            .attr("a1", "v1")
            .attr("a2", 2)
            .attr("foo", "a3", "bar")
-           .attr(true, "foo", "a4", "baz")
+           .attr("foo", "a4", "baz", true)
            .close();
 
         String cr = wax.getCR();
@@ -613,8 +612,8 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.noIndentsOrCRs();
         wax.start("root")
-           .setEscape(false).text("<")
-           .setEscape(true).text("<")
+           .rawText("<")
+           .text("<")
            .close();
 
         String xml = "<root><&lt;</root>";
@@ -914,11 +913,10 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.setTrustMe(true);
-        wax.setEscape(false);
         wax.noIndentsOrCRs();
         // Since error checking and escaping are turned off,
         // invalid element names and unescaped text are allowed.
-        wax.start("123").text("<>&'\"").close();
+        wax.start("123").rawText("<>&'\"").close();
 
         assertEquals("<123><>&'\"</123>", sw.toString());
     }
