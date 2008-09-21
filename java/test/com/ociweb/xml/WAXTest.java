@@ -829,10 +829,11 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.noIndentsOrCRs();
         wax.start("root");
-        wax.processingInstruction("target", "data");
+        wax.processingInstruction("target1", "data1");
+        wax.pi("target2", "data2");
         wax.close();
 
-        String xml = "<root><?target data?></root>";
+        String xml = "<root><?target1 data1?><?target2 data2?></root>";
         assertEquals(xml, sw.toString());
     }
 
