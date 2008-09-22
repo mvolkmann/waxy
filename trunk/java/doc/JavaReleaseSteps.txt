@@ -5,7 +5,7 @@ Steps to create a new WAX for Java release
 - cdwax
 - cd waxy/java
 - run "ant zip jar jar14 javadoc"
-- rm ~/Documents/VolkmannWebSite/programming/WAX/doc/api
+- rm -rf ~/Documents/VolkmannWebSite/programming/WAX/doc/api
 - cp -r doc/api ~/Documents/VolkmannWebSite/programming/WAX/doc
 - browse to http://code.google.com/p/waxy/
 - click the "Downloads" tab
@@ -28,6 +28,8 @@ Steps to create a new WAX for Java release
 - select the "WAX14_{version}.jar" file in WAX/waxy/java/build
 - press the "Submit File" button
 
+- update Documents/VolkmannWebSite/programming/wax.html if necessary
 - open a Terminal window
 - cd Documents/VolkmannWebSite
+- cp programming/wax.html programming/WAX.html
 - enter "./release"

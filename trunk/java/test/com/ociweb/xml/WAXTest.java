@@ -753,28 +753,6 @@ public class WAXTest {
     }
 
     @Test
-    public void testNewInstanceDefault() {
-        PrologWAX pw = WAX.newInstance();
-    }
-
-    @Test
-    public void testNewInstanceOutputStream() {
-        OutputStream os = System.out;
-        PrologWAX pw = WAX.newInstance(os);
-    }
-
-    @Test
-    public void testNewInstanceString() {
-        PrologWAX pw = WAX.newInstance("build/temp.xml");
-    }
-
-    @Test
-    public void testNewInstanceWriter() {
-        StringWriter sw = new StringWriter();
-        PrologWAX pw = WAX.newInstance(sw);
-    }
-
-    @Test
     public void testNoArgCtor() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalSystemOut = System.out;
