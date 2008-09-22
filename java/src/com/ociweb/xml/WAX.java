@@ -509,6 +509,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Gets the indentation characters being used.
+     * Note that there is a distinction between null and "".
+     * @see #setIndent(String)
+     * @see #setIndent(int)
      * @return the indentation characters
      */
     public String getIndent() {
