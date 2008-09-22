@@ -877,6 +877,23 @@ public class WAXTest {
     }
 
     @Test
+    public void testSpaceInEmptyElements() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+
+        wax.start("root").start("child1").end();
+        wax.setSpaceInEmptyElements(true);
+        wax.start("child2").end();
+        wax.setSpaceInEmptyElements(false);
+        wax.start("child3").close();
+
+        String xml = "<root><child1/><child2 /><child3/></root>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testText() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
