@@ -76,6 +76,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean hasIndentedContent;
     private boolean inCommentedStart;
     private boolean outputStarted;
+    private boolean spaceInEmptyElements;
     private boolean xsltSpecified;
 
     /**
@@ -466,6 +467,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             write(wasCommentedStart ? name.substring(1) : name);
             write(wasCommentedStart ? "-->" : ">");
         } else {
+            if (spaceInEmptyElements) write(" ");
             write(wasCommentedStart ? "/-->" : "/>");
         }
 
@@ -516,6 +518,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public String getIndent() {
         return indent;
+    }
+
+    /**
+     * Indicates whether a space is added before the slash in empty elements.
+     * @see #setSpaceInEmptyElements(boolean)
+     * @return true if a space is added; false otherwise
+     */
+    public boolean isSpaceInEmptyElements() {
+        return spaceInEmptyElements;
     }
 
     /**
@@ -843,6 +854,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public void noIndentsOrCRs() {
         setIndent(null);
+    }
+
+    /**
+     * Sets whether a space will be added before the closing slash
+     * in empty elements.
+     * When set true, output will look like "<tag />".
+     * When set false, output will look like "<tag/>".
+     * @see #getSpaceInEmptyElements(boolean)
+     * @param spaceInEmptyElements true to include a space; false otherwise
+     */
+    public void setSpaceInEmptyElements(boolean spaceInEmptyElements) {
+        this.spaceInEmptyElements = spaceInEmptyElements;
     }
 
     /**
