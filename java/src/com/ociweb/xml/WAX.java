@@ -373,7 +373,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Shorthand name for the defaultNamespace method.
-     * @see #defaultamespace(String)
+     * @see #defaultNamespace(String)
      * @param uri the namespace URI
      * @return the calling object to support chaining
      */
@@ -384,8 +384,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Shorthand name for the defaultNamespace method.
      * @see #defaultNamespace(String, String)
-     * @param prefix the namespace prefix
      * @param uri the namespace URI
+     * @param schemaPath the path to the XML Schema
      * @return the calling object to support chaining
      */
     public StartTagWAX defaultNS(String uri, String schemaPath) {
@@ -649,49 +649,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Creates a new WAX object that writes to stdout and
-     * returns it as an interface type that restricts the first method call
-     * to be one that is valid for the initial ouptut.
-     * @return a specific interface that WAX implements.
-     */
-    public static PrologWAX newInstance() {
-        return new WAX();
-    }
-
-    /**
-     * Creates a new WAX object that writes to a given OutputStream and
-     * returns it as an interface type that restricts the first method call
-     * to be one that is valid for the initial ouptut.
-     * @param os the OutputStream
-     * @return a specific interface that WAX implements.
-     */
-    public static PrologWAX newInstance(OutputStream os) {
-        return new WAX(os);
-    }
-
-    /**
-     * Creates a new WAX object that writes to a given file path and
-     * returns it as an interface type that restricts the first method call
-     * to be one that is valid for the initial ouptut.
-     * @param filePath the file path
-     * @return a specific interface that WAX implements.
-     */
-    public static PrologWAX newInstance(String filePath) {
-        return new WAX(filePath);
-    }
-
-    /**
-     * Creates a new WAX object that writes to a given Writer and
-     * returns it as an interface type that restricts the first method call
-     * to be one that is valid for the initial ouptut.
-     * @param writer the Writer
-     * @return a specific interface that WAX implements.
-     */
-    public static PrologWAX newInstance(Writer writer) {
-        return new WAX(writer);
-    }
-
-    /**
      * Shorthand name for the namespace method.
      * @see #namespace(String, String)
      * @param prefix the namespace prefix
@@ -768,7 +725,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         return rawAttr("", name, value);
     }
 
-    /*
+    /**
      * Same as the attr method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
      * @see #attr(String, String, Object)
@@ -781,7 +738,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         return rawAttr(prefix, name, value, false);
     }
 
-    /*
+    /**
      * Same as the attr method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
      * @see #attr(String, String, Object, boolean)
@@ -799,7 +756,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         return this;
     }
 
-    /*
+    /**
      * Same as the text method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
      * @see #text(String)
@@ -810,7 +767,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         return rawText(text, false);
     }
 
-    /*
+    /**
      * Same as the text method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
      * @see #text(String, boolean)

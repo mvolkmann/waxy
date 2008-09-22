@@ -1,4 +1,9 @@
 WAX for Java Release Notes
 
 Version 0.9.7
-- addressed the following issues: 2, 7, 8, 10, 11, 13, 14, 15
+- addressed the following issues:
+  2, 7, 8, 10, 11, 13, 14, 15
+
+Version 0.9.8
+- addresses the following issues:
+  1, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 28, 29
