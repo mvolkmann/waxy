@@ -7,13 +7,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * This class provides unit test methods for WAX.
@@ -42,8 +41,12 @@ public class WAXTest {
     private String getFileFirstLine(String filePath) throws IOException {
         FileReader fr = new FileReader(filePath);
         BufferedReader br = new BufferedReader(fr);
-        String line = br.readLine();
-        br.close();
+        String line = null;
+        try {
+            line = br.readLine();
+        } finally {
+            br.close();
+        }
         return line;
     }
 
@@ -60,7 +63,7 @@ public class WAXTest {
     public void testAttributeWithoutEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").rawAttr("a", "1<2").close();
+        wax.start("root").unescapedAttr("a", "1<2").close();
         String xml = "<root a=\"1<2\"/>";
         assertEquals(xml, sw.toString());
     }
@@ -341,7 +344,8 @@ public class WAXTest {
         WAX wax = new WAX(fw);
         wax.start("root");
         fw.close(); // closed the Writer instead of allowing WAX to do it
-        new File(filePath).delete();
+        boolean success = new File(filePath).delete();
+        assertTrue(success);
         wax.close(); // attempting to write more after the Writer was closed
     }
 
@@ -426,7 +430,6 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.start("root").cdata("1<2>3&4'5\"6").close();
 
-        String cr = wax.getCR();
         String xml =
             "<root><![CDATA[1<2>3&4'5\"6]]></root>";
         assertEquals(xml, sw.toString());
@@ -612,7 +615,7 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.noIndentsOrCRs();
         wax.start("root")
-           .rawText("<")
+           .unescapedText("<")
            .text("<")
            .close();
 
@@ -723,7 +726,6 @@ public class WAXTest {
            .start("child").namespace(prefix, uri + "2")
            .close();
 
-        String cr = wax.getCR();
         String xml =
             "<root xmlns:" + prefix + "=\"" + uri + "1\">" +
             "<child xmlns:" + prefix + "=\"" + uri + "2\"/>" +
@@ -744,7 +746,6 @@ public class WAXTest {
            .start("child").defaultNamespace(uri + "2")
            .close();
 
-        String cr = wax.getCR();
         String xml =
             "<root xmlns=\"" + uri + "1\">" +
             "<child xmlns=\"" + uri + "2\"/>" +
@@ -911,7 +912,7 @@ public class WAXTest {
         wax.noIndentsOrCRs();
         // Since error checking and escaping are turned off,
         // invalid element names and unescaped text are allowed.
-        wax.start("123").rawText("<>&'\"").close();
+        wax.start("123").unescapedText("<>&'\"").close();
 
         assertEquals("<123><>&'\"</123>", sw.toString());
     }
@@ -951,18 +952,24 @@ public class WAXTest {
         wax.noIndentsOrCRs();
         wax.start("root").text("text").close();
         assertEquals("<root>text</root>", getFileFirstLine(filePath));
-        new File(filePath).delete();
+        boolean success = new File(filePath).delete();
+        assertTrue(success);
     }
 
     @Test
     public void testWriteStream() throws IOException {
         String filePath = "build/temp.xml";
         FileOutputStream fos = new FileOutputStream(filePath);
-        WAX wax = new WAX(fos);
-        wax.noIndentsOrCRs();
-        wax.start("root").text("text").close();
-        assertEquals("<root>text</root>", getFileFirstLine(filePath));
-        new File(filePath).delete();
+        try {
+            WAX wax = new WAX(fos);
+            wax.noIndentsOrCRs();
+            wax.start("root").text("text").close();
+            assertEquals("<root>text</root>", getFileFirstLine(filePath));
+            boolean success = new File(filePath).delete();
+            assertTrue(success);
+        } finally {
+            fos.close();
+        }
     }
 
     @Test

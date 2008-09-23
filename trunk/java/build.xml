@@ -51,6 +51,20 @@
       classpathref="classpath" deprecation="on" debug="on"/>
   </target>
 
+  <target name="findbugs" depends="compile">
+    <taskdef name="findbugs"
+      classname="edu.umd.cs.findbugs.anttask.FindBugsTask"/>
+    <findbugs home="${findbugs.dir}"
+      output="html" outputFile="build/wax-fb.html">
+      <sourcePath path="src"/>
+      <auxClasspath location="${junit.jar}"/>
+      <class location="${classes.dir}"/>
+    </findbugs>
+    <antcall target="browse">
+      <param name="file.path" value="build/wax-fb.html"/>
+    </antcall>
+  </target>
+
   <target name="init">
     <mkdir dir="${classes.dir}"/>
   </target>

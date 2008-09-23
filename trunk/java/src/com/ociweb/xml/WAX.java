@@ -44,19 +44,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * in this class aren't called in an illogical order.
      * If they are, an IllegalStateException is thrown.
      */
-    private enum State {
-        // EMMA flags this, perhaps because it thinks that
-        // not all the values are used, but they are.
-        IN_PROLOG, IN_START_TAG, IN_ELEMENT, AFTER_ROOT
-    }
+    private enum State { IN_PROLOG, IN_START_TAG, IN_ELEMENT, AFTER_ROOT }
 
+    private List<String> entityDefs = new ArrayList<String>();
     private List<String> pendingPrefixes = new ArrayList<String>();
 
     // Using a TreeMap so keys are kept in sorted order.
     private Map<String, String> namespaceURIToSchemaPathMap =
         new TreeMap<String, String>();
 
-    private List<String> entityDefs = new ArrayList<String>();
     private Stack<String> parentStack = new Stack<String>();
     private Stack<String> prefixesStack = new Stack<String>();
     private State state = State.IN_PROLOG;
@@ -110,7 +106,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Creates a WAX that writes to a given Writer.
      * The writer will be closed by the close method of this class.
-     * 
      * @param writer the Writer
      */
     public WAX(Writer writer) { this(writer, Version.UNSPECIFIED); }
@@ -726,32 +721,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         return this;
     }
 
-
-    /**
-     * Same as the attr method, but special characters in the value
-     * aren't escaped.  This allows entity references to be embedded.
-     * @see #attr(String, Object)
-     * @param name the attribute name
-     * @param value the attribute value
-     * @return the calling object to support chaining
-     */
-    public StartTagWAX rawAttr(String name, Object value) {
-        return rawAttr("", name, value);
-    }
-
-    /**
-     * Same as the attr method, but special characters in the value
-     * aren't escaped.  This allows entity references to be embedded.
-     * @see #attr(String, String, Object)
-     * @param prefix the namespace prefix for the attribute
-     * @param name the attribute name
-     * @param value the attribute value
-     * @return the calling object to support chaining
-     */
-    public StartTagWAX rawAttr(String prefix, String name, Object value) {
-        return rawAttr(prefix, name, value, false);
-    }
-
     /**
      * Same as the attr method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
@@ -762,36 +731,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param newLine true to write on a new line; false otherwise
      * @return the calling object to support chaining
      */
-    public StartTagWAX rawAttr(
+    public StartTagWAX unescapedAttr(
         String prefix, String name, Object value, boolean newLine) {
         escape = false;
         attr(prefix, name, value);
-        escape = true;
-        return this;
-    }
-
-    /**
-     * Same as the text method, but special characters in the value
-     * aren't escaped.  This allows entity references to be embedded.
-     * @see #text(String)
-     * @param text the text
-     * @return the calling object to support chaining
-     */
-    public ElementWAX rawText(String text) {
-        return rawText(text, false);
-    }
-
-    /**
-     * Same as the text method, but special characters in the value
-     * aren't escaped.  This allows entity references to be embedded.
-     * @see #text(String, boolean)
-     * @param text the text
-     * @param newLine true to output the text on a new line; false otherwise
-     * @return the calling object to support chaining
-     */
-    public ElementWAX rawText(String text, boolean newLine) {
-        escape = false;
-        text(text, newLine);
         escape = true;
         return this;
     }
@@ -1001,6 +944,57 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
+     * Same as the attr method, but special characters in the value
+     * aren't escaped.  This allows entity references to be embedded.
+     * @see #attr(String, Object)
+     * @param name the attribute name
+     * @param value the attribute value
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX unescapedAttr(String name, Object value) {
+        return unescapedAttr("", name, value);
+    }
+
+    /**
+     * Same as the attr method, but special characters in the value
+     * aren't escaped.  This allows entity references to be embedded.
+     * @see #attr(String, String, Object)
+     * @param prefix the namespace prefix for the attribute
+     * @param name the attribute name
+     * @param value the attribute value
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX unescapedAttr(String prefix, String name, Object value) {
+        return unescapedAttr(prefix, name, value, false);
+    }
+
+    /**
+     * Same as the text method, but special characters in the value
+     * aren't escaped.  This allows entity references to be embedded.
+     * @see #text(String)
+     * @param text the text
+     * @return the calling object to support chaining
+     */
+    public ElementWAX unescapedText(String text) {
+        return unescapedText(text, false);
+    }
+
+    /**
+     * Same as the text method, but special characters in the value
+     * aren't escaped.  This allows entity references to be embedded.
+     * @see #text(String, boolean)
+     * @param text the text
+     * @param newLine true to output the text on a new line; false otherwise
+     * @return the calling object to support chaining
+     */
+    public ElementWAX unescapedText(String text, boolean newLine) {
+        escape = false;
+        text(text, newLine);
+        escape = true;
+        return this;
+    }
+
+    /**
      * Uses \n for carriage returns which is appropriate
      * on every platform except Windows.
      * This is the default.
@@ -1123,24 +1117,24 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         // Write the attributes needed to associate XML Schemas
         // with this XML.
-        String schemaLocation = "";
+        StringBuilder schemaLocation = new StringBuilder();
         for (String uri : namespaceURIToSchemaPathMap.keySet()) {
             String path = namespaceURIToSchemaPathMap.get(uri);
             
             // If not the first pair output ...
             if (schemaLocation.length() > 0) {
                 if (willIndent()) {
-                    schemaLocation += cr;
+                    schemaLocation.append(cr);
                     int size = parentStack.size();
                     for (int i = 0; i <= size; ++i) {
-                        schemaLocation += indent;
+                        schemaLocation.append(indent);
                     }
                 } else {
-                    schemaLocation += ' ';
+                    schemaLocation.append(' ');
                 }
             }
             
-            schemaLocation += uri + ' ' + path;
+            schemaLocation.append(uri + ' ' + path);
         }
         
         namespace("xsi", XMLUtil.XMLSCHEMA_INSTANCE_NS);

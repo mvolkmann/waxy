@@ -171,8 +171,8 @@ public class Tutorial {
         wax.entityDef("oci", "Object Computing, Inc.")
            .externalEntityDef("moreData", url + "moreData.xml")
            .start("root")
-           .rawText("The author works at &oci; in St. Louis, Missouri.", true)
-           .rawText("&moreData;", true)
+           .unescapedText("The author works at &oci; in St. Louis, Missouri.", true)
+           .unescapedText("&moreData;", true)
            .close();
         //<!DOCTYPE root [
         //  <!ENTITY oci "Object Computing, Inc.">
