@@ -97,9 +97,4 @@ public class XMLUtilTest {
         assertTrue(XMLUtil.isVersion("1.2"));
         assertTrue(!XMLUtil.isVersion("1.3"));
     }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testVerifyVersion() {
-        XMLUtil.verifyVersion("2.0");
-    }
 }
