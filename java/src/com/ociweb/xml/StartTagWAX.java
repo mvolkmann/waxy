@@ -95,18 +95,18 @@ public interface StartTagWAX extends ElementWAX {
     StartTagWAX ns(String prefix, String uri, String schemaPath);
 
     /**
-     * @see WAX#rawAttr(String, Object)
+     * @see WAX#unescapedAttr(String, Object)
      */
-    StartTagWAX rawAttr(String name, Object value);
+    StartTagWAX unescapedAttr(String name, Object value);
 
     /**
-     * @see WAX#rawAttr(String, String, Object)
+     * @see WAX#unescapedAttr(String, String, Object)
      */
-    StartTagWAX rawAttr(String prefix, String name, Object value);
+    StartTagWAX unescapedAttr(String prefix, String name, Object value);
 
     /**
-     * @see WAX#rawAttr(String, String, Object, boolean)
+     * @see WAX#unescapedAttr(String, String, Object, boolean)
      */
-    StartTagWAX rawAttr(
+    StartTagWAX unescapedAttr(
         String prefix, String name, Object value, boolean newLine);
 }
