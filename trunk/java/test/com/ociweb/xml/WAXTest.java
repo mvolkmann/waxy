@@ -54,8 +54,8 @@ public class WAXTest {
     public void testAttributeWithEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").attr("a", "1<2").close();
-        String xml = "<root a=\"1&lt;2\"/>";
+        wax.start("root").attr("a", "1&2").close();
+        String xml = "<root a=\"1&amp;2\"/>";
         assertEquals(xml, sw.toString());
     }
 
@@ -63,8 +63,8 @@ public class WAXTest {
     public void testAttributeWithoutEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").unescapedAttr("a", "1<2").close();
-        String xml = "<root a=\"1<2\"/>";
+        wax.start("root").unescapedAttr("a", "1&2").close();
+        String xml = "<root a=\"1&2\"/>";
         assertEquals(xml, sw.toString());
     }
 
@@ -91,6 +91,13 @@ public class WAXTest {
         assertEquals(xml, sw.toString());
     }
     
+    @Test(expected=IllegalArgumentException.class)
+    public void testBadAttributeName() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").attr("1a", "value").close();
+    }
+
     @Test(expected=IllegalStateException.class)
     public void testBadAttributeTimingCaught() {
         WAX wax = new WAX();
@@ -98,13 +105,6 @@ public class WAXTest {
         wax.text("text");
         // Can't call "attr" after calling "text".
         wax.attr("a1", "v1");
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testBadAttributeName() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root").attr("1a", "value").close();
     }
 
     @Test(expected=IllegalStateException.class)
@@ -210,7 +210,6 @@ public class WAXTest {
     public void testBadExtraEnd() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
         wax.start("root").end().end().close();
     }
 
@@ -242,14 +241,6 @@ public class WAXTest {
         wax.setIndent(5); // must be <= 4
     }
 
-    @Test(expected=IllegalStateException.class)
-    public void testBadNamespaceInElementContent() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root").text("text");
-        wax.namespace("tns", "http://www.ociweb.com/tns");
-    }
-
     @Test(expected=IllegalArgumentException.class)
     public void testBadNamespaceDuplicatePrefix() {
         StringWriter sw = new StringWriter();
@@ -260,6 +251,14 @@ public class WAXTest {
            .namespace("tns", "http://www.ociweb.com/tns")
            .namespace("tns", "http://www.ociweb.com/tns")
            .close();
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadNamespaceInElementContent() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").text("text");
+        wax.namespace("tns", "http://www.ociweb.com/tns");
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -290,6 +289,7 @@ public class WAXTest {
         wax.namespace("foo", "http://www.ociweb.com/foo");
         wax.child("foo", "child1", "one");
         wax.end();
+        // The prefix "foo" is out of scope now.
         wax.child("foo", "child2", "two");
         wax.close();
     }
@@ -317,8 +317,8 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.setTrustMe(false);
         // Since error checking is turned on,
-        // element names must be valid and text is escaped.
-        wax.start("123").text("<>&'\"").close();
+        // element names must be valid.
+        wax.start("123").close();
     }
 
     @Test(expected=IllegalStateException.class)
@@ -405,7 +405,7 @@ public class WAXTest {
         String cr = wax.getCR();
         String xml =
             "<root>" + cr +
-            "" + cr +
+            cr +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -520,6 +520,28 @@ public class WAXTest {
     }
 
     @Test
+    public void testCommentedStartWithNamespace() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root")
+           .namespace("foo", "http://www.ociweb.com/foo")
+           .commentedStart("foo", "child")
+           .child("grandchild", "some text")
+           .close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<root" + cr +
+            "  xmlns:foo=\"http://www.ociweb.com/foo\">" + cr +
+            "  <!--foo:child>" + cr +
+            "    <grandchild>some text</grandchild>" + cr +
+            "  </foo:child-->" + cr +
+            "</root>";
+        
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testDTDPublic() {
         // Testing with the ids for the strict form of XHTML.
         String publicId = "-//W3C//DTD XHTML 1.0 Strict//EN";
@@ -571,6 +593,7 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root").end(true).close();
+
         String xml = "<root></root>";
         assertEquals(xml, sw.toString());
     }
@@ -615,11 +638,11 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.noIndentsOrCRs();
         wax.start("root")
-           .unescapedText("<")
-           .text("<")
+           .unescapedText("&")
+           .text("&")
            .close();
 
-        String xml = "<root><&lt;</root>";
+        String xml = "<root>&&amp;</root>";
         assertEquals(xml, sw.toString());
     }
 
@@ -910,8 +933,8 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.setTrustMe(true);
         wax.noIndentsOrCRs();
-        // Since error checking and escaping are turned off,
-        // invalid element names and unescaped text are allowed.
+        // Since error checking is turned off,
+        // invalid element names are allowed.
         wax.start("123").unescapedText("<>&'\"").close();
 
         assertEquals("<123><>&'\"</123>", sw.toString());
