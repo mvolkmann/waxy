@@ -38,6 +38,16 @@ public interface CommonWAX {
     PrologOrElementWAX comment(String text, boolean newLine);
 
     /**
+     * @see WAX#commentedStart(String)
+     */
+    StartTagWAX commentedStart(String name);
+
+    /**
+     * @see WAX#commentedStart(String, String)
+     */
+    StartTagWAX commentedStart(String prefix, String name);
+
+    /**
      * @see WAX#pi(String, String)
      */
     PrologOrElementWAX pi(String target, String data);
