@@ -722,24 +722,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Same as the attr method, but special characters in the value
-     * aren't escaped.  This allows entity references to be embedded.
-     * @see #attr(String, String, Object, boolean)
-     * @param prefix the namespace prefix for the attribute
-     * @param name the attribute name
-     * @param value the attribute value
-     * @param newLine true to write on a new line; false otherwise
-     * @return the calling object to support chaining
-     */
-    public StartTagWAX unescapedAttr(
-        String prefix, String name, Object value, boolean newLine) {
-        escape = false;
-        attr(prefix, name, value);
-        escape = true;
-        return this;
-    }
-
-    /**
      * Sets the indentation characters to use.
      * Unless "trust me" is set to true, the only valid values are
      * a single tab, one or more spaces, an empty string, or null.
@@ -966,6 +948,24 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public StartTagWAX unescapedAttr(String prefix, String name, Object value) {
         return unescapedAttr(prefix, name, value, false);
+    }
+
+    /**
+     * Same as the attr method, but special characters in the value
+     * aren't escaped.  This allows entity references to be embedded.
+     * @see #attr(String, String, Object, boolean)
+     * @param prefix the namespace prefix for the attribute
+     * @param name the attribute name
+     * @param value the attribute value
+     * @param newLine true to write on a new line; false otherwise
+     * @return the calling object to support chaining
+     */
+    public StartTagWAX unescapedAttr(
+        String prefix, String name, Object value, boolean newLine) {
+        escape = false;
+        attr(prefix, name, value, newLine);
+        escape = true;
+        return this;
     }
 
     /**
