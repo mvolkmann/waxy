@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 using WAXNamespace;
 using NUnit.Framework;
 
@@ -32,7 +30,7 @@ namespace WaxTest
     [TestFixture]
     public class WAXTest
     {
-    	private const String TEMP_XML_FILE_PATH = "/tmp/temp.xml";
+        private string TEMP_XML_FILE_PATH = System.Environment.GetEnvironmentVariable("TEMP") + "/temp.xml";
 
         [Test]
         public void testAttributes() {
