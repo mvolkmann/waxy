@@ -136,6 +136,7 @@ public class XMLUtil {
      * Element and attribute names must be name tokens.
      * This is a regular expression used to determine whether a given string
      * is a valid XML "name token" using only Latin characters.
+     * Note that we're not allowing colons because namespaces are supported.
      */
     public static final Pattern LATIN_NAME_PATTERN =
         Pattern.compile("^[A-Za-z_][A-Za-z0-9\\-_\\.]*$");
