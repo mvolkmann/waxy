@@ -128,7 +128,7 @@ public class XMLUtil {
     public static final String NAME_CHAR_PATTERN =
         LETTER_PATTERN + "|" +
         DIGIT_PATTERN + "|" +
-        "'.'|'-'|'_'|':'|" +
+        "\\.|-|_|:|" +
         COMBINING_CHAR_PATTERN + "|" +
         EXTENDER_PATTERN;
 
@@ -147,7 +147,7 @@ public class XMLUtil {
      * is a valid XML "name token" using any valid Unicode characters.
      */
     public static final Pattern FULL_NAME_PATTERN = Pattern.compile(
-        "^(" + LETTER_PATTERN + "|'_')(" + NAME_CHAR_PATTERN + ")*$");
+        "^(" + LETTER_PATTERN + "|_)(" + NAME_CHAR_PATTERN + ")*$");
 
     public static final String XMLSCHEMA_INSTANCE_NS =
         "http://www.w3.org/1999/XMLSchema-instance";

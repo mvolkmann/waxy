@@ -68,7 +68,7 @@ public class XMLUtilTest {
     }
 
     @Test
-    public void testIsName() {
+    public void testIsNameOld() {
         assertTrue(!XMLUtil.isName(null));
 
         assertTrue(XMLUtil.isName("a1"));
@@ -98,4 +98,95 @@ public class XMLUtilTest {
         assertTrue(XMLUtil.isVersion("1.2"));
         assertTrue(!XMLUtil.isVersion("1.3"));
     }
+
+	@Test
+	public void testIsName() {
+		shouldNotBeValidName(null);
+
+		shouldBeValidName("a1");
+		shouldNotBeValidName("1a");
+
+		// Name tokens cannot begin with "XML" in any case.
+		shouldNotBeValidName("xmlFoo");
+		shouldNotBeValidName("XMLFoo");
+		shouldNotBeValidName("xMLFoo");
+
+		shouldBeValidName("\u3105\u0F20");
+	}
+
+	protected static void checkElementName(final StringBuffer errs,
+			final boolean expectIsValid, final String name) {
+
+		final String postfix = expectIsValid //
+		? " should be considered a valid XML Element name, but it is not." //
+				: " should NOT be considered a valid XML Element name, but it is.";
+
+		final String message = "<" + quote(name) + ">" + postfix;
+
+		if (XMLUtil.isName(name) != expectIsValid)
+			errs.append(message).append('\n');
+	}
+
+	private static String quote(final String string) {
+
+		if (string == null)
+			return "null";
+
+		final StringBuffer sb = new StringBuffer(string.length());
+		for (int idx = 0; idx < string.length(); ++idx) {
+			final char c = string.charAt(idx);
+			if (c > ' ' && c < 127)
+				sb.append(c);
+			else
+				sb.append("[" + Integer.toHexString(c) + "]");
+		}
+		return sb.toString();
+	}
+
+	@Test
+	public void testIsName_LeadingUnderscore() {
+		shouldBeValidName("_LeadingUnderscore");
+	}
+
+	@Test
+	public void testIsName_LeadingQuotedUnderscore() {
+		shouldNotBeValidName("'_'yz");
+	}
+
+	@Test
+	public void testIsName_NonLeadingQuotedDot() {
+		shouldNotBeValidName("x'.'z");
+	}
+
+	@Test
+	public void testIsName_NonLeadingQuotedAnyCharacter() {
+		shouldNotBeValidName("x'?'z");
+	}
+
+	@Test
+	public void testIsName_NonLeadingQuotedDash() {
+		shouldNotBeValidName("x'-'z");
+	}
+
+	@Test
+	public void testIsName_NonLeadingQuotedUnderscore() {
+		shouldNotBeValidName("x'_'z");
+	}
+
+	@Test
+	public void testIsName_NonLeadingQuotedColon() {
+		shouldNotBeValidName("x':'z");
+	}
+
+	private static void shouldBeValidName(final String name) {
+		final String message = "<" + quote(name)
+				+ "> should be considered a valid XML Element name.";
+		assertTrue(message, XMLUtil.isName(name));
+	}
+
+	private static void shouldNotBeValidName(final String name) {
+		final String message = "<" + quote(name)
+				+ "> should NOT be considered a valid XML Element name.";
+		assertFalse(message, XMLUtil.isName(name));
+	}
 }
