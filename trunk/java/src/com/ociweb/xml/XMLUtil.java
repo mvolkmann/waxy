@@ -138,7 +138,7 @@ public class XMLUtil {
      * is a valid XML "name token" using only Latin characters.
      */
     public static final Pattern LATIN_NAME_PATTERN =
-        Pattern.compile("^[A-Za-z][A-Za-z0-9\\-_\\.]*$");
+        Pattern.compile("^[A-Za-z_][A-Za-z0-9\\-_\\.]*$");
 
     /**
      * Element and attribute names must be name tokens.

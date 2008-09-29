@@ -72,6 +72,7 @@ public class XMLUtilTest {
         assertTrue(!XMLUtil.isName(null));
 
         assertTrue(XMLUtil.isName("a1"));
+        assertTrue(XMLUtil.isName("_a1"));
         assertTrue(!XMLUtil.isName("1a"));
 
         // Name tokens cannot begin with "XML" in any case.
