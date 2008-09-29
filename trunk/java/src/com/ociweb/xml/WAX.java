@@ -723,6 +723,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Sets the indentation characters to use.
+     * This defaults to two spaces.
      * Unless "trust me" is set to true, the only valid values are
      * a single tab, one or more spaces, an empty string, or null.
      * Passing "" causes elements to be output on separate lines,
@@ -756,6 +757,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Sets the number of spaces to use for indentation.
      * The number must be >= 0 and <= 4.
+     * This defaults to 2.
      * @param numSpaces the number of spaces
      */
     public void setIndent(int numSpaces) {
