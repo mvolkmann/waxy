@@ -182,6 +182,10 @@ public class Tutorial {
         //  The author works at &oci; in St. Louis, Missouri.
         //  &moreData;
         //</root>
+
+        out("Default indentation:");
+        wax = new WAX();
+        wax.start("foo").text("bar").comment("baz").close();
     }
 
     private static void out(String text) {
