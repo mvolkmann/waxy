@@ -259,7 +259,7 @@ public class XMLUtil {
     public static void verifyName(String text) {
         if (!isName(text)) {
             throw new IllegalArgumentException(
-                '"' + text + "\" is an invalid NMTOKEN");
+                '"' + text + "\" is an invalid XML name");
         }
     }
 
