@@ -183,9 +183,13 @@ public class Tutorial {
         //  &moreData;
         //</root>
 
-        out("Default indentation:");
+        out("Default indentation - text and comment:");
         wax = new WAX();
         wax.start("foo").text("bar").comment("baz").close();
+
+        out("Default indentation - text and cdata:");
+        wax = new WAX();
+        wax.start("foo").text("bar").cdata("baz").close();
     }
 
     private static void out(String text) {
