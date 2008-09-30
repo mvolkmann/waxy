@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class WAXTest {
 
     private static final String TEMP_DIR = System.getProperty("java.io.tmpdir");
-    private static final String TEMP_XML_FILE_PATH = TEMP_DIR + "/temp.xml";
+    private static final String TEMP_XML_FILE_PATH = TEMP_DIR + File.separator + "temp.xml";
 
     private String getFileFirstLine(String filePath) throws IOException {
         FileReader fr = new FileReader(filePath);
