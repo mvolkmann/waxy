@@ -39,13 +39,13 @@ public class XMLUtilTest {
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testBadVersion() {
-        XMLUtil.verifyVersion("1.3");
+    public void testBadURI() {
+        XMLUtil.verifyURI(":junk");
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testBadURI() {
-        XMLUtil.verifyURI(":junk");
+    public void testBadVersion() {
+        XMLUtil.verifyVersion("1.3");
     }
 
     @Test
