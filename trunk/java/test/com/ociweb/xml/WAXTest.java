@@ -950,9 +950,12 @@ public class WAXTest {
         wax.noIndentsOrCRs();
 
         wax.start("root").start("child1").end();
+        assertFalse(wax.isSpaceInEmptyElements());
         wax.setSpaceInEmptyElements(true);
+        assertTrue(wax.isSpaceInEmptyElements());
         wax.start("child2").end();
         wax.setSpaceInEmptyElements(false);
+        assertFalse(wax.isSpaceInEmptyElements());
         wax.start("child3").close();
 
         String xml = "<root><child1/><child2 /><child3/></root>";
