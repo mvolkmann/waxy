@@ -57,8 +57,15 @@ public class XMLUtilTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testBadVersion() {
+    public void testVerifyVersion_BadVersion() {
         XMLUtil.verifyVersion("1.3");
+    }
+
+    @Test
+    public void testVerifyVersion_GoodVersions() {
+        XMLUtil.verifyVersion("1.0");
+        XMLUtil.verifyVersion("1.1");
+        XMLUtil.verifyVersion("1.2");
     }
 
     @Test

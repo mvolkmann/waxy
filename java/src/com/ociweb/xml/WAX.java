@@ -1152,17 +1152,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param version the XML version
      */
     private void writeXMLDeclaration(Version version) {
-        if (version == Version.UNSPECIFIED) return;
-
-        String versionString =
-            version == Version.V1_0 ? "1.0" :
-            version == Version.V1_1 ? "1.1" :
-            version == Version.V1_2 ? "1.2" :
-                null; // should never happen
-
-        if (versionString == null) {
+        if (version == null) {
             throw new IllegalArgumentException("unsupported XML version");
         }
+        
+        if (version == Version.UNSPECIFIED) return;
+
+        String versionString = version.getVersionNumberString();
 
         write("<?xml version=\"" + versionString +
             "\" encoding=\"" + encoding + "\"?>" + cr);
