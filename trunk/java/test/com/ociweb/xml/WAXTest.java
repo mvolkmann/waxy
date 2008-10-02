@@ -898,6 +898,52 @@ public class WAXTest {
     }
 
     @Test
+    public void testDefaultNamespace() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root").defaultNamespace("http://www.ociweb.com/tns").close();
+        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>", sw.toString());
+    }
+
+    @Test
+    public void testDefaultNamespaceWithSchema() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root").defaultNamespace("http://www.ociweb.com/tns", "tns.xsd").close();
+        assertEquals(
+                "<root"
+                        + " xmlns=\"http://www.ociweb.com/tns\""
+                        + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\""
+                        + " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
+                sw.toString());
+    }
+
+    @Test
+    public void testDefaultNS() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root").defaultNS("http://www.ociweb.com/tns").close();
+        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>", sw.toString());
+    }
+
+    @Test
+    public void testDefaultNSWithSchema() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root").defaultNS("http://www.ociweb.com/tns", "tns.xsd").close();
+        assertEquals(
+                "<root"
+                        + " xmlns=\"http://www.ociweb.com/tns\""
+                        + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\""
+                        + " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
+                sw.toString());
+    }
+
+    @Test
     public void testSpaceInEmptyElements() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
