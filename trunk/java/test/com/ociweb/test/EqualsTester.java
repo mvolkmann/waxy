@@ -35,7 +35,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.ociweb.xml.gargoylesoftware;
+package com.ociweb.test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
