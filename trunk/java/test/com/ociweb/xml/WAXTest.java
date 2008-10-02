@@ -28,11 +28,8 @@ import static org.junit.Assert.*;
  */
 public class WAXTest {
 
-    private static final String TEMP_DIR = System.getProperty("java.io.tmpdir");
-    private static final String TEMP_XML_FILE_PATH = TEMP_DIR + File.separator + "temp.xml";
-
-    private String getFileFirstLine(String filePath) throws IOException {
-        FileReader fr = new FileReader(filePath);
+    private static String getFileFirstLine(File file) throws IOException {
+        FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
         String line = null;
         try {
@@ -41,6 +38,10 @@ public class WAXTest {
             br.close();
         }
         return line;
+    }
+
+    private static File getWaxTempXmlFile() throws IOException {
+        return File.createTempFile("wax_temp_", ".xml");
     }
 
     @Test
@@ -332,13 +333,14 @@ public class WAXTest {
 
     @Test(expected=RuntimeException.class)
     public void testBadWrite() throws IOException {
-        Writer fw = new FileWriter(TEMP_XML_FILE_PATH);
+        File tempXmlFile = getWaxTempXmlFile();
+        Writer fw = new FileWriter(tempXmlFile.getAbsolutePath());
         WAX wax = new WAX(fw);
         try {
             wax.start("root");
             fw.close(); // closed the Writer instead of allowing WAX to do it
         } finally {
-            boolean success = new File(TEMP_XML_FILE_PATH).delete();
+            boolean success = tempXmlFile.delete();
             assertTrue(success);
         }
         wax.close(); // attempting to write more after the Writer was closed
@@ -965,28 +967,30 @@ public class WAXTest {
 
     @Test
     public void testWriteFile() throws IOException {
-        WAX wax = new WAX(TEMP_XML_FILE_PATH);
+        File tempXmlFile = getWaxTempXmlFile();
+        WAX wax = new WAX(tempXmlFile.getAbsolutePath());
         try {
             wax.noIndentsOrCRs();
             wax.start("root").text("text").close();
-            assertEquals("<root>text</root>", getFileFirstLine(TEMP_XML_FILE_PATH));
+            assertEquals("<root>text</root>", getFileFirstLine(tempXmlFile));
         } finally {
-            boolean success = new File(TEMP_XML_FILE_PATH).delete();
+            boolean success = tempXmlFile.delete();
             assertTrue(success);
         }
     }
 
     @Test
     public void testWriteStream() throws IOException {
-        OutputStream fos = new FileOutputStream(TEMP_XML_FILE_PATH);
+        File tempXmlFile = getWaxTempXmlFile();
+        OutputStream fos = new FileOutputStream(tempXmlFile.getAbsolutePath());
         try {
             WAX wax = new WAX(fos);
             try {
                 wax.noIndentsOrCRs();
                 wax.start("root").text("text").close();
-                assertEquals("<root>text</root>", getFileFirstLine(TEMP_XML_FILE_PATH));
+                assertEquals("<root>text</root>", getFileFirstLine(tempXmlFile));
             } finally {
-                boolean success = new File(TEMP_XML_FILE_PATH).delete();
+                boolean success = tempXmlFile.delete();
                 assertTrue(success);
             }
         } finally {
