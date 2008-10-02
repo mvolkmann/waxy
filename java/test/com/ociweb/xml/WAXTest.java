@@ -1068,4 +1068,25 @@ public class WAXTest {
 
         assertEquals(xml, sw.toString());
     }
+
+    @Test
+    public void testCloseThrowsIOException() {
+        final IOException testIOException = new IOException("JUnit test exception.");
+        StringWriter sw = new StringWriter() {
+            @Override
+            public void close() throws IOException {
+                super.close();
+                throw testIOException;
+            }
+        };
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrCRs();
+        wax.start("root");
+        try {
+            wax.close();
+            fail("Expecting RuntimeException containing IOException.");
+        } catch (RuntimeException expectedRuntimeException) {
+            assertSame(testIOException, expectedRuntimeException.getCause());
+        }
+    }
 }
