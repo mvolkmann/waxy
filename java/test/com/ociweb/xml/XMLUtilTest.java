@@ -34,11 +34,11 @@ public class XMLUtilTest {
     // See: http://www.w3.org/TR/2006/REC-xml11-20060816/#charsets
     // XML 1.2 NameStartChar:
     // Excluded because we handle namespaces ourselves in WAX: "':' | " +
-    final String XML12_NAME_START_CHAR = "[A-Z] | '_' | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD]";
+    private static final String XML12_NAME_START_CHAR = "[A-Z] | '_' | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD]";
     // Not valid in Java 5: + "| [#x10000-#xEFFFF]";
 
     // XML 1.2 NameChar:
-    final String XML12_NAME_CHAR = XML12_NAME_START_CHAR
+    private static final String XML12_NAME_CHAR = XML12_NAME_START_CHAR
             + " | '-' | '.' | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]";
 
     @Test(expected=IllegalArgumentException.class)
