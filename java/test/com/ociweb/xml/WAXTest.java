@@ -977,7 +977,9 @@ public class WAXTest {
     public void testTrustMeTrue() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
+        assertFalse(wax.isTrustMe());
         wax.setTrustMe(true);
+        assertTrue(wax.isTrustMe());
         wax.noIndentsOrCRs();
         // Since error checking is turned off,
         // invalid element names are allowed.
