@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.ociweb.xml.gargoylesoftware.EqualsTester;
+
 public class CharRangeTest {
 
     @Test
@@ -12,6 +14,28 @@ public class CharRangeTest {
         assertEquals("[a-z]", new CharRange('a', 'z').toString());
         assertEquals("[0-9]", new CharRange('0', '9').toString());
         assertEquals("[x]", new CharRange('x').toString());
+    }
+
+    @Test
+    public void testEqualsDiffStart() {
+        final CharRange a = new CharRange('a', 'z');
+        final CharRange b = new CharRange('a', 'z');
+        final CharRange c = new CharRange('x', 'z');
+        final CharRange d = new CharRange('a', 'z') {
+        };
+
+        new EqualsTester(a, b, c, d);
+    }
+
+    @Test
+    public void testEqualsDiffEnd() {
+        final CharRange a = new CharRange('a', 'z');
+        final CharRange b = new CharRange('a', 'z');
+        final CharRange c = new CharRange('a', 'x');
+        final CharRange d = new CharRange('a', 'z') {
+        };
+
+        new EqualsTester(a, b, c, d);
     }
 
     @Test
