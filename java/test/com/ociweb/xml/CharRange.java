@@ -44,7 +44,7 @@ public class CharRange implements Comparable<CharRange> {
         return start * 31 + end;
     }
 
-    @Override
+	// Java 6: @Override
     public int compareTo(final CharRange obj) {
         final CharRange that = (CharRange) obj;
         final int startDiff = (this.start - that.start);
