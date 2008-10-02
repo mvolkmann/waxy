@@ -23,5 +23,16 @@ package com.ociweb.xml;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public enum Version {
-    UNSPECIFIED, V1_0, V1_1, V1_2
+
+    UNSPECIFIED(null), V1_0("1.0"), V1_1("1.1"), V1_2("1.2");
+    
+    private final String versionNumberString;
+
+    private Version(final String versionNumberString) {
+        this.versionNumberString = versionNumberString;
+    }
+
+    public String getVersionNumberString() {
+        return versionNumberString;
+    }
 }

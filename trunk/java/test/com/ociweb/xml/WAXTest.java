@@ -1009,6 +1009,30 @@ public class WAXTest {
     }
 
     @Test
+    public void testXMLVersion11() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw, Version.V1_1);
+        wax.start("root").close();
+
+        String cr = wax.getCR();
+        String xml =
+            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + cr +
+            "<root/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testXMLVersionNull() {
+        StringWriter sw = new StringWriter();
+        try {
+            new WAX(sw, null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("unsupported XML version", expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
     public void testXMLDeclarationNonDefaultEncoding()
     throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
