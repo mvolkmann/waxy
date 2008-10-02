@@ -275,7 +275,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
                 writer.flush();
             }
         } catch (IOException e) {
-            // EMMA flags this as uncovered, but I can't make this happen.
             throw new RuntimeException(e);
         }
 
