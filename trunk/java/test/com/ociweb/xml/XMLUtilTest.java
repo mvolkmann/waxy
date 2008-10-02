@@ -179,7 +179,7 @@ public class XMLUtilTest {
     public void testUnicodeXmlNameStartCharacter() {
         validateNamesWithCharacterRanges(XML12_NAME_START_CHAR,
                 new IGenerateName() {
-                    @Override
+                    // Java 6: @Override
                     public String nameContainingChar(final char chr) {
                         return chr + "__";
                     }
@@ -189,7 +189,7 @@ public class XMLUtilTest {
     @Test
     public void testUnicodeXmlOtherNameCharacters() {
         validateNamesWithCharacterRanges(XML12_NAME_CHAR, new IGenerateName() {
-            @Override
+            // Java 6: @Override
             public String nameContainingChar(final char chr) {
                 return "_" + chr + "_";
             }
