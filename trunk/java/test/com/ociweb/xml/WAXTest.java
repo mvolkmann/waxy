@@ -243,8 +243,7 @@ public class WAXTest {
         // than once on the same element.
         wax.start("root")
            .namespace("tns", "http://www.ociweb.com/tns")
-           .namespace("tns", "http://www.ociweb.com/tns")
-           .close();
+           .namespace("tns", "http://www.ociweb.com/tns");
     }
 
     @Test(expected=IllegalStateException.class)
@@ -263,8 +262,7 @@ public class WAXTest {
         // on the same element.
         wax.start("root")
            .defaultNamespace("http://www.ociweb.com/tns1")
-           .defaultNamespace("http://www.ociweb.com/tns2")
-           .close();
+           .defaultNamespace("http://www.ociweb.com/tns2");
     }
 
     @Test(expected=IllegalStateException.class)
