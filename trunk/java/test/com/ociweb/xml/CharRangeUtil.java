@@ -15,54 +15,24 @@ public class CharRangeUtil {
 
         final List<CharRange> charRanges = new ArrayList<CharRange>();
 
+        final ICharRangeRecognizer oneCharacterRecognizer = new OneCharacterRecognizer();
+        final ICharRangeRecognizer mulipleCharacterRangeRecognizer = new MultipleCharacterRangeRecognizer();
+
         final String[] characterRangeSpecifications = xmlStandardCharacterRanges
-                .split(Pattern.quote("|"));
+                .split(Pattern.quote("|") + "|" + ",");
         for (int specIdx = 0; specIdx < characterRangeSpecifications.length; ++specIdx) {
             final String rangeSpec = characterRangeSpecifications[specIdx]
                     .trim();
 
-            final String singleCharacterSpecRegEx = capturingGroup(".|"
-                    + nonCapturingGroup("#x[0-9A-F]{2,4}"));
+            final CharRange oneCharacterRange = oneCharacterRecognizer
+                    .recognize(rangeSpec);
+            final CharRange multipleCharacterRange = mulipleCharacterRangeRecognizer
+                    .recognize(rangeSpec);
 
-            final Matcher oneCharacterMatcher = Pattern.compile("" //
-                    + BEGIN //
-                    + capturingGroup("" //
-                            + nonCapturingGroup("'.'") //
-                            + "|" //
-                            + nonCapturingGroup("#x[0-9A-F]{2,4}") //
-                    ) //
-                    + END //
-            ).matcher(rangeSpec);
-
-            final Matcher characterRangeMatcher = Pattern.compile("" //
-                    + BEGIN //
-                    + quote('[') //
-                    + singleCharacterSpecRegEx + "-" + singleCharacterSpecRegEx //
-                    + quote(']') //
-                    + END //
-            ).matcher(rangeSpec);
-
-            if (oneCharacterMatcher.matches()) {
-                final String singleCharSpec = oneCharacterMatcher.group(1);
-                if (singleCharSpec.startsWith("'")
-                        && singleCharSpec.endsWith("'")) {
-                    final char matchedCharacter = singleCharSpec.charAt(1);
-                    charRanges.add(new CharRange(matchedCharacter));
-                } else if (singleCharSpec.startsWith("#x")) {
-                    final char matchedCharacter = (char) Integer.parseInt(
-                            singleCharSpec.substring(2), 16);
-                    charRanges.add(new CharRange(matchedCharacter));
-                } else {
-                    throw new InternalError(
-                            "Cannot process this valid single character spec:  <"
-                                    + singleCharSpec + ">");
-                }
-            } else if (characterRangeMatcher.matches()) {
-                final String startRangeSpec = characterRangeMatcher.group(1);
-                final String endRangeSpec = characterRangeMatcher.group(2);
-                final char startChar = toChar(startRangeSpec);
-                final char endChar = toChar(endRangeSpec);
-                charRanges.add(new CharRange(startChar, endChar));
+            if (oneCharacterRange != null) {
+                charRanges.add(oneCharacterRange);
+            } else if (multipleCharacterRange != null) {
+                charRanges.add(multipleCharacterRange);
             } else {
                 throw createIllegalArgumentException(specIdx, rangeSpec);
             }
@@ -105,4 +75,74 @@ public class CharRangeUtil {
         return new IllegalArgumentException(message);
     }
 
+    private static class OneCharacterRecognizer implements ICharRangeRecognizer {
+
+        private final Pattern pattern = Pattern.compile("" //
+                + BEGIN //
+                + capturingGroup("" //
+                        + nonCapturingGroup("'.'") //
+                        + "|" //
+                        + nonCapturingGroup("#x[0-9A-F]{2,4}") //
+                ) //
+                + END //
+        );
+
+        public CharRange recognize(final String rangeSpec) {
+            final Matcher matcher = pattern.matcher(rangeSpec);
+
+            if (matcher.matches()) {
+                final String singleCharSpec = matcher.group(1);
+                if (singleCharSpec.startsWith("'")
+                        && singleCharSpec.endsWith("'")) {
+                    final char matchedCharacter = singleCharSpec.charAt(1);
+                    return new CharRange(matchedCharacter);
+                } else if (singleCharSpec.startsWith("#x")) {
+                    final char matchedCharacter = (char) Integer.parseInt(
+                            singleCharSpec.substring(2), 16);
+                    return new CharRange(matchedCharacter);
+                } else {
+                    throw new InternalError(
+                            "Cannot process this valid single character spec:  <"
+                                    + singleCharSpec + ">");
+                }
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class MultipleCharacterRangeRecognizer implements
+            ICharRangeRecognizer {
+
+        final String singleCharacterSpecRegEx = capturingGroup(".|"
+                + nonCapturingGroup("#x[0-9A-F]{2,4}"));
+
+        private final Pattern pattern = Pattern.compile("" //
+                + BEGIN //
+                + quote('[') //
+                + singleCharacterSpecRegEx + "-" + singleCharacterSpecRegEx //
+                + quote(']') //
+                + END //
+        );
+
+        public CharRange recognize(final String rangeSpec) {
+            final Matcher matcher = pattern.matcher(rangeSpec);
+
+            if (matcher.matches()) {
+                final String startRangeSpec = matcher.group(1);
+                final String endRangeSpec = matcher.group(2);
+
+                final char startChar = toChar(startRangeSpec);
+                final char endChar = toChar(endRangeSpec);
+                
+                return new CharRange(startChar, endChar);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static interface ICharRangeRecognizer {
+        CharRange recognize(String rangeSpec);
+    }
 }

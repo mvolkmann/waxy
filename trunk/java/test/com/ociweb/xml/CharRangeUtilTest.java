@@ -92,6 +92,13 @@ public class CharRangeUtilTest {
     }
 
     @Test
+    public void testCommaSeparatedCharacterRanges() {
+        final CharRange[] expectedCharRanges = new CharRange[] {
+                new CharRange('a'), new CharRange('b'), new CharRange('c') };
+        assertArrayEquals(expectedCharRanges, toCharRanges("'a','b', 'c'"));
+    }
+
+    @Test
     public void testEmptyStringError() {
         try {
             toCharRanges("");
