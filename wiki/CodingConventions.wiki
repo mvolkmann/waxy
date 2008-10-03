@@ -1,5 +1,3 @@
-#Coding Conventions for the WAX project
-
   * Indentation in Java code should be four spaces and there should be no tabs.
   * Indentation in Ruby code should be four spaces and there should be no tabs.
   * Indentation in Smalltalk code should one tab.
