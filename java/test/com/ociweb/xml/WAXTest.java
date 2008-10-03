@@ -40,8 +40,8 @@ public class WAXTest {
         return line;
     }
 
-    private static File getWaxTempXmlFile() throws IOException {
-        return File.createTempFile("wax_temp_", ".xml");
+    private static File getWAXTempXMLFile() throws IOException {
+        return File.createTempFile("WAXTest", ".xml");
     }
 
     @Test
@@ -74,13 +74,13 @@ public class WAXTest {
            .attr("foo", "a4", "baz", true)
            .close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root" + cr +
-            "  xmlns:foo=\"http://www.ociweb.com/foo\"" + cr +
-            "  a1=\"v1\"" + cr +
-            "  a2=\"2\"" + cr +
-            "  foo:a3=\"bar\"" + cr +
+            "<root" + lineSeparator +
+            "  xmlns:foo=\"http://www.ociweb.com/foo\"" + lineSeparator +
+            "  a1=\"v1\"" + lineSeparator +
+            "  a2=\"2\"" + lineSeparator +
+            "  foo:a3=\"bar\"" + lineSeparator +
             "  foo:a4=\"baz\"/>";
         assertEquals(xml, sw.toString());
     }
@@ -316,31 +316,24 @@ public class WAXTest {
     }
 
     @Test(expected=IllegalStateException.class)
-    public void testBadUseNonWindowsCR() {
+    public void testBadSetLineSeparatorTiming() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root");
-        wax.useNonWindowsCR(); // can't call after output has started
-    }
-
-    @Test(expected=IllegalStateException.class)
-    public void testBadUseWindowsCR() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root");
-        wax.useWindowsCR(); // can't call after output has started
+        // can't call after output has started
+        wax.setLineSeparator(WAX.UNIX_LINE_SEPARATOR);
     }
 
     @Test(expected=RuntimeException.class)
     public void testBadWrite() throws IOException {
-        File tempXmlFile = getWaxTempXmlFile();
-        Writer fw = new FileWriter(tempXmlFile.getAbsolutePath());
+        File tempXMLFile = getWAXTempXMLFile();
+        Writer fw = new FileWriter(tempXMLFile.getAbsolutePath());
         WAX wax = new WAX(fw);
         try {
             wax.start("root");
             fw.close(); // closed the Writer instead of allowing WAX to do it
         } finally {
-            boolean success = tempXmlFile.delete();
+            boolean success = tempXMLFile.delete();
             assertTrue(success);
         }
         wax.close(); // attempting to write more after the Writer was closed
@@ -380,14 +373,14 @@ public class WAXTest {
         wax.text("text #3", true);
         wax.close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            "  text #1" + cr +
-            "  <child1>text</child1>" + cr +
-            "  text #2" + cr +
-            "  <child2 a1=\"v1\"/>" + cr +
-            "  text #3" + cr +
+            "<root>" + lineSeparator +
+            "  text #1" + lineSeparator +
+            "  <child1>text</child1>" + lineSeparator +
+            "  text #2" + lineSeparator +
+            "  <child2 a1=\"v1\"/>" + lineSeparator +
+            "  text #3" + lineSeparator +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -399,10 +392,10 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.start("root").blankLine().close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            cr +
+            "<root>" + lineSeparator +
+            lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -413,10 +406,10 @@ public class WAXTest {
         WAX wax = new WAX(sw);
         wax.start("root").cdata("1<2>3&4'5\"6", true).close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            "  <![CDATA[1<2>3&4'5\"6]]>" + cr +
+            "<root>" + lineSeparator +
+            "  <![CDATA[1<2>3&4'5\"6]]>" + lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -439,18 +432,18 @@ public class WAXTest {
         wax.comment("comment #1", true).comment("comment #2", true)
            .start("root").comment("comment #3", true).close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<!--" + cr +
-            "  comment #1" + cr +
-            "-->" + cr +
-            "<!--" + cr +
-            "  comment #2" + cr +
-            "-->" + cr +
-            "<root>" + cr +
-            "  <!--" + cr +
-            "    comment #3" + cr +
-            "  -->" + cr +
+            "<!--" + lineSeparator +
+            "  comment #1" + lineSeparator +
+            "-->" + lineSeparator +
+            "<!--" + lineSeparator +
+            "  comment #2" + lineSeparator +
+            "-->" + lineSeparator +
+            "<root>" + lineSeparator +
+            "  <!--" + lineSeparator +
+            "    comment #3" + lineSeparator +
+            "  -->" + lineSeparator +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -463,12 +456,12 @@ public class WAXTest {
         wax.comment("comment #1").comment("comment #2")
            .start("root").comment("comment #3").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<!-- comment #1 -->" + cr +
-            "<!-- comment #2 -->" + cr +
-            "<root>" + cr +
-            "  <!-- comment #3 -->" + cr +
+            "<!-- comment #1 -->" + lineSeparator +
+            "<!-- comment #2 -->" + lineSeparator +
+            "<root>" + lineSeparator +
+            "  <!-- comment #3 -->" + lineSeparator +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -484,12 +477,12 @@ public class WAXTest {
            .child("grandchild", "some text")
            .close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            "  <!--child>" + cr +
-            "    <grandchild>some text</grandchild>" + cr +
-            "  </child-->" + cr +
+            "<root>" + lineSeparator +
+            "  <!--child>" + lineSeparator +
+            "    <grandchild>some text</grandchild>" + lineSeparator +
+            "  </child-->" + lineSeparator +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -506,11 +499,11 @@ public class WAXTest {
            .child("child2", "some text")
            .close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            "  <!--child1/-->" + cr +
-            "  <child2>some text</child2>" + cr +
+            "<root>" + lineSeparator +
+            "  <!--child1/-->" + lineSeparator +
+            "  <child2>some text</child2>" + lineSeparator +
             "</root>";
 
         assertEquals(xml, sw.toString());
@@ -526,13 +519,13 @@ public class WAXTest {
            .child("grandchild", "some text")
            .close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root" + cr +
-            "  xmlns:foo=\"http://www.ociweb.com/foo\">" + cr +
-            "  <!--foo:child>" + cr +
-            "    <grandchild>some text</grandchild>" + cr +
-            "  </foo:child-->" + cr +
+            "<root" + lineSeparator +
+            "  xmlns:foo=\"http://www.ociweb.com/foo\">" + lineSeparator +
+            "  <!--foo:child>" + lineSeparator +
+            "    <grandchild>some text</grandchild>" + lineSeparator +
+            "  </foo:child-->" + lineSeparator +
             "</root>";
         
         assertEquals(xml, sw.toString());
@@ -550,10 +543,10 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
             "<!DOCTYPE root PUBLIC \"" + publicId + "\" \"" +
-            systemId  + "\">" + cr +
+            systemId  + "\">" + lineSeparator +
             "<root/>";
         assertEquals(xml, sw.toString());
     }
@@ -568,9 +561,9 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<!DOCTYPE root SYSTEM \"" + systemId  + "\">" + cr +
+            "<!DOCTYPE root SYSTEM \"" + systemId  + "\">" + lineSeparator +
             "<root/>";
         assertEquals(xml, sw.toString());
     }
@@ -579,7 +572,7 @@ public class WAXTest {
     public void testEmpty() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").close();
 
         assertEquals("<root/>", sw.toString());
@@ -599,7 +592,7 @@ public class WAXTest {
     public void testEntityDef() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.entityDef("name", "value").start("root").close();
 
         String xml = "<!DOCTYPE root [<!ENTITY name \"value\">]><root/>";
@@ -610,7 +603,7 @@ public class WAXTest {
     public void testExternalEntityDef() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.externalEntityDef("name", "value").start("root").close();
 
         String xml = "<!DOCTYPE root [<!ENTITY name SYSTEM \"value\">]><root/>";
@@ -621,7 +614,7 @@ public class WAXTest {
     public void testEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").text("abc<def>ghi'jkl\"mno&pqr").close();
 
         String xml =
@@ -633,7 +626,7 @@ public class WAXTest {
     public void testEscapeOffAndOn() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root")
            .unescapedText("&")
            .text("&")
@@ -655,7 +648,7 @@ public class WAXTest {
         wax.setIndent("\t");
         assertEquals("\t", wax.getIndent());
 
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         assertEquals(null, wax.getIndent());
 
         wax.setIndent("");
@@ -669,10 +662,10 @@ public class WAXTest {
         wax.setIndent(1);
         wax.start("root").child("child", "text").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            " <child>text</child>" + cr +
+            "<root>" + lineSeparator +
+            " <child>text</child>" + lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -685,10 +678,10 @@ public class WAXTest {
         wax.setIndent(" "); // 1 space
         wax.start("root").child("child", "text").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            " <child>text</child>" + cr +
+            "<root>" + lineSeparator +
+            " <child>text</child>" + lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -706,10 +699,10 @@ public class WAXTest {
 
         wax.start("root").child("child", "text").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<root>" + cr +
-            indent + "<child>text</child>" + cr +
+            "<root>" + lineSeparator +
+            indent + "<child>text</child>" + lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -718,7 +711,7 @@ public class WAXTest {
     public void testNamespace() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root")
            .defaultNamespace("http://www.ociweb.com/tns1")
            .namespace("tns2", "http://www.ociweb.com/tns2")
@@ -736,7 +729,7 @@ public class WAXTest {
     public void testNamespaceDuplicatePrefix() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
 
         // Can define same namespace prefix more than once
         // on different elements.
@@ -757,7 +750,7 @@ public class WAXTest {
     public void testNamespaceMultipleDefault() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
 
         // Can define default namespace prefix more than once
         // on different elements.
@@ -791,7 +784,7 @@ public class WAXTest {
     public void testNoIndent() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").child("child", "text").close();
 
         String xml = "<root><child>text</child></root>";
@@ -801,7 +794,7 @@ public class WAXTest {
     @Test
     public void testNoIndentOrCRs() {
         WAX wax = new WAX();
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         assertEquals(null, wax.getIndent());
     }
 
@@ -814,9 +807,9 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>" + cr +
+            "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>" + lineSeparator +
             "<root/>";
         assertEquals(xml, sw.toString());
     }
@@ -825,7 +818,7 @@ public class WAXTest {
     public void testProcessingInstructionAfterPrologue() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root");
         wax.processingInstruction("target1", "data1");
         wax.pi("target2", "data2");
@@ -839,7 +832,7 @@ public class WAXTest {
     public void testPrefix() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("foo", "root")
            .attr("bar", "baz")
            // Note that the namespace is defined after it is used,
@@ -862,15 +855,15 @@ public class WAXTest {
            .ns("tns3", "http://www.ociweb.com/tns3", "tns3.xsd")
            .close();
 
-        String cr = wax.getCR();
-        String xml = "<root" + cr +
-            "  xmlns=\"http://www.ociweb.com/tns1\"" + cr +
-            "  xmlns:tns2=\"http://www.ociweb.com/tns2\"" + cr +
-            "  xmlns:tns3=\"http://www.ociweb.com/tns3\"" + cr +
-            "  xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" + cr +
+        String lineSeparator = wax.getLineSeparator();
+        String xml = "<root" + lineSeparator +
+            "  xmlns=\"http://www.ociweb.com/tns1\"" + lineSeparator +
+            "  xmlns:tns2=\"http://www.ociweb.com/tns2\"" + lineSeparator +
+            "  xmlns:tns3=\"http://www.ociweb.com/tns3\"" + lineSeparator +
+            "  xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" + lineSeparator +
             "  xsi:schemaLocation=\"" +
-            "http://www.ociweb.com/tns1 tns1.xsd" + cr +
-            "    http://www.ociweb.com/tns2 tns2.xsd" + cr +
+            "http://www.ociweb.com/tns1 tns1.xsd" + lineSeparator +
+            "    http://www.ociweb.com/tns2 tns2.xsd" + lineSeparator +
             "    http://www.ociweb.com/tns3 tns3.xsd" +
             "\"/>";
         assertEquals(xml, sw.toString());
@@ -880,7 +873,7 @@ public class WAXTest {
     public void testSchemasWithoutIndent() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root")
            .defaultNamespace("http://www.ociweb.com/tns1", "tns1.xsd")
            .namespace("tns2", "http://www.ociweb.com/tns2", "tns2.xsd")
@@ -901,53 +894,60 @@ public class WAXTest {
     public void testDefaultNamespace() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
-        wax.start("root").defaultNamespace("http://www.ociweb.com/tns").close();
-        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>", sw.toString());
+        wax.noIndentsOrLineSeparators();
+        wax.start("root")
+           .defaultNamespace("http://www.ociweb.com/tns")
+           .close();
+        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>",
+            sw.toString());
     }
 
     @Test
     public void testDefaultNamespaceWithSchema() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
-        wax.start("root").defaultNamespace("http://www.ociweb.com/tns", "tns.xsd").close();
+        wax.noIndentsOrLineSeparators();
+        wax.start("root")
+           .defaultNamespace("http://www.ociweb.com/tns", "tns.xsd").close();
         assertEquals(
-                "<root"
-                        + " xmlns=\"http://www.ociweb.com/tns\""
-                        + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\""
-                        + " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
-                sw.toString());
+            "<root" +
+            " xmlns=\"http://www.ociweb.com/tns\"" +
+            " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
+            " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
+            sw.toString());
     }
 
     @Test
     public void testDefaultNS() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").defaultNS("http://www.ociweb.com/tns").close();
-        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>", sw.toString());
+        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>",
+            sw.toString());
     }
 
     @Test
     public void testDefaultNSWithSchema() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
-        wax.start("root").defaultNS("http://www.ociweb.com/tns", "tns.xsd").close();
+        wax.noIndentsOrLineSeparators();
+        wax.start("root")
+           .defaultNS("http://www.ociweb.com/tns", "tns.xsd")
+           .close();
         assertEquals(
-                "<root"
-                        + " xmlns=\"http://www.ociweb.com/tns\""
-                        + " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\""
-                        + " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
-                sw.toString());
+            "<root" +
+            " xmlns=\"http://www.ociweb.com/tns\"" +
+            " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
+            " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
+            sw.toString());
     }
 
     @Test
     public void testSpaceInEmptyElements() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
 
         wax.start("root").start("child1").end();
         assertFalse(wax.isSpaceInEmptyElements());
@@ -967,7 +967,7 @@ public class WAXTest {
     public void testText() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").text("text").close();
 
         assertEquals("<root>text</root>", sw.toString());
@@ -980,7 +980,7 @@ public class WAXTest {
         assertFalse(wax.isTrustMe());
         wax.setTrustMe(true);
         assertTrue(wax.isTrustMe());
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         // Since error checking is turned off,
         // invalid element names are allowed.
         wax.start("123").unescapedText("<>&'\"").close();
@@ -989,59 +989,60 @@ public class WAXTest {
     }
 
     @Test
-    public void testUseNonWindowsCR() {
+    public void testSetLineSeparator() {
         WAX wax = new WAX();
-        wax.useNonWindowsCR();
-        assertEquals("\n", wax.getCR());
+        wax.setLineSeparator(WAX.UNIX_LINE_SEPARATOR);
+        assertEquals(WAX.UNIX_LINE_SEPARATOR, wax.getLineSeparator());
 
         // Most of the other tests verify that
         // this CR is actually used in the output.
     }
 
     @Test
-    public void testUseWindowsCR() {
+    public void testUseWindowsLineSeparator() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.useWindowsCR();
+        wax.setLineSeparator(WAX.WINDOWS_LINE_SEPARATOR);
         wax.start("root")
            .child("child", "text")
            .close();
 
-        String cr = wax.getCR();
-        assertEquals("\r\n", cr);
+        String lineSeparator = wax.getLineSeparator();
+        assertEquals(WAX.WINDOWS_LINE_SEPARATOR, lineSeparator);
 
-        String xml = "<root>" + cr +
-            "  <child>text</child>" + cr +
+        String xml = "<root>" + lineSeparator +
+            "  <child>text</child>" + lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
 
     @Test
     public void testWriteFile() throws IOException {
-        File tempXmlFile = getWaxTempXmlFile();
-        WAX wax = new WAX(tempXmlFile.getAbsolutePath());
+        File tempXMLFile = getWAXTempXMLFile();
+        WAX wax = new WAX(tempXMLFile.getAbsolutePath());
         try {
-            wax.noIndentsOrCRs();
+            wax.noIndentsOrLineSeparators();
             wax.start("root").text("text").close();
-            assertEquals("<root>text</root>", getFileFirstLine(tempXmlFile));
+            assertEquals("<root>text</root>", getFileFirstLine(tempXMLFile));
         } finally {
-            boolean success = tempXmlFile.delete();
+            boolean success = tempXMLFile.delete();
             assertTrue(success);
         }
     }
 
     @Test
     public void testWriteStream() throws IOException {
-        File tempXmlFile = getWaxTempXmlFile();
-        OutputStream fos = new FileOutputStream(tempXmlFile.getAbsolutePath());
+        File tempXMLFile = getWAXTempXMLFile();
+        OutputStream fos = new FileOutputStream(tempXMLFile.getAbsolutePath());
         try {
             WAX wax = new WAX(fos);
             try {
-                wax.noIndentsOrCRs();
+                wax.noIndentsOrLineSeparators();
                 wax.start("root").text("text").close();
-                assertEquals("<root>text</root>", getFileFirstLine(tempXmlFile));
+                assertEquals("<root>text</root>",
+                    getFileFirstLine(tempXMLFile));
             } finally {
-                boolean success = tempXmlFile.delete();
+                boolean success = tempXMLFile.delete();
                 assertTrue(success);
             }
         } finally {
@@ -1053,12 +1054,12 @@ public class WAXTest {
     public void testXMLDeclaration() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw, Version.V1_0);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + cr +
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + lineSeparator +
             "<root/>";
         assertEquals(xml, sw.toString());
     }
@@ -1069,9 +1070,9 @@ public class WAXTest {
         WAX wax = new WAX(sw, Version.V1_1);
         wax.start("root").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + cr +
+            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
             "<root/>";
         assertEquals(xml, sw.toString());
     }
@@ -1083,7 +1084,8 @@ public class WAXTest {
             new WAX(sw, null);
             fail("Expected IllegalArgumentException.");
         } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("unsupported XML version", expectedIllegalArgumentException.getMessage());
+            assertEquals("unsupported XML version",
+                expectedIllegalArgumentException.getMessage());
         }
     }
 
@@ -1094,12 +1096,12 @@ public class WAXTest {
         String encoding = "UTF-16";
         OutputStreamWriter osw = new OutputStreamWriter(baos, encoding);
         WAX wax = new WAX(osw, Version.V1_2);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root").close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<?xml version=\"1.2\" encoding=\"" + encoding + "\"?>" + cr +
+            "<?xml version=\"1.2\" encoding=\"" + encoding + "\"?>" + lineSeparator +
             "<root/>";
         assertEquals(xml, baos.toString(encoding));
     }
@@ -1112,9 +1114,9 @@ public class WAXTest {
         wax.start("root");
         wax.close();
 
-        String cr = wax.getCR();
+        String lineSeparator = wax.getLineSeparator();
         String xml =
-            "<?xml-stylesheet type=\"text/xsl\" href=\"root.xslt\"?>" + cr +
+            "<?xml-stylesheet type=\"text/xsl\" href=\"root.xslt\"?>" + lineSeparator +
             "<root/>";
 
         assertEquals(xml, sw.toString());
@@ -1122,7 +1124,9 @@ public class WAXTest {
 
     @Test
     public void testCloseThrowsIOException() {
-        final IOException testIOException = new IOException("JUnit test exception.");
+        final IOException testIOException = 
+            new IOException("JUnit test exception");
+
         StringWriter sw = new StringWriter() {
             @Override
             public void close() throws IOException {
@@ -1130,14 +1134,15 @@ public class WAXTest {
                 throw testIOException;
             }
         };
+        
         WAX wax = new WAX(sw);
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("root");
         try {
             wax.close();
-            fail("Expecting RuntimeException containing IOException.");
-        } catch (RuntimeException expectedRuntimeException) {
-            assertSame(testIOException, expectedRuntimeException.getCause());
+            fail("expecting RuntimeException containing IOException");
+        } catch (RuntimeException e) {
+            assertSame(testIOException, e.getCause());
         }
     }
 }

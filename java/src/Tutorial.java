@@ -50,7 +50,7 @@ public class Tutorial {
 
         out("Without indentation, on a single line:");
         wax = new WAX();
-        wax.noIndentsOrCRs();
+        wax.noIndentsOrLineSeparators();
         wax.start("car").child("model", "Prius").close();
         // <car><model>Prius</model></car>
 
