@@ -1151,4 +1151,55 @@ public class WAXTest {
             assertSame(testIOException, e.getCause());
         }
     }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testNullComment() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.comment(null);
+    }
+
+    @Test
+    public void testNullCommentWithTrustMe() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(true);
+
+        wax.comment(null);
+
+        wax.start("root").close();
+        String lineSeparator = wax.getLineSeparator();
+        assertEquals("<!-- null -->" + lineSeparator + "<root/>", sw.toString());
+    }
+
+    @Test
+    public void testCommentOnlyFileFails() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(true);
+        wax.comment(null);
+        try {
+            wax.close();
+            fail("Expecting IllegalStateException.");
+        } catch (IllegalStateException expectedIllegalStateException) {
+            assertEquals("can't call close when state is IN_PROLOG",
+                    expectedIllegalStateException.getMessage());
+        }
+    }
+
+    @Test
+    public void testNullCommentAfterClose() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").close();
+        wax.setTrustMe(true);
+        try {
+            wax.comment(null, true);
+            fail("Expecting IllegalStateException.");
+        } catch (IllegalStateException expectedIllegalStateException) {
+            assertEquals("attempting to write XML after close has been called",
+                    expectedIllegalStateException.getMessage());
+        }
+        assertEquals("<root/>", sw.toString());
+    }
 }

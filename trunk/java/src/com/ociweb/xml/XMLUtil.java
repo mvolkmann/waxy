@@ -111,7 +111,7 @@ public class XMLUtil {
      * @param text the text
      */
     public static boolean isComment(String text) {
-        return !text.contains("--");
+        return (text != null) && !text.contains("--");
     }
 
     /**

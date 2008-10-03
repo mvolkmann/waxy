@@ -45,7 +45,12 @@ public class XMLUtilTest {
     public void testBadComment() {
         XMLUtil.verifyComment("one -- two");
     }
-    
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testNullComment() {
+        XMLUtil.verifyComment(null);
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadName() {
         XMLUtil.verifyName("1a");
