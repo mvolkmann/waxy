@@ -182,7 +182,7 @@ public class WAXTest {
     public void testBadElementName() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("1root").close();
+        wax.start("1root");
     }
 
     @Test(expected=IllegalStateException.class)
