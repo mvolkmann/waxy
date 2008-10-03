@@ -782,13 +782,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         }
 
         if (checkMe) {
-            if (lineSeparator != MAC_LINE_SEPARATOR &&
-                lineSeparator != UNIX_LINE_SEPARATOR &&
-                lineSeparator != WINDOWS_LINE_SEPARATOR) {
+            boolean valid =
+                MAC_LINE_SEPARATOR.equals(lineSeparator) ||
+                UNIX_LINE_SEPARATOR.equals(lineSeparator) ||
+                WINDOWS_LINE_SEPARATOR.equals(lineSeparator);
+            if (!valid) {
                 throw new IllegalArgumentException(
                     "invalid line separator characters");
             }
-
         }
 
         this.lineSeparator = lineSeparator;
