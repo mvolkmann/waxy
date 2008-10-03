@@ -36,8 +36,9 @@ import java.util.*;
  */
 public class WAX implements PrologOrElementWAX, StartTagWAX {
 
-    public static final String NONWINDOWS_CR = "\n";
-    public static final String WINDOWS_CR = "\r\n";
+    public static final String MAC_LINE_SEPARATOR = "\n";
+    public static final String UNIX_LINE_SEPARATOR = "\n";
+    public static final String WINDOWS_LINE_SEPARATOR = "\r\n";
 
     /**
      * The current state of XML output is used to verify that methods
@@ -56,10 +57,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private Stack<String> parentStack = new Stack<String>();
     private Stack<String> prefixesStack = new Stack<String>();
     private State state = State.IN_PROLOG;
-    private String cr;
     private String doctypePublicId;
     private String doctypeSystemId;
     private String indent = "  ";
+    private String lineSeparator;
     private Writer writer;
     private boolean attrOnNewLine;
     private boolean checkMe = true;
@@ -110,7 +111,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public WAX(Writer writer) { this(writer, Version.UNSPECIFIED); }
     public WAX(Writer writer, Version version) {
         this.writer = writer;
-        useNonWindowsCR();
+        lineSeparator = System.getProperty("line.separator");
 
         writeXMLDeclaration(version);
     }
@@ -304,7 +305,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             write("<!-- " + text + " -->");
         }
 
-        if (willIndent() && parentStack.size() == 0) write(cr);
+        if (willIndent() && parentStack.size() == 0) write(lineSeparator);
 
         return this;
     }
@@ -484,14 +485,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Gets the carriage return characters currently being used.
-     * @return the carriage return characters
-     */
-    public String getCR() {
-        return cr;
-    }
-
-    /**
      * Gets the indentation characters being used.
      * Note that there is a distinction between null and "".
      * @see #setIndent(String)
@@ -500,6 +493,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public String getIndent() {
         return indent;
+    }
+
+    /**
+     * Gets the line separator characters currently being used.
+     * @return the line separator characters
+     */
+    public String getLineSeparator() {
+        return lineSeparator;
     }
 
     /**
@@ -703,7 +704,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (parentStack.size() > 0) writeIndent();
 
         write("<?" + target + ' ' + data + "?>");
-        if (willIndent() && parentStack.size() == 0) write(cr);
+        if (willIndent() && parentStack.size() == 0) write(lineSeparator);
 
         return this;
     }
@@ -763,11 +764,23 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Don't output indent output or write carriage returns.
+     * Don't output indent output or write line separators.
      * Write out the XML on a single line.
      */
-    public void noIndentsOrCRs() {
+    public void noIndentsOrLineSeparators() {
         setIndent(null);
+    }
+
+    /**
+     * Sets the line separator characters to be used.
+     * @param lineSeparator the line separator characters
+     */
+    public void setLineSeparator(String lineSeparator) {
+        if (outputStarted) {
+            throw new IllegalStateException(
+                "can't change CR characters after output has started");
+        }
+        this.lineSeparator = lineSeparator;
     }
 
     /**
@@ -908,7 +921,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             if (escape) text = XMLUtil.escape(text);
             write(text);
         } else if (newLine) {
-            write(cr);
+            write(lineSeparator);
         }
 
         return this;
@@ -984,32 +997,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Uses \n for carriage returns which is appropriate
-     * on every platform except Windows.
-     * This is the default.
-     */
-    public void useNonWindowsCR() {
-        if (outputStarted) {
-            throw new IllegalStateException(
-                "can't change CR characters after output has started");
-        }
-        cr = NONWINDOWS_CR;
-    }
-
-    /**
-     * Uses \r\n for carriage returns which is appropriate
-     * only on the Windows platform.
-     * This is not the default.
-     */
-    public void useWindowsCR() {
-        if (outputStarted) {
-            throw new IllegalStateException(
-                "can't change CR characters after output has started");
-        }
-        cr = WINDOWS_CR;
-    }
-
-    /**
      * Verifies that all the pending namespace prefix are currently in scope.
      * @throws IllegalArgumentException if any aren't in scope
      */
@@ -1070,18 +1057,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             write(" [");
 
             for (String entityDef : entityDefs) {
-                if (willIndent()) write(cr + indent);
+                if (willIndent()) write(lineSeparator + indent);
                 write("<!ENTITY " + entityDef + '>');
             }
 
-            if (willIndent()) write(cr);
+            if (willIndent()) write(lineSeparator);
             write(']');
 
             entityDefs.clear();
         }
 
         write('>');
-        if (willIndent()) write(cr);
+        if (willIndent()) write(lineSeparator);
     }
 
     /**
@@ -1091,7 +1078,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private void writeIndent() {
         if (!willIndent()) return;
 
-        write(cr);
+        write(lineSeparator);
         int size = parentStack.size();
         for (int i = 0; i < size; ++i) write(indent);
     }
@@ -1113,7 +1100,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             // If not the first pair output ...
             if (schemaLocation.length() > 0) {
                 if (willIndent()) {
-                    schemaLocation.append(cr);
+                    schemaLocation.append(lineSeparator);
                     int size = parentStack.size();
                     for (int i = 0; i <= size; ++i) {
                         schemaLocation.append(indent);
@@ -1160,7 +1147,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         }
 
         write("<?xml version=\"" + versionString +
-            "\" encoding=\"" + encoding + "\"?>" + cr);
+            "\" encoding=\"" + encoding + "\"?>" + lineSeparator);
     }
 
     /**
