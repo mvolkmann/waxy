@@ -32,4 +32,4 @@ Steps to create a new WAX for Java release
 - open a Terminal window
 - cd Documents/VolkmannWebSite
 - cp programming/wax.html programming/WAX.html
-- enter "./release"
+- ./release
