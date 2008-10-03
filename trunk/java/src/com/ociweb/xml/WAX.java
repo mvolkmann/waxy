@@ -780,6 +780,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             throw new IllegalStateException(
                 "can't change CR characters after output has started");
         }
+
+        if (checkMe) {
+            if (lineSeparator != MAC_LINE_SEPARATOR &&
+                lineSeparator != UNIX_LINE_SEPARATOR &&
+                lineSeparator != WINDOWS_LINE_SEPARATOR) {
+                throw new IllegalArgumentException(
+                    "invalid line separator characters");
+            }
+
+        }
+
         this.lineSeparator = lineSeparator;
     }
 
