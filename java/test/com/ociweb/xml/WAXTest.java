@@ -119,13 +119,6 @@ public class WAXTest {
     }
 
     @Test(expected=IllegalStateException.class)
-    public void testBadCloseWithoutRoot() throws IOException {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.close(); // didn't write anything yet
-    }
-
-    @Test(expected=IllegalStateException.class)
     public void testBadCloseAlreadyClosedByWAX() throws IOException {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -155,6 +148,13 @@ public class WAXTest {
         wax.start("more"); // already closed
     }
 
+    @Test(expected=IllegalStateException.class)
+    public void testBadCloseWithoutRoot() throws IOException {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.close(); // didn't write anything yet
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadComment() {
         StringWriter sw = new StringWriter();
@@ -162,7 +162,7 @@ public class WAXTest {
         wax.start("root").comment("foo--bar").close();
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test(expected=IllegalStateException.class)
     public void testBadDTDAfterRoot() throws IOException {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -195,7 +195,7 @@ public class WAXTest {
     @Test(expected=IllegalStateException.class)
     public void testBadEntityDef() {
         WAX wax = new WAX();
-        // Can't define and entity after the root element start tag.
+        // Can't define an entity after the root element start tag.
         wax.start("root");
         wax.entityDef("name", "value");
     }
@@ -204,7 +204,7 @@ public class WAXTest {
     public void testBadExtraEnd() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").end().end().close();
+        wax.start("root").end().end();
     }
 
     @Test(expected=IllegalArgumentException.class)
