@@ -315,6 +315,12 @@ public class WAXTest {
         wax.start("123").close();
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testBadSetLineSeparator() {
+        WAX wax = new WAX();
+        wax.setLineSeparator("abc");
+    }
+
     @Test(expected=IllegalStateException.class)
     public void testBadSetLineSeparatorTiming() {
         StringWriter sw = new StringWriter();
