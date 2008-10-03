@@ -106,7 +106,7 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         // Can't call cdata while in prologue section.
-        wax.cdata("text").close();
+        wax.cdata("text");
     }
 
     @Test(expected=IllegalStateException.class)
