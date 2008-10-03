@@ -2,4 +2,5 @@
   * Indentation in Ruby code should be four spaces and there should be no tabs.
   * Indentation in Smalltalk code should one tab.
   * Acronyms should be all uppercase, even when used in camel-cased names.
+  * Lines shouldn't extend past 80 columns in most cases. This makes it easier to get non-wrapping code printouts.
   * Methods should appear in alphabetical order within their class.
