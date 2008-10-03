@@ -1147,6 +1147,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         String versionString = version.getVersionNumberString();
 
+        // We could also consider using the value of
+        // the "file.encoding" system property.
+        // However, if we did that then users would have to remember to
+        // set that property back to the same value when reading the XML later.
+        // Also, many uses might expect WAX to use UTF-8 encoding
+        // regardless of the value of that property.
+
         String encoding = XMLUtil.DEFAULT_ENCODING;
         if (writer instanceof OutputStreamWriter) {
             encoding = ((OutputStreamWriter) writer).getEncoding();
