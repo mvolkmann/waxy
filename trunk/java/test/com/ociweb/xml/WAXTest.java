@@ -1,7 +1,17 @@
 package com.ociweb.xml;
 
 import java.io.*;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
 import static org.junit.Assert.*;
 
 /**
@@ -1199,5 +1209,97 @@ public class WAXTest {
                     expectedIllegalStateException.getMessage());
         }
         assertEquals("<root/>", sw.toString());
+    }
+
+    /**
+     * From <a
+     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#syntax">Extensible
+     * Markup Language (XML) 1.0 (Fifth Edition), W3C Proposed Edited
+     * Recommendation 05 February 2008 - 2.4 Character Data and Markup:</a> <br>
+     * "The right angle bracket (>) may be represented using the string
+     * '&amp;gt;', and MUST, <a
+     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-compat">for
+     * compatibility</a>, be escaped using either '&amp;gt;' or a character
+     * reference when it appears in the string ']]>' in content, when that
+     * string is not marking the end of a <a
+     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-cdsection">CDATA
+     * section</a>."
+     */
+    @Test
+    public void testCompatibilityQuoteForCdataEndMarker() throws Exception {
+        final StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").text("==]]>==").close();
+
+        final String xmlString = sw.toString();
+        assertEquals("<root>==]]&gt;==</root>", xmlString);
+
+        final Document doc = parseXml(xmlString);
+        doc.normalize();
+        final Element rootElement = doc.getDocumentElement();
+        assertEquals("root", rootElement.getNodeName());
+        assertEquals("==]]>==", rootElement.getTextContent());
+    }
+
+    @Test
+    public void testIllustrateParsingErrorWhenTextLooksLikeCdataCloseSequence()
+            throws Exception {
+
+        final String systemErrorOutput = captureSystemErrorOutput(new RunnableThrowsException() {
+            public void run() throws Exception {
+                try {
+                    parseXml("<root>==]]>==</root>");
+
+                    fail("Expecting SAXParseException.");
+                } catch (final SAXParseException expectedSAXParseException) {
+                    assertEquals(
+                            "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
+                            expectedSAXParseException.getMessage());
+                }
+            }
+        });
+
+        assertTrue(systemErrorOutput.startsWith("[Fatal Error] "));
+        assertStringContains(
+                "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
+                systemErrorOutput);
+    }
+
+    private static void assertStringContains(final String expectedSubstring,
+            final String actualStringValue) {
+        final String assertionErrorMessage = "Expected string\n" //
+                + "   <" + actualStringValue + ">\n" //
+                + " to contain the substring\n" //
+                + "   <" + expectedSubstring + ">";
+        assertTrue(assertionErrorMessage, actualStringValue
+                .indexOf(expectedSubstring) > -1);
+    }
+
+    private static String captureSystemErrorOutput(
+            final RunnableThrowsException runnable) throws Exception {
+        final PrintStream originalSystemErrorOutput = System.err;
+        try {
+            final ByteArrayOutputStream fakeSystemErrorOutput = new ByteArrayOutputStream();
+            System.setErr(new PrintStream(fakeSystemErrorOutput));
+
+            runnable.run();
+
+            return fakeSystemErrorOutput.toString();
+        } finally {
+            System.setErr(originalSystemErrorOutput);
+        }
+    }
+
+    private static Document parseXml(final String xmlString)
+            throws ParserConfigurationException, SAXException, IOException {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        final DocumentBuilder db = dbf.newDocumentBuilder();
+        final Document doc = db.parse(new ByteArrayInputStream(xmlString
+                .getBytes()));
+        return doc;
+    }
+
+    private static interface RunnableThrowsException {
+        void run() throws Exception;
     }
 }
