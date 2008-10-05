@@ -296,6 +296,12 @@ public class WAXTest {
         wax.close();
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testBadSetLineSeparator() {
+        WAX wax = new WAX();
+        wax.setLineSeparator("abc");
+    }
+
     @Test(expected=IllegalStateException.class)
     public void testBadTextAfterRootEnd() {
         StringWriter sw = new StringWriter();
@@ -320,13 +326,7 @@ public class WAXTest {
         wax.setTrustMe(false);
         // Since error checking is turned on,
         // element names must be valid.
-        wax.start("123").close();
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testBadSetLineSeparator() {
-        WAX wax = new WAX();
-        wax.setLineSeparator("abc");
+        wax.start("123");
     }
 
     @Test(expected=IllegalStateException.class)
@@ -364,7 +364,7 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root");
-        wax.xslt("root.xslt"); // can't write pi after root element
+        wax.xslt("root.xslt"); // can't write this pi after root element
     }
 
     @Test(expected=IllegalStateException.class)
