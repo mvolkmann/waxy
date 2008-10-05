@@ -800,7 +800,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * in empty elements.
      * When set true, output will look like "<tag />".
      * When set false, output will look like "<tag/>".
-     * @see #getSpaceInEmptyElements(boolean)
+     * @see #isSpaceInEmptyElements()
      * @param spaceInEmptyElements true to include a space; false otherwise
      */
     public void setSpaceInEmptyElements(boolean spaceInEmptyElements) {
