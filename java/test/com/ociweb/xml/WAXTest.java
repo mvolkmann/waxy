@@ -1265,6 +1265,25 @@ public class WAXTest {
                 systemErrorOutput);
     }
 
+    @Test
+    public void testNoApersignOrLessThanQuotingInComment() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root").comment("1&2<3").close();
+        assertEquals("<root><!-- 1&2<3 --></root>", sw.toString());
+    }
+    
+    @Test
+    public void testNoApersignOrLessThanQuotingInProcessingInstruction() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(true);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root").processingInstruction("1&2<3", "3&2<1").close();
+        assertEquals("<root><?1&2<3 3&2<1?></root>", sw.toString());
+    }
+
     private static void assertStringContains(final String expectedSubstring,
             final String actualStringValue) {
         final String assertionErrorMessage = "Expected string\n" //
