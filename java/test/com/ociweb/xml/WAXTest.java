@@ -875,11 +875,9 @@ public class WAXTest {
             "  xmlns:tns2=\"http://www.ociweb.com/tns2\"" + lineSeparator +
             "  xmlns:tns3=\"http://www.ociweb.com/tns3\"" + lineSeparator +
             "  xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" + lineSeparator +
-            "  xsi:schemaLocation=\"" +
-            "http://www.ociweb.com/tns1 tns1.xsd" + lineSeparator +
+            "  xsi:schemaLocation=\"http://www.ociweb.com/tns1 tns1.xsd" + lineSeparator +
             "    http://www.ociweb.com/tns2 tns2.xsd" + lineSeparator +
-            "    http://www.ociweb.com/tns3 tns3.xsd" +
-            "\"/>";
+            "    http://www.ociweb.com/tns3 tns3.xsd\"/>";
         assertEquals(xml, sw.toString());
     }
 
