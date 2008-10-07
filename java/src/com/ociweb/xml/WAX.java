@@ -47,15 +47,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     private enum State { IN_PROLOG, IN_START_TAG, IN_ELEMENT, AFTER_ROOT }
 
-    private List<String> entityDefs = new ArrayList<String>();
-    private List<String> pendingPrefixes = new ArrayList<String>();
+    private final List<String> entityDefs = new ArrayList<String>();
+    private final List<String> pendingPrefixes = new ArrayList<String>();
 
     // Using a TreeMap so keys are kept in sorted order.
-    private Map<String, String> namespaceURIToSchemaPathMap =
+    private final Map<String, String> namespaceURIToSchemaPathMap =
         new TreeMap<String, String>();
 
-    private Stack<String> parentStack = new Stack<String>();
-    private Stack<String> prefixesStack = new Stack<String>();
+    private final Stack<String> parentStack = new Stack<String>();
+    private final Stack<String> prefixesStack = new Stack<String>();
     private State state = State.IN_PROLOG;
     private String doctypePublicId;
     private String doctypeSystemId;
