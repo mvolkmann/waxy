@@ -114,10 +114,10 @@ public class CharRangeUtil {
     private static class MultipleCharacterRangeRecognizer implements
             ICharRangeRecognizer {
 
-        final String singleCharacterSpecRegEx = capturingGroup(".|"
+        private static final String singleCharacterSpecRegEx = capturingGroup(".|"
                 + nonCapturingGroup("#x[0-9A-F]{2,4}"));
 
-        private final Pattern pattern = Pattern.compile("" //
+        private static final Pattern pattern = Pattern.compile("" //
                 + BEGIN //
                 + quote('[') //
                 + singleCharacterSpecRegEx + "-" + singleCharacterSpecRegEx //
