@@ -232,11 +232,21 @@ public class EqualsTester extends Assert {
 
 	private void assertAEqualsNull(final Object a) {
 		try {
-			if (a.equals(null) == true) {
+			if (a.equals(getNullObjectValue()) == true) {
 				fail("A.equals(null) returned true");
 			}
 		} catch (final NullPointerException e) {
 			fail("a.equals(null) threw a NullPointerException.  It should have returned false");
 		}
 	}
+
+	/**
+     * This method "hides" the null from FindBugs -- a tool that doesn't like
+     * <code>.equals(null)</code> calls.
+     *
+     * @return <code>null</code> -- <i>in <b>all</b> cases.</i>
+     */
+    private static Object getNullObjectValue() {
+        return null;
+    }
 }
