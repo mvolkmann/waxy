@@ -88,15 +88,15 @@ public class XMLUtilTest {
     public void testIsComment() {
         assertTrue(XMLUtil.isComment("one two"));
         assertTrue(XMLUtil.isComment("one - two"));
-        assertTrue(!XMLUtil.isComment("one -- two"));
-        assertTrue(!XMLUtil.isComment("-- one two"));
-        assertTrue(!XMLUtil.isComment("one two --"));
+        assertFalse(XMLUtil.isComment("one -- two"));
+        assertFalse(XMLUtil.isComment("-- one two"));
+        assertFalse(XMLUtil.isComment("one two --"));
     }
 
     @Test
     public void testIsURI() {
         assertTrue(XMLUtil.isURI("http://www.ociweb.com/foo"));
-        assertTrue(!XMLUtil.isURI(":junk"));
+        assertFalse(XMLUtil.isURI(":junk"));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class XMLUtilTest {
         assertTrue(XMLUtil.isVersion("1.0"));
         assertTrue(XMLUtil.isVersion("1.1"));
         assertTrue(XMLUtil.isVersion("1.2"));
-        assertTrue(!XMLUtil.isVersion("1.3"));
+        assertFalse(XMLUtil.isVersion("1.3"));
     }
 
     @Test
