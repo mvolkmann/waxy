@@ -310,7 +310,7 @@ public class XMLUtilTest {
         return "\\u" + hexString.substring(hexString.length() - 4);
     }
 
-    private static interface IGenerateName {
+    private interface IGenerateName {
         String nameContainingChar(char chr);
     }
 }
