@@ -142,7 +142,7 @@ public class CharRangeUtil {
         }
     }
 
-    private static interface ICharRangeRecognizer {
+    private interface ICharRangeRecognizer {
         CharRange recognize(String rangeSpec);
     }
 }

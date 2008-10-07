@@ -1316,7 +1316,7 @@ public class WAXTest {
         return doc;
     }
 
-    private static interface RunnableThrowsException {
+    private interface RunnableThrowsException {
         void run() throws Exception;
     }
 }
