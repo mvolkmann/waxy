@@ -189,7 +189,9 @@ public class EqualsTesterTest extends TestCase {
             new Date( 200 ) {
                 private static final long serialVersionUID = 1L;
 				public boolean equals( final Object object ) {
-                    return true;
+				    if (object instanceof Date)
+				        return true;
+				    throw new AssertionError("This line should be unreachable, in this test.");
                 }
                 public int hashCode() {
                     return 2;
@@ -254,7 +256,9 @@ public class EqualsTesterTest extends TestCase {
 
         /** @inheritDoc Object#equals(Object) */
         public boolean equals( final Object object ) {
-            return equalChecker_.equals( this, (TestObject)object );
+            if (object == null || object instanceof TestObject)
+                return equalChecker_.equals( this, (TestObject)object );
+            throw new AssertionError("This line should be unreachable, in this test.");
         }
 
         /** @inheritDoc Object#hashCode() */
