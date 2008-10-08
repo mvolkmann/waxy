@@ -843,7 +843,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (elementStack.size() > 0) writeIndent();
 
-
         if (inCommentedStart) {
             write("<!--" + qName);
         } else {
