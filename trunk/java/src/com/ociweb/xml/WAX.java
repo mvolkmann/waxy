@@ -54,8 +54,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private final Map<String, String> namespaceURIToSchemaPathMap =
         new TreeMap<String, String>();
 
-    private final Stack<String> parentStack = new Stack<String>();
-    private final Stack<Set<String>> prefixesStack = new Stack<Set<String>>();
+    private final Stack<ElementMetadata> elementStack = new Stack<ElementMetadata>();
+
     private State state = State.IN_PROLOG;
     private String doctypePublicId;
     private String doctypeSystemId;
@@ -255,7 +255,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (state == State.IN_PROLOG) badState("close");
 
         // End all the unended elements.
-        while (parentStack.size() > 0) end();
+        while (elementStack.size() > 0) end();
 
         try {
             if (closeStream) {
@@ -292,7 +292,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         
         hasContent = hasIndentedContent = true;
         terminateStart();
-        if (parentStack.size() > 0) writeIndent();
+        if (elementStack.size() > 0) writeIndent();
 
         if (newLine) {
             write("<!--");
@@ -305,7 +305,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             write("<!-- " + text + " -->");
         }
 
-        if (willIndent() && parentStack.size() == 0) write(lineSeparator);
+        if (willIndent() && elementStack.size() == 0) write(lineSeparator);
 
         return this;
     }
@@ -433,30 +433,24 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         writeSchemaLocations();
 
-        String name = parentStack.pop();
-
-        // Namespace prefixes that were in scope for this element
-        // are no longer in scope.
-        prefixesStack.pop();
-
-        // Check for hypen at beginning of element name
-        // which indicates that the commentedStart method was used.
-        boolean wasCommentedStart = name.charAt(0) == '-';
+        ElementMetadata elementData = elementStack.pop();
+        String name = elementData.getName();
+        boolean wasCommentedStart = elementData.isInComment();
 
         if (hasContent || verbose) {
             if (verbose) write(">");
             if (hasIndentedContent) writeIndent();
             write("</");
-            write(wasCommentedStart ? name.substring(1) : name);
-            write(wasCommentedStart ? "-->" : ">");
+            write(name);
         } else {
             if (spaceInEmptyElements) write(" ");
-            write(wasCommentedStart ? "/-->" : "/>");
+            write('/');
         }
+        write(wasCommentedStart ? "-->" : ">");
 
         hasContent = hasIndentedContent = true; // new setting for parent
 
-        state = parentStack.size() == 0 ?
+        state = elementStack.size() == 0 ?
             State.AFTER_ROOT : State.IN_ELEMENT;
 
         return this;
@@ -518,8 +512,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return true if it is in scope; false otherwise
      */
     private boolean isInScopePrefix(String prefix) {
-        for (Set<String> prefixes : prefixesStack)
-            if (prefixes != null && prefixes.contains(prefix))
+        for (ElementMetadata elementData : elementStack)
+            if (elementData.containsPrefix(prefix))
                 return true;
 
         return false;
@@ -573,7 +567,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (prefix == null) prefix = "";
         boolean hasPrefix = prefix.length() > 0;
-        Set<String> prefixes = prefixesStack.pop();
+        ElementMetadata elementData = elementStack.peek();
 
         if (checkMe) {
             if (hasPrefix) XMLUtil.verifyName(prefix);
@@ -583,7 +577,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             // Verify that the prefix isn't already defined
             // on the current element.
             if (hasPrefix) {
-                if (prefixes != null && prefixes.contains(prefix)) {
+                if (elementData.containsPrefix(prefix)) {
                     throw new IllegalArgumentException(
                         "The namespace prefix \"" + prefix +
                         "\" is already defined on the current element.");
@@ -610,16 +604,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (hasPrefix) {
             // Add this prefix to the list of those in scope for this element.
-            if (prefixes == null)
-                prefixes = new HashSet<String>();
-            prefixes.add(prefix);
+            elementData.addPrefix(prefix);
         } else {
             defaultNSOnCurrentElement = true;
         }
-
-        // Note that the entry for the current element was popped off
-        // near the beginning of this method, so we're pushing it back on.
-        prefixesStack.push(prefixes);
 
         attrOnNewLine = true; // for the next attribute
 
@@ -682,10 +670,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         
         hasContent = hasIndentedContent = true;
         terminateStart();
-        if (parentStack.size() > 0) writeIndent();
+        if (elementStack.size() > 0) writeIndent();
 
         write("<?" + target + ' ' + data + "?>");
-        if (willIndent() && parentStack.size() == 0) write(lineSeparator);
+        if (willIndent() && elementStack.size() == 0) write(lineSeparator);
 
         return this;
     }
@@ -848,25 +836,19 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             pendingPrefixes.add(prefix);
         }
 
-        if (parentStack.size() > 0) writeIndent();
+        if (elementStack.size() > 0) writeIndent();
 
         String qName = hasPrefix ? prefix + ':' + name : name;
 
         if (inCommentedStart) {
             write("<!--" + qName);
-            // Add a "marker" to the element name on the stack
-            // so the end method knows to terminate the comment.
-            parentStack.push('-' + qName);
         } else {
             write('<' + qName);
-            parentStack.push(qName);
         }
+        elementStack.push(new ElementMetadata(qName, inCommentedStart));
 
         defaultNSOnCurrentElement = false;
         
-        // No namespace prefixes have been associated with this element yet.
-        prefixesStack.push(null);
-
         state = State.IN_START_TAG;
 
         return this;
@@ -1072,7 +1054,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (!willIndent()) return;
 
         write(lineSeparator);
-        int size = parentStack.size();
+        int size = elementStack.size();
         for (int i = 0; i < size; ++i) write(indent);
     }
 
@@ -1094,7 +1076,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             if (schemaLocation.length() > 0) {
                 if (willIndent()) {
                     schemaLocation.append(lineSeparator);
-                    int size = parentStack.size();
+                    int size = elementStack.size();
                     for (int i = 0; i <= size; ++i) {
                         schemaLocation.append(indent);
                     }
