@@ -282,8 +282,8 @@ public class WAXTest {
         wax.close();
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testBadPrefix() {
+    @Test
+    public void testBadPrefix_NamespaceWentOutOfScope() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root");
@@ -291,9 +291,60 @@ public class WAXTest {
         wax.namespace("foo", "http://www.ociweb.com/foo");
         wax.child("foo", "child1", "one");
         wax.end();
-        // The prefix "foo" is out of scope now.
-        wax.child("foo", "child2", "two");
-        wax.close();
+        try {
+            // The prefix "foo" is out of scope now.
+            wax.child("foo", "child2", "two");
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+        try {
+            wax.close();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
+    public void testBadAttributePrefixDetectedInEndCall() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.start("parent");
+        wax.attr("foo", "child2", "two");
+        try {
+            wax.end();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+        try {
+            wax.close();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
+    public void testBadAttributePrefixDetectedInCloseCall() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.start("parent");
+        wax.attr("foo", "child2", "two");
+        try {
+            wax.close();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test(expected=IllegalArgumentException.class)

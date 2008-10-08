@@ -155,17 +155,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (state != State.IN_START_TAG) badState("attr");
 
-        boolean hasPrefix = prefix != null && prefix.length() > 0;
-
-        if (checkMe) {
-            if (hasPrefix) {
-                XMLUtil.verifyName(prefix);
-                pendingPrefixes.add(prefix);
-            }
-            XMLUtil.verifyName(name);
-        }
-
-        String qName = hasPrefix ? prefix + ':' + name : name;
+        String qName = buildQName(prefix, name);
 
         if (newLine) {
             writeIndent();
@@ -196,6 +186,31 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public ElementWAX blankLine() {
         return text("", true);
+    }
+
+    /**
+     * Build <a href="http://www.w3.org/TR/REC-xml-names/">XML Namespace</a>
+     * <a href="http://www.w3.org/TR/REC-xml-names/#NT-QName">"Qualified Name"</a>
+     * for an XML element or attribute.
+     * 
+     * @param prefix the namespace prefix for the attribute
+     * @param name the element or attribute name
+     * @return <a href="http://www.w3.org/TR/REC-xml-names/">XML Namespace</a>
+     *      <a href="http://www.w3.org/TR/REC-xml-names/#NT-QName">"Qualified Name"</a>
+     */
+    private String buildQName(String prefix, String name) {
+
+        boolean hasPrefix = prefix != null && prefix.length() > 0;
+
+        if (checkMe) {
+            if (hasPrefix) {
+                XMLUtil.verifyName(prefix);
+                pendingPrefixes.add(prefix);
+            }
+            XMLUtil.verifyName(name);
+        }
+
+        return hasPrefix ? prefix + ':' + name : name;
     }
 
     /**
@@ -821,21 +836,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (state == State.AFTER_ROOT) badState("start");
 
-        boolean hasPrefix = prefix != null && prefix.length() > 0;
-        if (checkMe) {
-            if (hasPrefix) {
-                XMLUtil.verifyName(prefix);
-                pendingPrefixes.add(prefix);
-            }
-            XMLUtil.verifyName(name);
-        }
+        String qName = buildQName(prefix, name);
 
         // If this is the root element ...
         if (state == State.IN_PROLOG) writeDocType(name);
 
         if (elementStack.size() > 0) writeIndent();
 
-        String qName = hasPrefix ? prefix + ':' + name : name;
 
         if (inCommentedStart) {
             write("<!--" + qName);
