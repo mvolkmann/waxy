@@ -786,9 +786,9 @@ public class WAXTest {
         PrintStream originalSystemOut = System.out;
         System.setOut(new PrintStream(baos));
         try {
-        WAX wax = new WAX();
-        wax.start("root").close();
-        assertEquals("<root/>", baos.toString());
+            WAX wax = new WAX();
+            wax.start("root").close();
+            assertEquals("<root/>", baos.toString());
         } finally {
             System.setOut(originalSystemOut);
         }
