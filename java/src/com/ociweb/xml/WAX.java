@@ -55,7 +55,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         new TreeMap<String, String>();
 
     private final Stack<String> parentStack = new Stack<String>();
-    private final Stack<String> prefixesStack = new Stack<String>();
+    private final Stack<Set<String>> prefixesStack = new Stack<Set<String>>();
     private State state = State.IN_PROLOG;
     private String doctypePublicId;
     private String doctypeSystemId;
@@ -518,19 +518,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return true if it is in scope; false otherwise
      */
     private boolean isInScopePrefix(String prefix) {
-        for (String prefixes : prefixesStack) {
-            if (prefixes == null) continue;
-
-            // Check for the special case where we are testing for the
-            // default namespace and that's the only namespace in scope.
-            if (prefix.length() == 0 && prefixes.length() == 0) return true;
-
-            StringTokenizer st = new StringTokenizer(prefixes, ",");
-            while (st.hasMoreTokens()) {
-                String token = st.nextToken();
-                if (token.equals(prefix)) return true;
-            }
-        }
+        for (Set<String> prefixes : prefixesStack)
+            if (prefixes != null && prefixes.contains(prefix))
+                return true;
 
         return false;
     }
@@ -583,7 +573,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (prefix == null) prefix = "";
         boolean hasPrefix = prefix.length() > 0;
-        String prefixesOnCurrentElement = prefixesStack.pop();
+        Set<String> prefixes = prefixesStack.pop();
 
         if (checkMe) {
             if (hasPrefix) XMLUtil.verifyName(prefix);
@@ -593,17 +583,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             // Verify that the prefix isn't already defined
             // on the current element.
             if (hasPrefix) {
-                if (prefixesOnCurrentElement != null) {
-                    StringTokenizer st =
-                        new StringTokenizer(prefixesOnCurrentElement, ",");
-                    while (st.hasMoreTokens()) {
-                        String definedPrefix = st.nextToken();
-                        if (prefix.equals(definedPrefix)) {
-                            throw new IllegalArgumentException(
-                                "The namespace prefix \"" + prefix +
-                                "\" is already defined on the current element.");
-                        }
-                    }
+                if (prefixes != null && prefixes.contains(prefix)) {
+                    throw new IllegalArgumentException(
+                        "The namespace prefix \"" + prefix +
+                        "\" is already defined on the current element.");
                 }
             } else if (defaultNSOnCurrentElement) {
                 throw new IllegalArgumentException("The default namespace " +
@@ -627,18 +610,16 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (hasPrefix) {
             // Add this prefix to the list of those in scope for this element.
-            if (prefixesOnCurrentElement == null) {
-                prefixesOnCurrentElement = prefix;
-            } else {
-                prefixesOnCurrentElement += ',' + prefix;
-            }
+            if (prefixes == null)
+                prefixes = new HashSet<String>();
+            prefixes.add(prefix);
         } else {
             defaultNSOnCurrentElement = true;
         }
 
         // Note that the entry for the current element was popped off
         // near the beginning of this method, so we're pushing it back on.
-        prefixesStack.push(prefixesOnCurrentElement);
+        prefixesStack.push(prefixes);
 
         attrOnNewLine = true; // for the next attribute
 
