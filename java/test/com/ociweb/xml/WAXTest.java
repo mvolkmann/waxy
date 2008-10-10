@@ -120,6 +120,26 @@ public class WAXTest {
     }
 
     @Test
+    public void testAttributeWithDifferentNamespaceURL() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("x").namespace("n1", "http://www.w3.org/1") //
+                .namespace("n2", "http://www.w3.org/2");
+        wax.start("good").attr("n1", "a", "1");
+        // Assertion: The following call is OK; it does NOT throw an
+        // IllegalArgumentException.
+        wax.attr("n2", "a", "2");
+        //
+        wax.close();
+        assertEquals(
+                "<x xmlns:n1=\"http://www.w3.org/1\" xmlns:n2=\"http://www.w3.org/2\">"
+                        + "<good n1:a=\"1\" n2:a=\"2\"/>" //
+                        + "</x>", //
+                sw.toString());
+    }
+
+    @Test
     public void testAttributeWithEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -135,6 +155,29 @@ public class WAXTest {
         wax.start("root").unescapedAttr("a", "1&2").close();
         String xml = "<root a=\"1&2\"/>";
         assertEquals(xml, sw.toString());
+    }
+
+    /**
+     * From <a
+     * href="http://www.w3.org/TR/2004/REC-xml-names11-20040204/#uniqAttrs"
+     * >Namespaces in XML 1.1 -- 6.3 Uniqueness of Attributes</a>
+     */
+    @Test
+    public void testBadAttribute_DuplicateExpandedName() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        final String namespaceURL = "http://www.w3.org";
+        wax.comment(namespaceURL + " is bound to n1 and n2");
+        wax.start("x").namespace("n1", namespaceURL).namespace("n2", namespaceURL);
+        wax.start("bad").attr("n1", "a", "1");
+        try {
+            wax.attr("n2", "a", "2");
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The attribute \"xmlns:ns=\"" + namespaceURL
+                    + "\" ns:a\" is defined twice in this element.",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     /**
