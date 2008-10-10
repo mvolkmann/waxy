@@ -133,6 +133,19 @@ public class WAXTest {
         assertEquals(xml, sw.toString());
     }
 
+    /**
+     * From <a href="http://www.w3.org/TR/2008/PER-xml-20080205/#sec-starttags">
+     * Extensible Markup Language (XML) 1.0 (Fifth Edition) -- 3.1 Start-Tags,
+     * End-Tags, and Empty-Element Tags</a>:
+     * <p>
+     * <b>Well-formedness constraint: Unique Att Spec</b>
+     * </p>
+     * <p>
+     * An attribute name <em class="rfc2119"
+     * title="Keyword in RFC 2119 context">MUST NOT</em> appear more than once
+     * in the same start-tag or empty-element tag.
+     * </p>
+     */
     @Test
     public void testBadAttribute_DuplicateName() {
         StringWriter sw = new StringWriter();
@@ -148,6 +161,10 @@ public class WAXTest {
         }
     }
 
+    /**
+     * Covered by same spec as <code>testBadAttribute_DuplicateName</code>
+     * method above.
+     */
     @Test
     public void testBadAttribute_DuplicateQualifiedName() {
         StringWriter sw = new StringWriter();
