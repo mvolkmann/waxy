@@ -181,6 +181,31 @@ public class WAXTest {
     }
 
     /**
+     * This <b>interpretation</b> of what the XML Namespace spec means, in terms
+     * of attribute name uniqueness, has not yet been implemented.
+     */
+    @Test
+    public void testBadAttribute_DuplicateExpandedName_WithLateDefinitions() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        final String namespaceURL = "http://www.w3.org";
+        wax.start("root");
+        wax.attr("n1", "a", "1");
+        wax.attr("n2", "a", "2");
+        wax.namespace("n1", namespaceURL);
+        try {
+            wax.namespace("n2", namespaceURL);
+            wax.close();
+            // TODO: Add this assertion:
+            // fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The attribute \"xmlns:ns=\"" + namespaceURL
+                    + "\" ns:a\" is defined twice in this element.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    /**
      * From <a href="http://www.w3.org/TR/2008/PER-xml-20080205/#sec-starttags">
      * Extensible Markup Language (XML) 1.0 (Fifth Edition) -- 3.1 Start-Tags,
      * End-Tags, and Empty-Element Tags</a>:
