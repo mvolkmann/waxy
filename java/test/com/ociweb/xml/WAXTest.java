@@ -38,6 +38,35 @@ import static org.junit.Assert.*;
  */
 public class WAXTest {
 
+    private interface RunnableThrowsException {
+        void run() throws Exception;
+    }
+
+    private static void assertStringContains(final String expectedSubstring,
+            final String actualStringValue) {
+        final String assertionErrorMessage = "Expected string\n" //
+                + "   <" + actualStringValue + ">\n" //
+                + " to contain the substring\n" //
+                + "   <" + expectedSubstring + ">";
+        assertTrue(assertionErrorMessage, actualStringValue
+                .indexOf(expectedSubstring) > -1);
+    }
+
+    private static String captureSystemErrorOutput(
+            final RunnableThrowsException runnable) throws Exception {
+        final PrintStream originalSystemErrorOutput = System.err;
+        try {
+            final ByteArrayOutputStream fakeSystemErrorOutput = new ByteArrayOutputStream();
+            System.setErr(new PrintStream(fakeSystemErrorOutput));
+
+            runnable.run();
+
+            return fakeSystemErrorOutput.toString();
+        } finally {
+            System.setErr(originalSystemErrorOutput);
+        }
+    }
+
     private static String getFileFirstLine(File file) throws IOException {
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
@@ -54,22 +83,13 @@ public class WAXTest {
         return File.createTempFile("WAXTest", ".xml");
     }
 
-    @Test
-    public void testAttributeWithEscape() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root").attr("a", "1&2").close();
-        String xml = "<root a=\"1&amp;2\"/>";
-        assertEquals(xml, sw.toString());
-    }
-
-    @Test
-    public void testAttributeWithoutEscape() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root").unescapedAttr("a", "1&2").close();
-        String xml = "<root a=\"1&2\"/>";
-        assertEquals(xml, sw.toString());
+    private static Document parseXml(final String xmlString)
+            throws ParserConfigurationException, SAXException, IOException {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        final DocumentBuilder db = dbf.newDocumentBuilder();
+        final Document doc = db.parse(new ByteArrayInputStream(xmlString
+                .getBytes()));
+        return doc;
     }
 
     @Test
@@ -94,12 +114,69 @@ public class WAXTest {
             "  foo:a4=\"baz\"/>";
         assertEquals(xml, sw.toString());
     }
+
+    @Test
+    public void testAttributeWithEscape() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").attr("a", "1&2").close();
+        String xml = "<root a=\"1&amp;2\"/>";
+        assertEquals(xml, sw.toString());
+    }
     
+    @Test
+    public void testAttributeWithoutEscape() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").unescapedAttr("a", "1&2").close();
+        String xml = "<root a=\"1&2\"/>";
+        assertEquals(xml, sw.toString());
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadAttributeName() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.start("root").attr("1a", "value").close();
+    }
+
+    @Test
+    public void testBadAttributePrefixDetectedInCloseCall() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.start("parent");
+        wax.attr("foo", "child2", "two");
+        try {
+            wax.close();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
+    public void testBadAttributePrefixDetectedInEndCall() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.start("parent");
+        wax.attr("foo", "child2", "two");
+        try {
+            wax.end();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+        try {
+            wax.close();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test(expected=IllegalStateException.class)
@@ -110,6 +187,18 @@ public class WAXTest {
         // Can't call "attr" after calling "text".
         wax.attr("a1", "v1");
     }
+
+    /*
+    @Test(expected=RuntimeException.class)
+    public void testBadCloseAlreadyClosedByCaller() throws IOException {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        sw.close();
+        // Note that the Writer doesn't throw an exception in the next line!
+        wax.close(); // the Writer is already closed
+    }
+    */
 
     @Test(expected=IllegalStateException.class)
     public void testBadCDATA() {
@@ -136,18 +225,6 @@ public class WAXTest {
         wax.close();
         wax.close(); // already closed
     }
-
-    /*
-    @Test(expected=RuntimeException.class)
-    public void testBadCloseAlreadyClosedByCaller() throws IOException {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root");
-        sw.close();
-        // Note that the Writer doesn't throw an exception in the next line!
-        wax.close(); // the Writer is already closed
-    }
-    */
 
     @Test(expected=IllegalStateException.class)
     public void testBadCloseThenWrite() throws IOException {
@@ -225,17 +302,17 @@ public class WAXTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testBadIndentNegative() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.setIndent(-1); // must be >= 0
-    }
-
-    @Test(expected=IllegalArgumentException.class)
     public void testBadIndentMultipleTabs() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.setIndent("\t\t"); // more than one tab
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testBadIndentNegative() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setIndent(-1); // must be >= 0
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -308,49 +385,19 @@ public class WAXTest {
         }
     }
 
-    @Test
-    public void testBadAttributePrefixDetectedInEndCall() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root");
-        wax.start("parent");
-        wax.attr("foo", "child2", "two");
-        try {
-            wax.end();
-            fail("Expected IllegalArgumentException.");
-        } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The namespace prefix \"foo\" isn't in scope.",
-                    expectedIllegalArgumentException.getMessage());
-        }
-        try {
-            wax.close();
-            fail("Expected IllegalArgumentException.");
-        } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The namespace prefix \"foo\" isn't in scope.",
-                    expectedIllegalArgumentException.getMessage());
-        }
-    }
-
-    @Test
-    public void testBadAttributePrefixDetectedInCloseCall() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root");
-        wax.start("parent");
-        wax.attr("foo", "child2", "two");
-        try {
-            wax.close();
-            fail("Expected IllegalArgumentException.");
-        } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The namespace prefix \"foo\" isn't in scope.",
-                    expectedIllegalArgumentException.getMessage());
-        }
-    }
-
     @Test(expected=IllegalArgumentException.class)
     public void testBadSetLineSeparator() {
         WAX wax = new WAX();
         wax.setLineSeparator("abc");
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testBadSetLineSeparatorTiming() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        // can't call after output has started
+        wax.setLineSeparator(WAX.UNIX_LINE_SEPARATOR);
     }
 
     @Test(expected=IllegalStateException.class)
@@ -378,15 +425,6 @@ public class WAXTest {
         // Since error checking is turned on,
         // element names must be valid.
         wax.start("123");
-    }
-
-    @Test(expected=IllegalStateException.class)
-    public void testBadSetLineSeparatorTiming() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root");
-        // can't call after output has started
-        wax.setLineSeparator(WAX.UNIX_LINE_SEPARATOR);
     }
 
     @Test(expected=RuntimeException.class)
@@ -450,7 +488,7 @@ public class WAXTest {
 
         assertEquals(xml, sw.toString());
     }
-
+    
     @Test
     public void testBlankLine() {
         StringWriter sw = new StringWriter();
@@ -464,7 +502,7 @@ public class WAXTest {
             "</root>";
         assertEquals(xml, sw.toString());
     }
-    
+
     @Test
     public void testCDATAWithNewLines() {
         StringWriter sw = new StringWriter();
@@ -488,6 +526,109 @@ public class WAXTest {
         String xml =
             "<root><![CDATA[1<2>3&4'5\"6]]></root>";
         assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCloseThrowsIOException() {
+        final IOException testIOException = 
+            new IOException("JUnit test exception");
+
+        StringWriter sw = new StringWriter() {
+            @Override
+            public void close() throws IOException {
+                super.close();
+                throw testIOException;
+            }
+        };
+        
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root");
+        try {
+            wax.close();
+            fail("expecting RuntimeException containing IOException");
+        } catch (RuntimeException e) {
+            assertSame(testIOException, e.getCause());
+        }
+    }
+
+    @Test
+    public void testCommentedStartWithContent() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+
+        wax.start("root")
+           .commentedStart("child")
+           .child("grandchild", "some text")
+           .close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<root>" + lineSeparator +
+            "  <!--child>" + lineSeparator +
+            "    <grandchild>some text</grandchild>" + lineSeparator +
+            "  </child-->" + lineSeparator +
+            "</root>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCommentedStartWithNamespace() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root")
+           .namespace("foo", "http://www.ociweb.com/foo")
+           .commentedStart("foo", "child")
+           .child("grandchild", "some text")
+           .close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<root" + lineSeparator +
+            "  xmlns:foo=\"http://www.ociweb.com/foo\">" + lineSeparator +
+            "  <!--foo:child>" + lineSeparator +
+            "    <grandchild>some text</grandchild>" + lineSeparator +
+            "  </foo:child-->" + lineSeparator +
+            "</root>";
+        
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCommentedStartWithoutContent() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+
+        wax.start("root")
+           .commentedStart("child1")
+           .end()
+           .child("child2", "some text")
+           .close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<root>" + lineSeparator +
+            "  <!--child1/-->" + lineSeparator +
+            "  <child2>some text</child2>" + lineSeparator +
+            "</root>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCommentOnlyFileFails() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(true);
+        wax.comment(null);
+        try {
+            wax.close();
+            fail("Expecting IllegalStateException.");
+        } catch (IllegalStateException expectedIllegalStateException) {
+            assertEquals("can't call close when state is IN_PROLOG",
+                    expectedIllegalStateException.getMessage());
+        }
     }
 
     @Test
@@ -532,68 +673,87 @@ public class WAXTest {
         assertEquals(xml, sw.toString());
     }
 
+    /**
+     * From <a
+     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#syntax">Extensible
+     * Markup Language (XML) 1.0 (Fifth Edition), W3C Proposed Edited
+     * Recommendation 05 February 2008 - 2.4 Character Data and Markup:</a> <br>
+     * "The right angle bracket (>) may be represented using the string
+     * '&amp;gt;', and MUST, <a
+     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-compat">for
+     * compatibility</a>, be escaped using either '&amp;gt;' or a character
+     * reference when it appears in the string ']]>' in content, when that
+     * string is not marking the end of a <a
+     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-cdsection">CDATA
+     * section</a>."
+     */
     @Test
-    public void testCommentedStartWithContent() {
-        StringWriter sw = new StringWriter();
+    public void testCompatibilityQuoteForCdataEndMarker() throws Exception {
+        final StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
+        wax.start("root").text("==]]>==").close();
 
-        wax.start("root")
-           .commentedStart("child")
-           .child("grandchild", "some text")
-           .close();
+        final String xmlString = sw.toString();
+        assertEquals("<root>==]]&gt;==</root>", xmlString);
 
-        String lineSeparator = wax.getLineSeparator();
-        String xml =
-            "<root>" + lineSeparator +
-            "  <!--child>" + lineSeparator +
-            "    <grandchild>some text</grandchild>" + lineSeparator +
-            "  </child-->" + lineSeparator +
-            "</root>";
-
-        assertEquals(xml, sw.toString());
+        final Document doc = parseXml(xmlString);
+        doc.normalize();
+        final Element rootElement = doc.getDocumentElement();
+        assertEquals("root", rootElement.getNodeName());
+        assertEquals("==]]>==", rootElement.getTextContent());
     }
 
     @Test
-    public void testCommentedStartWithoutContent() {
+    public void testDefaultNamespace() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-
+        wax.noIndentsOrLineSeparators();
         wax.start("root")
-           .commentedStart("child1")
-           .end()
-           .child("child2", "some text")
+           .defaultNamespace("http://www.ociweb.com/tns")
            .close();
-
-        String lineSeparator = wax.getLineSeparator();
-        String xml =
-            "<root>" + lineSeparator +
-            "  <!--child1/-->" + lineSeparator +
-            "  <child2>some text</child2>" + lineSeparator +
-            "</root>";
-
-        assertEquals(xml, sw.toString());
+        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>",
+            sw.toString());
     }
 
     @Test
-    public void testCommentedStartWithNamespace() {
+    public void testDefaultNamespaceWithSchema() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
         wax.start("root")
-           .namespace("foo", "http://www.ociweb.com/foo")
-           .commentedStart("foo", "child")
-           .child("grandchild", "some text")
-           .close();
+           .defaultNamespace("http://www.ociweb.com/tns", "tns.xsd").close();
+        assertEquals(
+            "<root" +
+            " xmlns=\"http://www.ociweb.com/tns\"" +
+            " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
+            " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
+            sw.toString());
+    }
 
-        String lineSeparator = wax.getLineSeparator();
-        String xml =
-            "<root" + lineSeparator +
-            "  xmlns:foo=\"http://www.ociweb.com/foo\">" + lineSeparator +
-            "  <!--foo:child>" + lineSeparator +
-            "    <grandchild>some text</grandchild>" + lineSeparator +
-            "  </foo:child-->" + lineSeparator +
-            "</root>";
-        
-        assertEquals(xml, sw.toString());
+    @Test
+    public void testDefaultNS() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root").defaultNS("http://www.ociweb.com/tns").close();
+        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>",
+            sw.toString());
+    }
+
+    @Test
+    public void testDefaultNSWithSchema() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root")
+           .defaultNS("http://www.ociweb.com/tns", "tns.xsd")
+           .close();
+        assertEquals(
+            "<root" +
+            " xmlns=\"http://www.ociweb.com/tns\"" +
+            " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
+            " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
+            sw.toString());
     }
 
     @Test
@@ -665,17 +825,6 @@ public class WAXTest {
     }
 
     @Test
-    public void testExternalEntityDef() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.externalEntityDef("name", "value").start("root").close();
-
-        String xml = "<!DOCTYPE root [<!ENTITY name SYSTEM \"value\">]><root/>";
-        assertEquals(xml, sw.toString());
-    }
-
-    @Test
     public void testEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -702,6 +851,17 @@ public class WAXTest {
     }
 
     @Test
+    public void testExternalEntityDef() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.externalEntityDef("name", "value").start("root").close();
+
+        String xml = "<!DOCTYPE root [<!ENTITY name SYSTEM \"value\">]><root/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testGetIndent() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -718,6 +878,30 @@ public class WAXTest {
 
         wax.setIndent("");
         assertEquals("", wax.getIndent());
+    }
+
+    @Test
+    public void testIllustrateParsingErrorWhenTextLooksLikeCdataCloseSequence()
+            throws Exception {
+
+        final String systemErrorOutput = captureSystemErrorOutput(new RunnableThrowsException() {
+            public void run() throws Exception {
+                try {
+                    parseXml("<root>==]]>==</root>");
+
+                    fail("Expecting SAXParseException.");
+                } catch (final SAXParseException expectedSAXParseException) {
+                    assertEquals(
+                            "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
+                            expectedSAXParseException.getMessage());
+                }
+            }
+        });
+
+        assertTrue(systemErrorOutput.startsWith("[Fatal Error] "));
+        assertStringContains(
+                "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
+                systemErrorOutput);
     }
 
     @Test
@@ -832,6 +1016,25 @@ public class WAXTest {
     }
 
     @Test
+    public void testNoApersignOrLessThanQuotingInComment() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root").comment("1&2<3").close();
+        assertEquals("<root><!-- 1&2<3 --></root>", sw.toString());
+    }
+
+    @Test
+    public void testNoApersignOrLessThanQuotingInProcessingInstruction() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(true);
+        wax.noIndentsOrLineSeparators();
+        wax.start("root").processingInstruction("1&2<3", "3&2<1").close();
+        assertEquals("<root><?1&2<3 3&2<1?></root>", sw.toString());
+    }
+
+    @Test
     public void testNoArgCtor() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalSystemOut = System.out;
@@ -863,19 +1066,56 @@ public class WAXTest {
         assertEquals(null, wax.getIndent());
     }
 
-    @Test
-    public void testProcessingInstructionInPrologue() {
+    @Test(expected=IllegalArgumentException.class)
+    public void testNullComment() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.processingInstruction("xml-stylesheet",
-            "type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"");
-        wax.start("root");
-        wax.close();
+        wax.comment(null);
+    }
 
+    @Test
+    public void testNullCommentAfterClose() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").close();
+        wax.setTrustMe(true);
+        try {
+            wax.comment(null, true);
+            fail("Expecting IllegalStateException.");
+        } catch (IllegalStateException expectedIllegalStateException) {
+            assertEquals("attempting to write XML after close has been called",
+                    expectedIllegalStateException.getMessage());
+        }
+        assertEquals("<root/>", sw.toString());
+    }
+
+    @Test
+    public void testNullCommentWithTrustMe() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setTrustMe(true);
+
+        wax.comment(null);
+
+        wax.start("root").close();
         String lineSeparator = wax.getLineSeparator();
-        String xml =
-            "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>" + lineSeparator +
-            "<root/>";
+        assertEquals("<!-- null -->" + lineSeparator + "<root/>", sw.toString());
+    }
+
+    @Test
+    public void testPrefix() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("foo", "root")
+           .attr("bar", "baz")
+           // Note that the namespace is defined after it is used,
+           // but on the same element, which should be allowed.
+           .namespace("foo", "http://www.ociweb.com/foo")
+           .close();
+
+        String xml = "<foo:root bar=\"baz\" " +
+            "xmlns:foo=\"http://www.ociweb.com/foo\"/>";
         assertEquals(xml, sw.toString());
     }
 
@@ -894,19 +1134,18 @@ public class WAXTest {
     }
 
     @Test
-    public void testPrefix() {
+    public void testProcessingInstructionInPrologue() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("foo", "root")
-           .attr("bar", "baz")
-           // Note that the namespace is defined after it is used,
-           // but on the same element, which should be allowed.
-           .namespace("foo", "http://www.ociweb.com/foo")
-           .close();
+        wax.processingInstruction("xml-stylesheet",
+            "type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"");
+        wax.start("root");
+        wax.close();
 
-        String xml = "<foo:root bar=\"baz\" " +
-            "xmlns:foo=\"http://www.ociweb.com/foo\"/>";
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>" + lineSeparator +
+            "<root/>";
         assertEquals(xml, sw.toString());
     }
 
@@ -954,56 +1193,13 @@ public class WAXTest {
     }
 
     @Test
-    public void testDefaultNamespace() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root")
-           .defaultNamespace("http://www.ociweb.com/tns")
-           .close();
-        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>",
-            sw.toString());
-    }
+    public void testSetLineSeparator() {
+        WAX wax = new WAX();
+        wax.setLineSeparator(WAX.UNIX_LINE_SEPARATOR);
+        assertEquals(WAX.UNIX_LINE_SEPARATOR, wax.getLineSeparator());
 
-    @Test
-    public void testDefaultNamespaceWithSchema() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root")
-           .defaultNamespace("http://www.ociweb.com/tns", "tns.xsd").close();
-        assertEquals(
-            "<root" +
-            " xmlns=\"http://www.ociweb.com/tns\"" +
-            " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
-            " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
-            sw.toString());
-    }
-
-    @Test
-    public void testDefaultNS() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root").defaultNS("http://www.ociweb.com/tns").close();
-        assertEquals("<root xmlns=\"http://www.ociweb.com/tns\"/>",
-            sw.toString());
-    }
-
-    @Test
-    public void testDefaultNSWithSchema() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root")
-           .defaultNS("http://www.ociweb.com/tns", "tns.xsd")
-           .close();
-        assertEquals(
-            "<root" +
-            " xmlns=\"http://www.ociweb.com/tns\"" +
-            " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
-            " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
-            sw.toString());
+        // Most of the other tests verify that
+        // this CR is actually used in the output.
     }
 
     @Test
@@ -1049,16 +1245,6 @@ public class WAXTest {
         wax.start("123").unescapedText("<>&'\"").close();
 
         assertEquals("<123><>&'\"</123>", sw.toString());
-    }
-
-    @Test
-    public void testSetLineSeparator() {
-        WAX wax = new WAX();
-        wax.setLineSeparator(WAX.UNIX_LINE_SEPARATOR);
-        assertEquals(WAX.UNIX_LINE_SEPARATOR, wax.getLineSeparator());
-
-        // Most of the other tests verify that
-        // this CR is actually used in the output.
     }
 
     @Test
@@ -1128,31 +1314,6 @@ public class WAXTest {
     }
 
     @Test
-    public void testXMLVersion11() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw, Version.V1_1);
-        wax.start("root").close();
-
-        String lineSeparator = wax.getLineSeparator();
-        String xml =
-            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
-            "<root/>";
-        assertEquals(xml, sw.toString());
-    }
-
-    @Test
-    public void testXMLVersionNull() {
-        StringWriter sw = new StringWriter();
-        try {
-            new WAX(sw, null);
-            fail("Expected IllegalArgumentException.");
-        } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("unsupported XML version",
-                expectedIllegalArgumentException.getMessage());
-        }
-    }
-
-    @Test
     public void testXMLDeclarationNonDefaultEncoding()
     throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1170,6 +1331,31 @@ public class WAXTest {
     }
 
     @Test
+    public void testXMLVersion11() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw, Version.V1_1);
+        wax.start("root").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
+            "<root/>";
+        assertEquals(xml, sw.toString());
+    }
+    
+    @Test
+    public void testXMLVersionNull() {
+        StringWriter sw = new StringWriter();
+        try {
+            new WAX(sw, null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("unsupported XML version",
+                expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
     public void testXSLT() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -1183,191 +1369,5 @@ public class WAXTest {
             "<root/>";
 
         assertEquals(xml, sw.toString());
-    }
-
-    @Test
-    public void testCloseThrowsIOException() {
-        final IOException testIOException = 
-            new IOException("JUnit test exception");
-
-        StringWriter sw = new StringWriter() {
-            @Override
-            public void close() throws IOException {
-                super.close();
-                throw testIOException;
-            }
-        };
-        
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root");
-        try {
-            wax.close();
-            fail("expecting RuntimeException containing IOException");
-        } catch (RuntimeException e) {
-            assertSame(testIOException, e.getCause());
-        }
-    }
-
-    @Test(expected=IllegalArgumentException.class)
-    public void testNullComment() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.comment(null);
-    }
-
-    @Test
-    public void testNullCommentWithTrustMe() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.setTrustMe(true);
-
-        wax.comment(null);
-
-        wax.start("root").close();
-        String lineSeparator = wax.getLineSeparator();
-        assertEquals("<!-- null -->" + lineSeparator + "<root/>", sw.toString());
-    }
-
-    @Test
-    public void testCommentOnlyFileFails() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.setTrustMe(true);
-        wax.comment(null);
-        try {
-            wax.close();
-            fail("Expecting IllegalStateException.");
-        } catch (IllegalStateException expectedIllegalStateException) {
-            assertEquals("can't call close when state is IN_PROLOG",
-                    expectedIllegalStateException.getMessage());
-        }
-    }
-
-    @Test
-    public void testNullCommentAfterClose() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root").close();
-        wax.setTrustMe(true);
-        try {
-            wax.comment(null, true);
-            fail("Expecting IllegalStateException.");
-        } catch (IllegalStateException expectedIllegalStateException) {
-            assertEquals("attempting to write XML after close has been called",
-                    expectedIllegalStateException.getMessage());
-        }
-        assertEquals("<root/>", sw.toString());
-    }
-
-    /**
-     * From <a
-     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#syntax">Extensible
-     * Markup Language (XML) 1.0 (Fifth Edition), W3C Proposed Edited
-     * Recommendation 05 February 2008 - 2.4 Character Data and Markup:</a> <br>
-     * "The right angle bracket (>) may be represented using the string
-     * '&amp;gt;', and MUST, <a
-     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-compat">for
-     * compatibility</a>, be escaped using either '&amp;gt;' or a character
-     * reference when it appears in the string ']]>' in content, when that
-     * string is not marking the end of a <a
-     * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-cdsection">CDATA
-     * section</a>."
-     */
-    @Test
-    public void testCompatibilityQuoteForCdataEndMarker() throws Exception {
-        final StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.start("root").text("==]]>==").close();
-
-        final String xmlString = sw.toString();
-        assertEquals("<root>==]]&gt;==</root>", xmlString);
-
-        final Document doc = parseXml(xmlString);
-        doc.normalize();
-        final Element rootElement = doc.getDocumentElement();
-        assertEquals("root", rootElement.getNodeName());
-        assertEquals("==]]>==", rootElement.getTextContent());
-    }
-
-    @Test
-    public void testIllustrateParsingErrorWhenTextLooksLikeCdataCloseSequence()
-            throws Exception {
-
-        final String systemErrorOutput = captureSystemErrorOutput(new RunnableThrowsException() {
-            public void run() throws Exception {
-                try {
-                    parseXml("<root>==]]>==</root>");
-
-                    fail("Expecting SAXParseException.");
-                } catch (final SAXParseException expectedSAXParseException) {
-                    assertEquals(
-                            "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
-                            expectedSAXParseException.getMessage());
-                }
-            }
-        });
-
-        assertTrue(systemErrorOutput.startsWith("[Fatal Error] "));
-        assertStringContains(
-                "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
-                systemErrorOutput);
-    }
-
-    @Test
-    public void testNoApersignOrLessThanQuotingInComment() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root").comment("1&2<3").close();
-        assertEquals("<root><!-- 1&2<3 --></root>", sw.toString());
-    }
-    
-    @Test
-    public void testNoApersignOrLessThanQuotingInProcessingInstruction() {
-        StringWriter sw = new StringWriter();
-        WAX wax = new WAX(sw);
-        wax.setTrustMe(true);
-        wax.noIndentsOrLineSeparators();
-        wax.start("root").processingInstruction("1&2<3", "3&2<1").close();
-        assertEquals("<root><?1&2<3 3&2<1?></root>", sw.toString());
-    }
-
-    private static void assertStringContains(final String expectedSubstring,
-            final String actualStringValue) {
-        final String assertionErrorMessage = "Expected string\n" //
-                + "   <" + actualStringValue + ">\n" //
-                + " to contain the substring\n" //
-                + "   <" + expectedSubstring + ">";
-        assertTrue(assertionErrorMessage, actualStringValue
-                .indexOf(expectedSubstring) > -1);
-    }
-
-    private static String captureSystemErrorOutput(
-            final RunnableThrowsException runnable) throws Exception {
-        final PrintStream originalSystemErrorOutput = System.err;
-        try {
-            final ByteArrayOutputStream fakeSystemErrorOutput = new ByteArrayOutputStream();
-            System.setErr(new PrintStream(fakeSystemErrorOutput));
-
-            runnable.run();
-
-            return fakeSystemErrorOutput.toString();
-        } finally {
-            System.setErr(originalSystemErrorOutput);
-        }
-    }
-
-    private static Document parseXml(final String xmlString)
-            throws ParserConfigurationException, SAXException, IOException {
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        final DocumentBuilder db = dbf.newDocumentBuilder();
-        final Document doc = db.parse(new ByteArrayInputStream(xmlString
-                .getBytes()));
-        return doc;
-    }
-
-    private interface RunnableThrowsException {
-        void run() throws Exception;
     }
 }
