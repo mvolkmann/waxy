@@ -32,7 +32,8 @@ import java.util.Set;
      */
     private final Set<String> definedAttributeNames = new HashSet<String>();
 
-    /* package */ ElementMetadata(final String qualifiedName, final boolean isInComment) {
+    /* package */ ElementMetadata(
+        final String qualifiedName, final boolean isInComment) {
         this.qualifiedName = qualifiedName;
         this.isInComment = isInComment;
     }

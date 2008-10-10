@@ -1,4 +1,4 @@
-<project name="WAX" default="test">
+<project name="wax" default="test">
 
   <property name="classes.dir" value="build/classes"/>
   <property name="coverage.dir" value="build/coverage"/>

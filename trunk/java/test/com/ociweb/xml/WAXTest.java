@@ -42,18 +42,21 @@ public class WAXTest {
         void run() throws Exception;
     }
 
-    private static void assertStringContains(final String expectedSubstring,
-            final String actualStringValue) {
+    private static void assertStringContains(
+        final String expectedSubstring,
+        final String actualStringValue) {
+
         final String assertionErrorMessage = "Expected string\n" //
                 + "   <" + actualStringValue + ">\n" //
                 + " to contain the substring\n" //
                 + "   <" + expectedSubstring + ">";
-        assertTrue(assertionErrorMessage, actualStringValue
-                .indexOf(expectedSubstring) > -1);
+        assertTrue(assertionErrorMessage,
+            actualStringValue.indexOf(expectedSubstring) > -1);
     }
 
     private static String captureSystemErrorOutput(
-            final RunnableThrowsException runnable) throws Exception {
+        final RunnableThrowsException runnable) throws Exception {
+
         final PrintStream originalSystemErrorOutput = System.err;
         try {
             final ByteArrayOutputStream fakeSystemErrorOutput = new ByteArrayOutputStream();
@@ -84,7 +87,8 @@ public class WAXTest {
     }
 
     private static Document parseXml(final String xmlString)
-            throws ParserConfigurationException, SAXException, IOException {
+    throws ParserConfigurationException, SAXException, IOException {
+
         final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         final DocumentBuilder db = dbf.newDocumentBuilder();
         final Document doc = db.parse(new ByteArrayInputStream(xmlString
@@ -929,9 +933,10 @@ public class WAXTest {
 
     @Test
     public void testIllustrateParsingErrorWhenTextLooksLikeCdataCloseSequence()
-            throws Exception {
+    throws Exception {
 
-        final String systemErrorOutput = captureSystemErrorOutput(new RunnableThrowsException() {
+        final String systemErrorOutput =
+            captureSystemErrorOutput(new RunnableThrowsException() {
             public void run() throws Exception {
                 try {
                     parseXml("<root>==]]>==</root>");
@@ -939,16 +944,16 @@ public class WAXTest {
                     fail("Expecting SAXParseException.");
                 } catch (final SAXParseException expectedSAXParseException) {
                     assertEquals(
-                            "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
-                            expectedSAXParseException.getMessage());
+                        "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
+                        expectedSAXParseException.getMessage());
                 }
             }
         });
 
         assertTrue(systemErrorOutput.startsWith("[Fatal Error] "));
         assertStringContains(
-                "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
-                systemErrorOutput);
+            "The character sequence \"]]>\" must not appear in content unless used to mark the end of a CDATA section.",
+            systemErrorOutput);
     }
 
     @Test
