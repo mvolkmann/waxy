@@ -27,6 +27,11 @@ import java.util.Set;
      */
     private final Set<String> prefixes = new HashSet<String>();
 
+    /**
+     * Set of all attribute names defined in this XML Element.
+     */
+    private final Set<String> definedAttributeNames = new HashSet<String>();
+
     /* package */ ElementMetadata(final String qualifiedName, final boolean isInComment) {
         this.qualifiedName = qualifiedName;
         this.isInComment = isInComment;
@@ -36,8 +41,17 @@ import java.util.Set;
         prefixes.add(prefix);
     }
 
-    public boolean containsPrefix(String prefix) {
+    public boolean containsPrefix(final String prefix) {
         return prefixes.contains(prefix);
+    }
+
+    public void defineAttribute(final String qName) {
+        if (definedAttributeNames.contains(qName)) {
+            throw new IllegalArgumentException("The attribute \"" + qName
+                    + "\" is defined twice in this element.");
+        } else {
+            definedAttributeNames.add(qName);
+        }
     }
 
     public String getName() {

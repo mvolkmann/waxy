@@ -157,6 +157,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         String qName = buildQName(prefix, name);
 
+        ElementMetadata elementMetadata = elementStack.peek();
+        elementMetadata.defineAttribute(qName);
+
         if (newLine) {
             writeIndent();
         } else {
