@@ -59,7 +59,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private final Map<String, String> namespaceURIToSchemaPathMap =
         new TreeMap<String, String>();
 
-    private final Stack<ElementMetadata> elementStack = new Stack<ElementMetadata>();
+    private final Stack<ElementMetadata> elementStack =
+        new Stack<ElementMetadata>();
 
     private State state = State.IN_PROLOG;
     private String doctypePublicId;
@@ -199,10 +200,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param prefix the namespace prefix for the attribute
      * @param name the element or attribute name
      * @return <a href="http://www.w3.org/TR/REC-xml-names/">XML Namespace</a>
-     *      <a href="http://www.w3.org/TR/REC-xml-names/#NT-QName">"Qualified Name"</a>
+     *     <a href="http://www.w3.org/TR/REC-xml-names/#NT-QName">"Qualified Name"</a>
      */
     private String buildQName(String prefix, String name) {
-
         boolean hasPrefix = prefix != null && prefix.length() > 0;
 
         if (checkMe) {
@@ -471,8 +471,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         hasContent = hasIndentedContent = true; // new setting for parent
 
-        state = elementStack.size() == 0 ?
-            State.AFTER_ROOT : State.IN_ELEMENT;
+        state = elementStack.size() == 0 ? State.AFTER_ROOT : State.IN_ELEMENT;
 
         return this;
     }
@@ -533,9 +532,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return true if it is in scope; false otherwise
      */
     private boolean isInScopePrefix(String prefix) {
-        for (ElementMetadata elementMetadata : elementStack)
-            if (elementMetadata.containsPrefix(prefix))
-                return true;
+        for (ElementMetadata elementMetadata : elementStack) {
+            if (elementMetadata.containsPrefix(prefix)) return true;
+        }
 
         return false;
     }
