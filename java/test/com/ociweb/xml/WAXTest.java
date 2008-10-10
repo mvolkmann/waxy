@@ -133,6 +133,36 @@ public class WAXTest {
         assertEquals(xml, sw.toString());
     }
 
+    @Test
+    public void testBadAttribute_DuplicateName() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.attr("name", "value1");
+        try {
+            wax.attr("name", "value2");
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The attribute \"name\" is defined twice in this element.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
+    public void testBadAttribute_DuplicateQualifiedName() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root");
+        wax.attr("ns", "attr", "value1");
+        try {
+            wax.attr("ns", "attr", "value2");
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The attribute \"ns:attr\" is defined twice in this element.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testBadAttributeName() {
         StringWriter sw = new StringWriter();
