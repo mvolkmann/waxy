@@ -104,8 +104,9 @@ import java.util.*;
                     + "\" is defined twice in this element.");
         }
 
+        final String namespaceURL = getNamespaceUrl(prefix);
+        if (namespaceURL != null)
         {
-            final String namespaceURL = getNamespaceUrl(prefix);
             final String expandedName = namespaceURL + name;
             if (expendedAttributeNames.contains(expandedName)) {
                 throw new IllegalArgumentException(
