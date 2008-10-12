@@ -252,11 +252,19 @@ public class WAXTest {
         }
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testBadAttributeName() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").attr("1a", "value").close();
+        wax.start("root");
+        try {
+            wax.attr("1a", "value");
+            fail("Expected IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("\"1a\" is an invalid XML name",
+                expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test
@@ -284,13 +292,6 @@ public class WAXTest {
         wax.attr("foo", "child2", "two");
         try {
             wax.end();
-            fail("Expected IllegalArgumentException.");
-        } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The namespace prefix \"foo\" isn't in scope.",
-                    expectedIllegalArgumentException.getMessage());
-        }
-        try {
-            wax.close();
             fail("Expected IllegalArgumentException.");
         } catch (IllegalArgumentException expectedIllegalArgumentException) {
             assertEquals("The namespace prefix \"foo\" isn't in scope.",
@@ -361,11 +362,19 @@ public class WAXTest {
         wax.close(); // didn't write anything yet
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testBadComment() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("root").comment("foo--bar").close();
+        wax.start("root");
+        try {
+            wax.comment("foo--bar");
+            fail("Expected IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("\"foo--bar\" is an invalid comment",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test(expected=IllegalStateException.class)
@@ -384,11 +393,18 @@ public class WAXTest {
         wax.dtd("two.dtd"); // can't specify two DTDs
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testBadElementName() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.start("1root");
+        try {
+            wax.start("1root");
+            fail("Expected IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("\"1root\" is an invalid XML name",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test(expected=IllegalStateException.class)
@@ -1186,11 +1202,18 @@ public class WAXTest {
         assertEquals(null, wax.getIndent());
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testNullComment() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
-        wax.comment(null);
+        try {
+            wax.comment(null);
+            fail("Expected IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("\"null\" is an invalid comment",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test
