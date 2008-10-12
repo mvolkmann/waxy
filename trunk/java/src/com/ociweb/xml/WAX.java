@@ -437,7 +437,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             if (spaceInEmptyElements) write(" ");
             write('/');
         }
-        write(elementMetadata.isInComment() ? "-->" : ">");
+        write(elementMetadata.isCommentElement() ? "-->" : ">");
 
         hasContent = hasIndentedContent = true; // new setting for parent
 
