@@ -181,8 +181,22 @@ public class WAXTest {
     }
 
     /**
-     * This <b>interpretation</b> of what the XML Namespace spec means, in terms
-     * of attribute name uniqueness, has not yet been implemented.
+     * See the
+     * <a href="http://www.w3.org/TR/2004/REC-xml-names11-20040204/#scoping">
+     *    6.1 Namespace Scoping</a>
+     * section of the
+     * <a href="http://www.w3.org/TR/2004/REC-xml-names11-20040204">
+     *    Namespaces in XML 1.1 -- W3C Recommendation 4 February 2004</a>,
+     * which says:
+     * <i>"The scope of a namespace declaration declaring a prefix extends from
+     *    the beginning of the start-tag in which it appears to the end of the
+     *    corresponding end-tag, [...]"</i>
+     *
+     * <p>
+     * <b>TODO:</b> This <b>interpretation</b> of what the XML Namespace spec
+     * means, in terms of attribute name uniqueness, has not yet been
+     * implemented.
+     * </p>
      */
     @Test
     public void testBadAttribute_DuplicateExpandedName_WithLateDefinitions() {
@@ -926,6 +940,21 @@ public class WAXTest {
             "<!DOCTYPE root SYSTEM \"" + systemId  + "\">" + lineSeparator +
             "<root/>";
         assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testElementPrefixFailsToGetDefined() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.noIndentsOrLineSeparators();
+        wax.start("foo", "root");
+        try {
+            wax.close();
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"foo\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
     }
 
     @Test

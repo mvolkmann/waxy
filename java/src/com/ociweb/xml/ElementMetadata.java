@@ -13,13 +13,13 @@ import java.util.*;
      * <code>Name</code></a> of an XML <code>Element</code>, with optional XML
      * Namespace "colon" prefix.
      */
-    private final String qualifiedName;
+    private final String elementQualifiedName;
 
     /**
      * <code>true</code> if and only if this XML Element is the start/root/base
      * of an XML Fragment that is a comment representing possible XML elements.
      */
-    private final boolean isInComment;
+    private final boolean isCommentElement;
 
     /**
      * <code>ElementMetadata</code> for the XML Element that contains this
@@ -37,26 +37,31 @@ import java.util.*;
      * XML <a href="http://www.w3.org/TR/REC-xml-names/#NT-Prefix">prefixes</a>
      * used in the current XML <code>Element</code>.
      */
-    private final Set<String> unverifiedNamespacePrefixes = new HashSet<String>();
+    private final Set<String> namespacePrefixesUsed = new HashSet<String>();
 
     /**
-     * Set of all attribute names defined in this XML Element.
+     * Set of all attribute names defined in this XML Element. Contains all
+     * "qualified" (IE: namespace prefixed) attribute names.
      */
     private final Set<String> definedAttributeNames = new HashSet<String>();
 
+    /**
+     * Set of all "expanded" attribute names. (IE: Namespace URL + ':' +
+     * Attribute Name) Used to enforce uniqueness.
+     */
     private final Set<String> expendedAttributeNames = new HashSet<String>();
 
     /* package */ ElementMetadata(
             final String prefix,
             final String name,
-            final boolean isInComment,
+            final boolean isCommentElement,
             final ElementMetadata parent,
             final boolean checkMe)
     {
         final String qualifiedName = buildQualifiedName(prefix, name, checkMe);
 
-        this.qualifiedName = qualifiedName;
-        this.isInComment = isInComment;
+        this.elementQualifiedName = qualifiedName;
+        this.isCommentElement = isCommentElement;
         this.parent = parent;
     }
 
@@ -81,7 +86,7 @@ import java.util.*;
         if (checkMe) {
             if (hasPrefix) {
                 XMLUtil.verifyName(prefix);
-                unverifiedNamespacePrefixes.add(prefix);
+                namespacePrefixesUsed.add(prefix);
             }
             XMLUtil.verifyName(name);
         }
@@ -98,26 +103,27 @@ import java.util.*;
             final String name,
             final boolean checkMe)
     {
-        final String qualifiedName = buildQualifiedName(prefix, name, checkMe);
-        if (definedAttributeNames.contains(qualifiedName)) {
-            throw new IllegalArgumentException("The attribute \"" + qualifiedName
+        final String qualifiedAttributeName = buildQualifiedName(prefix, name,
+                checkMe);
+        if (definedAttributeNames.contains(qualifiedAttributeName)) {
+            throw new IllegalArgumentException("The attribute \""
+                    + qualifiedAttributeName
                     + "\" is defined twice in this element.");
         }
 
         final String namespaceURL = getNamespaceUrl(prefix);
-        if (namespaceURL != null)
-        {
-            final String expandedName = namespaceURL + name;
-            if (expendedAttributeNames.contains(expandedName)) {
+        if (namespaceURL != null) {
+            final String expandedAttributeName = namespaceURL + name;
+            if (expendedAttributeNames.contains(expandedAttributeName)) {
                 throw new IllegalArgumentException(
                         "The attribute \"xmlns:ns=\"" + namespaceURL + "\" ns:"
                                 + name + "\" is defined twice in this element.");
             }
-            expendedAttributeNames.add(expandedName);
+            expendedAttributeNames.add(expandedAttributeName);
         }
 
-        definedAttributeNames.add(qualifiedName);
-        return qualifiedName;
+        definedAttributeNames.add(qualifiedAttributeName);
+        return qualifiedAttributeName;
     }
 
     public void defineNamespace(final String prefix, final String uri) {
@@ -132,11 +138,11 @@ import java.util.*;
     }
 
     public String getQualifiedName() {
-        return qualifiedName;
+        return elementQualifiedName;
     }
 
-    public boolean isInComment() {
-        return isInComment;
+    public boolean isCommentElement() {
+        return isCommentElement;
     }
 
     /**
@@ -157,13 +163,13 @@ import java.util.*;
      * @throws IllegalArgumentException if any aren't in scope
      */
     public void verifyOutstandingNamespacePrefixes() {
-        for (final String prefix : unverifiedNamespacePrefixes) {
+        for (final String prefix : namespacePrefixesUsed) {
             if (!isNamespacePrefixInScope(prefix)) {
                 throw new IllegalArgumentException(
                     "The namespace prefix \"" + prefix + "\" isn't in scope.");
             }
         }
 
-        unverifiedNamespacePrefixes.clear();
+        namespacePrefixesUsed.clear();
     }
 }
