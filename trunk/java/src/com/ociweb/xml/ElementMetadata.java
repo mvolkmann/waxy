@@ -34,22 +34,10 @@ import java.util.*;
             = new HashMap<String, String>();
 
     /**
-     * XML <a href="http://www.w3.org/TR/REC-xml-names/#NT-Prefix">prefixes</a>
-     * used in the current XML <code>Element</code>.
-     */
-    private final Set<String> namespacePrefixesUsed = new HashSet<String>();
-
-    /**
      * Set of all attribute names defined in this XML Element. Contains all
      * "qualified" (IE: namespace prefixed) attribute names.
      */
     private final Set<String> definedAttributeNames = new HashSet<String>();
-
-    /**
-     * Set of all "expanded" attribute names. (IE: Namespace URL + ':' +
-     * Attribute Name) Used to enforce uniqueness.
-     */
-    private final Set<String> expendedAttributeNames = new HashSet<String>();
 
     /* package */ ElementMetadata(
             final String prefix,
@@ -84,10 +72,8 @@ import java.util.*;
         final boolean hasPrefix = (prefix != null) && (prefix.length() > 0);
 
         if (checkMe) {
-            if (hasPrefix) {
+            if (hasPrefix)
                 XMLUtil.verifyName(prefix);
-                namespacePrefixesUsed.add(prefix);
-            }
             XMLUtil.verifyName(name);
         }
 
@@ -109,17 +95,6 @@ import java.util.*;
             throw new IllegalArgumentException("The attribute \""
                     + qualifiedAttributeName
                     + "\" is defined twice in this element.");
-        }
-
-        final String namespaceURL = getNamespaceUrl(prefix);
-        if (namespaceURL != null) {
-            final String expandedAttributeName = namespaceURL + name;
-            if (expendedAttributeNames.contains(expandedAttributeName)) {
-                throw new IllegalArgumentException(
-                        "The attribute \"xmlns:ns=\"" + namespaceURL + "\" ns:"
-                                + name + "\" is defined twice in this element.");
-            }
-            expendedAttributeNames.add(expandedAttributeName);
         }
 
         definedAttributeNames.add(qualifiedAttributeName);
@@ -163,13 +138,48 @@ import java.util.*;
      * @throws IllegalArgumentException if any aren't in scope
      */
     public void verifyOutstandingNamespacePrefixes() {
-        for (final String prefix : namespacePrefixesUsed) {
-            if (!isNamespacePrefixInScope(prefix)) {
+        verifyElementNamespaceUsage();
+        verifyAttributeNamesWithinStartTag();
+    }
+
+    private void verifyElementNamespaceUsage() {
+        final int colonIndex = elementQualifiedName.indexOf(':');
+        if (colonIndex > 0) {
+            final String prefix = elementQualifiedName.substring(0, colonIndex);
+            final String namespaceURL = getNamespaceUrl(prefix);
+            if (namespaceURL == null /* || "".equals(namespaceURL) */ ) {
                 throw new IllegalArgumentException(
-                    "The namespace prefix \"" + prefix + "\" isn't in scope.");
+                        "The namespace prefix \"" + prefix + "\" isn't in scope.");
             }
         }
+    }
 
-        namespacePrefixesUsed.clear();
+    private void verifyAttributeNamesWithinStartTag() {
+        final Set<String> expandedAttributeNames = new HashSet<String>();
+
+        for (final String qualifiedAttributeName : definedAttributeNames) {
+            final int colonIndex = qualifiedAttributeName.indexOf(':');
+            if (colonIndex > 0) {
+                final String prefix = qualifiedAttributeName.substring(0, colonIndex);
+                final String name = qualifiedAttributeName.substring(colonIndex + 1);
+                final String namespaceURL = getNamespaceUrl(prefix);
+
+                if (namespaceURL == null /* || "".equals(namespaceURL) */) {
+                    throw new IllegalArgumentException(
+                            "The namespace prefix \"" + prefix
+                                    + "\" isn't in scope.");
+                }
+
+                final String expandedName = namespaceURL + ':' + name;
+                if (expandedAttributeNames.contains(expandedName)) {
+                    throw new IllegalArgumentException(
+                            "The attribute <xmlns:ns=\"" + namespaceURL
+                                    + "\" ns:" + name
+                                    + "> is defined twice in this element.");
+                } else {
+                    expandedAttributeNames.add(expandedName);
+                }
+            }
+        }
     }
 }
