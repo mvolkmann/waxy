@@ -105,6 +105,14 @@ import java.util.*;
         namespacePrefixToURLMap.put(prefix, uri);
     }
 
+    /**
+     * @param prefix
+     * @return The URL for the given namespace <code>prefix</code>;
+     *         <code>null</code> if this <code>prefix</code> is not defined
+     *         anywhere on the Element stack; empty string (<code>""</code>) if
+     *         the namespace is explicitly <b>undefined</b> in the current
+     *         scope.
+     */
     private String getNamespaceUrl(final String prefix) {
         final String namespaceURL = namespacePrefixToURLMap.get(prefix);
         if (namespaceURL == null && parent != null)
@@ -116,21 +124,23 @@ import java.util.*;
         return elementQualifiedName;
     }
 
-    public boolean isCommentElement() {
-        return isCommentElement;
+    /**
+     * @param prefix
+     * @return The URL for the given namespace <code>prefix</code>.
+     * @throws IllegalArgumentException if the namespace <code>prefix</code> is
+     *          not defined in the current scope.
+     */
+    private String getRequiredNamespaceURL(final String prefix) {
+        final String namespaceURL = getNamespaceUrl(prefix);
+        if (namespaceURL == null || "".equals(namespaceURL)) {
+            throw new IllegalArgumentException(
+                    "The namespace prefix \"" + prefix + "\" isn't in scope.");
+        }
+        return namespaceURL;
     }
 
-    /**
-     * @return <code>true</code> if the given XML Namespace <code>prefix</code>
-     *         is defined in this XML Element, or any of its parent Elements.
-     */
-    public boolean isNamespacePrefixInScope(final String prefix) {
-        if (this.containsNamespacePrefix(prefix))
-            return true;
-        else if (parent != null)
-            return parent.isNamespacePrefixInScope(prefix);
-        else
-            return false;
+    public boolean isCommentElement() {
+        return isCommentElement;
     }
 
     /**
@@ -146,11 +156,7 @@ import java.util.*;
         final int colonIndex = elementQualifiedName.indexOf(':');
         if (colonIndex > 0) {
             final String prefix = elementQualifiedName.substring(0, colonIndex);
-            final String namespaceURL = getNamespaceUrl(prefix);
-            if (namespaceURL == null /* || "".equals(namespaceURL) */ ) {
-                throw new IllegalArgumentException(
-                        "The namespace prefix \"" + prefix + "\" isn't in scope.");
-            }
+            getRequiredNamespaceURL(prefix);
         }
     }
 
@@ -162,13 +168,7 @@ import java.util.*;
             if (colonIndex > 0) {
                 final String prefix = qualifiedAttributeName.substring(0, colonIndex);
                 final String name = qualifiedAttributeName.substring(colonIndex + 1);
-                final String namespaceURL = getNamespaceUrl(prefix);
-
-                if (namespaceURL == null /* || "".equals(namespaceURL) */) {
-                    throw new IllegalArgumentException(
-                            "The namespace prefix \"" + prefix
-                                    + "\" isn't in scope.");
-                }
+                final String namespaceURL = getRequiredNamespaceURL(prefix);
 
                 final String expandedName = namespaceURL + ':' + name;
                 if (expandedAttributeNames.contains(expandedName)) {
