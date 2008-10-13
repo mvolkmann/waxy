@@ -639,6 +639,40 @@ public class WAXTest {
     }
 
     @Test
+    public void testCDATAContainingCDATASectionCloseDelimiter()
+            throws Exception {
+        final StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").cdata("==]]>==").close();
+
+        final String xmlString = sw.toString();
+        assertEquals("<root><![CDATA[==]]]]><![CDATA[>==]]></root>", xmlString);
+
+        final Document doc = parseXml(xmlString);
+        doc.normalize();
+        final Element rootElement = doc.getDocumentElement();
+        assertEquals("root", rootElement.getNodeName());
+        assertEquals("==]]>==", rootElement.getTextContent());
+    }
+
+    @Test
+    public void testCDATAContainingMultipleCDATASectionCloseDelimiters()
+            throws Exception {
+        final StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        final String difficultCDATAText = "a ]]> b ]]> c ]]> d";
+        wax.start("root").cdata(difficultCDATAText).close();
+
+        final String xmlString = sw.toString();
+
+        final Document doc = parseXml(xmlString);
+        doc.normalize();
+        final Element rootElement = doc.getDocumentElement();
+        assertEquals("root", rootElement.getNodeName());
+        assertEquals(difficultCDATAText, rootElement.getTextContent());
+    }
+
+    @Test
     public void testCDATAWithNewLines() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);

@@ -2,6 +2,7 @@ package com.ociweb.xml;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -206,7 +207,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         }
 
         escape = false;
-        text("<![CDATA[" + text + "]]>", newLine);
+        final String start = "<![CDATA[";
+        final String end = "]]>";
+        final String middle = text.replaceAll(Pattern.quote(end),
+                "]]" + end + start + ">");
+        text(start + middle + end, newLine);
         escape = true;
         return this;
     }
