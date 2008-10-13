@@ -171,11 +171,11 @@ public class WAXTest {
         wax.start("x").namespace("n1", namespaceURL).namespace("n2", namespaceURL);
         wax.start("bad").attr("n1", "a", "1");
         try {
-            wax.attr("n2", "a", "2");
+            wax.attr("n2", "a", "2").end();
             fail("Expected IllegalArgumentException.");
         } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The attribute \"xmlns:ns=\"" + namespaceURL
-                    + "\" ns:a\" is defined twice in this element.",
+            assertEquals("The attribute <xmlns:ns=\"" + namespaceURL
+                    + "\" ns:a> is defined twice in this element.",
                     expectedIllegalArgumentException.getMessage());
         }
     }
@@ -210,11 +210,10 @@ public class WAXTest {
         try {
             wax.namespace("n2", namespaceURL);
             wax.close();
-            // TODO: Add this assertion:
-            // fail("Expected IllegalArgumentException.");
+            fail("Expected IllegalArgumentException.");
         } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The attribute \"xmlns:ns=\"" + namespaceURL
-                    + "\" ns:a\" is defined twice in this element.",
+            assertEquals("The attribute <xmlns:ns=\"" + namespaceURL
+                    + "\" ns:a> is defined twice in this element.",
                     expectedIllegalArgumentException.getMessage());
         }
     }
