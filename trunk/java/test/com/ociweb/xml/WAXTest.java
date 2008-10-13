@@ -191,12 +191,6 @@ public class WAXTest {
      * <i>"The scope of a namespace declaration declaring a prefix extends from
      *    the beginning of the start-tag in which it appears to the end of the
      *    corresponding end-tag, [...]"</i>
-     *
-     * <p>
-     * <b>TODO:</b> This <b>interpretation</b> of what the XML Namespace spec
-     * means, in terms of attribute name uniqueness, has not yet been
-     * implemented.
-     * </p>
      */
     @Test
     public void testBadAttribute_DuplicateExpandedName_WithLateDefinitions() {
