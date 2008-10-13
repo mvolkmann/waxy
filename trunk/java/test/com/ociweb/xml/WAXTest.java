@@ -524,13 +524,6 @@ public class WAXTest {
             assertEquals("The namespace prefix \"foo\" isn't in scope.",
                     expectedIllegalArgumentException.getMessage());
         }
-        try {
-            wax.close();
-            fail("Expected IllegalArgumentException.");
-        } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("The namespace prefix \"foo\" isn't in scope.",
-                    expectedIllegalArgumentException.getMessage());
-        }
     }
 
     @Test(expected=IllegalArgumentException.class)
