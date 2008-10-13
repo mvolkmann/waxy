@@ -953,6 +953,58 @@ public class WAXTest {
         assertEquals("<root/>", sw.toString());
     }
 
+    /**
+     * See the
+     * <a href="http://www.w3.org/TR/2004/REC-xml-names11-20040204/#scoping">
+     *    6.1 Namespace Scoping</a>
+     * section of the
+     * <a href="http://www.w3.org/TR/2004/REC-xml-names11-20040204">
+     *    Namespaces in XML 1.1 -- W3C Recommendation 4 February 2004</a>,
+     * which says:
+     * <i>"The attribute value in a namespace declaration for a prefix MAY be empty.
+     *    This has the effect, within the scope of the declaration, of removing any
+     *    association of the prefix with a namespace name.  [...]"</i>
+     */
+    @Test
+    public void testEmptyStringUndefinesNamespace_AttributeTest() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        final String namespaceURL = "http://www.w3.org";
+        wax.start("e1");
+        wax.namespace("n1", namespaceURL);
+        wax.attr("n1", "a", "value1");
+        wax.start("e2");
+        wax.namespace("n1", ""); // Undefine namespace tied to "n1:".
+        wax.start("e3");
+        wax.attr("n1", "a", "value2"); // illegal; the prefix n1 is not bound here
+        try {
+            wax.close(); // attribute validation is done here
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"n1\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
+    public void testEmptyStringUndefinesNamespace_ElementTest() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        final String namespaceURL = "http://www.w3.org";
+        wax.start("x");
+        wax.namespace("n1", namespaceURL);
+        wax.child("n1", "a", ""); // legal; the prefix n1 is bound to http://www.w3.org
+        wax.start("x");
+        wax.namespace("n1", ""); // Undefine namespace tied to "n1:".
+        try {
+            wax.child("n1", "a", ""); // illegal; the prefix n1 is not bound here
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("The namespace prefix \"n1\" isn't in scope.",
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
     @Test
     public void testEndVerbose() {
         StringWriter sw = new StringWriter();
