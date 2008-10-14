@@ -291,7 +291,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         terminateStart();
         if (elementStack.size() > 0) writeIndent();
 
-        if (newLine) {
+        if (newLine && willIndent()) {
             write("<!--");
             writeIndent();
             write(indent);

@@ -825,6 +825,19 @@ public class WAXTest {
     }
 
     @Test
+    public void testCommentWithNewLinesButNoIndent() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setIndent(null);
+        wax.comment("comment #1", true).comment("comment #2", true);
+        wax.start("root").comment("comment #3", true).close();
+        assertEquals( //
+                "<!-- comment #1 --><!-- comment #2 -->"
+                        + "<root><!-- comment #3 --></root>", //
+                sw.toString());
+    }
+
+    @Test
     public void testCommentWithoutNewLines() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
