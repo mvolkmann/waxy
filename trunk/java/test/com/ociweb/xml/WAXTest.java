@@ -1330,7 +1330,6 @@ public class WAXTest {
             assertEquals("attempting to write XML after close has been called",
                     expectedIllegalStateException.getMessage());
         }
-        assertEquals("<root/>", sw.toString());
     }
 
     @Test

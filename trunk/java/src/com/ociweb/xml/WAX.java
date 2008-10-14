@@ -299,7 +299,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             writeIndent();
             write("-->");
         } else {
-            write("<!-- " + text + " -->");
+            write("<!-- ");
+            write(text);
+            write(" -->");
         }
 
         if (willIndent() && elementStack.empty()) write(lineSeparator);
@@ -434,12 +436,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         ElementMetadata elementMetadata = elementStack.pop();
 
         if (hasContent || verbose) {
-            if (verbose) write(">");
+            if (verbose) write('>');
             if (hasIndentedContent) writeIndent();
             write("</");
             write(elementMetadata.getQualifiedName());
         } else {
-            if (spaceInEmptyElements) write(" ");
+            if (spaceInEmptyElements) write(' ');
             write('/');
         }
         write(elementMetadata.isCommentElement() ? "-->" : ">");
@@ -547,8 +549,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (state != State.IN_START_TAG) badState("namespace");
 
-        if (prefix == null) prefix = "";
-        boolean hasPrefix = prefix.length() > 0;
+        boolean hasPrefix = (prefix != null) && (prefix.length() > 0);
         ElementMetadata currentElementMetadata = elementStack.peek();
 
         if (checkMe) {
@@ -823,12 +824,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (elementStack.size() > 0) writeIndent();
 
         if (inCommentedStart) {
-            write("<!--" + qualifiedName);
+            write("<!--");
         } else {
-            write('<' + qualifiedName);
+            write('<');
         }
-        elementStack.push(elementMetadata);
+        write(qualifiedName);
 
+        elementStack.push(elementMetadata);
         defaultNSOnCurrentElement = false;
         
         state = State.IN_START_TAG;
@@ -969,18 +971,25 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Writes the toString value of an Object to the stream.
-     * @param obj the Object
+     * Writes a character value to the stream.
+     * @param chr the character to write
      */
-    private void write(Object obj) {
+    private void write(char chr) {
+        write(String.valueOf(chr));
+    }
+
+    /**
+     * Writes a string value to the stream.
+     * @param str the String to write
+     */
+    private void write(String str) {
         if (writer == null) {
-            // EMMA flags this as uncovered, but I can't make this happen.
             throw new IllegalStateException(
                 "attempting to write XML after close has been called");
         }
 
         try {
-            writer.write(obj.toString());
+            writer.write(str);
             outputStarted = true;
         } catch (IOException e) {
             throw new RuntimeException(e);
