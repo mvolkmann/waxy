@@ -1310,7 +1310,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testNoIndentOrCRs() {
+    public void testNoIndentOrLineSeparators() {
         WAX wax = new WAX();
         wax.noIndentsOrLineSeparators();
         assertEquals(null, wax.getIndent());
@@ -1455,7 +1455,7 @@ public class WAXTest {
         assertEquals(WAX.UNIX_LINE_SEPARATOR, wax.getLineSeparator());
 
         // Most of the other tests verify that
-        // this CR is actually used in the output.
+        // this line separator is actually used in the output.
     }
 
     @Test
