@@ -1376,7 +1376,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testProcessingInstructionAfterPrologue() {
+    public void testProcessingInstructionAfterProlog() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.noIndentsOrLineSeparators();
@@ -1390,7 +1390,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testProcessingInstructionInPrologue() {
+    public void testProcessingInstructionInProlog() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.processingInstruction("xml-stylesheet",
