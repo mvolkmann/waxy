@@ -1266,7 +1266,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testNoApersignOrLessThanQuotingInComment() {
+    public void testNoAmpersandOrLessThanQuotingInComment() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.noIndentsOrLineSeparators();
@@ -1275,7 +1275,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testNoApersignOrLessThanQuotingInProcessingInstruction() {
+    public void testNoAmpersandOrLessThanQuotingInProcessingInstruction() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.setTrustMe(true);
