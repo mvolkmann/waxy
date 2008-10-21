@@ -315,17 +315,28 @@ public class WAXTest {
         wax.attr("a1", "v1");
     }
 
-    /*
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testBadCloseAlreadyClosedByCaller() throws IOException {
-        StringWriter sw = new StringWriter();
+        final String testExceptionMessage = "Artifical TEST Exception";
+        final IOException testIOException = new IOException(testExceptionMessage);
+        StringWriter sw = new StringWriter() {
+            @Override
+            public void close() throws IOException {
+                throw testIOException;
+            }
+        };
         WAX wax = new WAX(sw);
         wax.start("root");
-        sw.close();
-        // Note that the Writer doesn't throw an exception in the next line!
-        wax.close(); // the Writer is already closed
+        try {
+            wax.close(); // the Writer is already closed
+        } catch (RuntimeException ex) {
+            IOException actualIOException = (IOException) ex.getCause();
+            assertSame(testIOException, actualIOException);
+            assertEquals( //
+                    IOException.class.getName() + ": " + testExceptionMessage, //
+                    ex.getMessage());
+        }
     }
-    */
 
     @Test(expected=IllegalStateException.class)
     public void testBadCDATA() {
