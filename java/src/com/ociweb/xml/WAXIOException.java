@@ -11,4 +11,8 @@ public class WAXIOException extends WAXException {
                 ioException);
     }
 
+    public IOException getIOException() {
+        return (IOException) getCause();
+    }
+
 }
