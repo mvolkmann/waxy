@@ -260,8 +260,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             } else {
                 writer.flush();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ioException) {
+            throw new WAXIOException(ioException);
         }
 
         writer = null;
@@ -520,8 +520,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private static Writer makeWriter(String filePath) {
         try {
             return new FileWriter(filePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ioException) {
+            throw new WAXIOException(ioException);
         }
     }
 
@@ -991,8 +991,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         try {
             writer.write(str);
             outputStarted = true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ioException) {
+            throw new WAXIOException(ioException);
         }
     }
 
