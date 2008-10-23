@@ -82,6 +82,13 @@ public class WAXTest {
         return line;
     }
 
+    private static IOException getIOException(WAXIOException waxIOException) {
+        WAXException waxException = (WAXException) waxIOException;
+        IOException actualIOException = waxException.getIOException();
+        assertSame(waxException.getCause(), actualIOException);
+        return actualIOException;
+    }
+
     private static File getWAXTempXMLFile() throws IOException {
         return File.createTempFile("WAXTest", ".xml");
     }
@@ -329,12 +336,12 @@ public class WAXTest {
         wax.start("root");
         try {
             wax.close(); // the Writer is already closed
-        } catch (RuntimeException ex) {
-            IOException actualIOException = (IOException) ex.getCause();
+        } catch (WAXIOException waxIOException) {
+            IOException actualIOException = getIOException(waxIOException);
             assertSame(testIOException, actualIOException);
             assertEquals( //
-                    IOException.class.getName() + ": " + testExceptionMessage, //
-                    ex.getMessage());
+                    "Unexpected IOException: " + testExceptionMessage, //
+                    waxIOException.getMessage());
         }
     }
 
@@ -573,7 +580,7 @@ public class WAXTest {
         wax.start("123");
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testBadWrite() throws IOException {
         File tempXMLFile = getWAXTempXMLFile();
         Writer fw = new FileWriter(tempXMLFile.getAbsolutePath());
@@ -585,13 +592,25 @@ public class WAXTest {
             boolean success = tempXMLFile.delete();
             assertTrue(success);
         }
-        wax.close(); // attempting to write more after the Writer was closed
+        try {
+            wax.close(); // attempting to write more after the Writer was closed
+            fail("Expected [WAX]IOException.");
+        } catch (WAXIOException waxIOException) {
+            assertEquals("Unexpected IOException: Stream closed",
+                    waxIOException.getMessage());
+        }
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testBadWriteFile() throws IOException {
         String filePath = "."; // the current directory, not a file
-        new WAX(filePath);
+        try {
+            new WAX(filePath);
+            fail("Expected [WAX]IOException.");
+        } catch (WAXIOException waxIOException) {
+            assertEquals("Unexpected IOException: . (Access is denied)",
+                    waxIOException.getMessage());
+        }
     }
 
     @Test(expected=RuntimeException.class)
