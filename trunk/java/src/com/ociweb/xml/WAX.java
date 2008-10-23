@@ -97,7 +97,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Creates a WAX that writes to a given file path.
+     *
      * @param filePath the file path
+     * @throws WAXIOException
+     *             if the named file exists but is a directory rather than a
+     *             regular file, does not exist but cannot be created, or cannot
+     *             be opened for any other reason.
      */
     public WAX(String filePath) { this(filePath, Version.UNSPECIFIED); }
     public WAX(String filePath, Version version) {
@@ -140,11 +145,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes an attribute for the currently open element start tag.
+     *
      * @param prefix the namespace prefix for the attribute
      * @param name the attribute name
      * @param value the attribute value
      * @param newLine true to write on a new line; false otherwise
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             unless we have a start tag open, for writing XML attributes.
      */
     public StartTagWAX attr(
         String prefix, String name, Object value, boolean newLine) {
@@ -169,9 +177,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Throws an IllegalStateException that indicates
-     * the method that was called and the current state that was invalid.
+     * Throws an IllegalStateException that indicates the method that was called
+     * and the current state that was invalid.
+     *
      * @param methodName the method name
+     * @throws IllegalStateException
+     *             in all cases; exception message includes the
+     *             <code>methodName</code> that was passed in.
      */
     private void badState(String methodName) {
         throw new IllegalStateException(
@@ -197,9 +209,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a CDATA section in the content of the current element.
+     *
      * @param text the text
      * @param newLine true to output the text on a new line; false otherwise
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if before the beginning or after end of writing the root
+     *             <code>Element</code>.
      */
     public ElementWAX cdata(String text, boolean newLine) {
         if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
@@ -230,10 +246,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * A convenience method that is a shortcut for
      * start(prefix, name).text(text).end().
+     *
      * @param prefix the namespace prefix of the child element
      * @param name the child element name
      * @param text the child element text content
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if after end of writing the root <code>Element</code>.
      */
     public ElementWAX child(String prefix, String name, String text) {
         if (state == State.AFTER_ROOT) badState("child");
@@ -241,9 +260,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
-     * Terminates all unterminated elements,
-     * closes the Writer that is being used to output XML,
-     * and insures that nothing else can be written.
+     * Terminates all unterminated elements, closes the Writer that is being
+     * used to output XML, and insures that nothing else can be written.
+     *
+     * @throws IllegalStateException
+     *             if WAX had already been closed, or
+     *             if we have not yet written a root <code>Element</code>.
+     * @throws WAXIOException if an I/O error occurs.
      */
     public void close() {
         if (writer == null) throw new IllegalStateException("already closed");
@@ -278,9 +301,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a comment (&lt;!-- text --&gt;).
+     *
      * @param text the comment text (cannot contain "--")
      * @param newLine true to output the text on a new line; false otherwise
      * @return the calling object to support chaining
+     * @throws IllegalArgumentException
+     *             if <code>text</code> is <code>null</code> or contains two
+     *             sequential dash characters (<code>"--"</code>).
      */
     public PrologOrElementWAX comment(String text, boolean newLine) {
         // Comments can be output in any state.
@@ -386,9 +413,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a DOCTYPE that associates a DTD with the XML document.
+     *
      * @param publicId the public ID of the DTD
      * @param systemId the file path or URL to the DTD
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if this method is called more than once, or
+     *             if we have already started writing XML <code>Element</code>s.
+     * @throws IllegalArgumentException
+     *             if <code>systemId</code> is not a valid URI.
      */
     public PrologWAX dtd(String publicId, String systemId) {
         if (dtdSpecified) {
@@ -421,8 +454,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * The verbose option is useful in cases like the HTML script tag
      * which cannot be terminated in the shorthand way
      * even though it has no content.
+     *
      * @param verbose true to not consider shorthand way; false to consider it
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if before the beginning or after end of writing the root
+     *             <code>Element</code>.
      */
     public ElementWAX end(boolean verbose) {
         if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
@@ -455,9 +492,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Adds an entity definition to the internal subset of the DOCTYPE.
+     *
      * @param name
      * @param value
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if we have already started writing XML <code>Element</code>s.
      */
     public PrologWAX entityDef(String name, String value) {
         if (state != State.IN_PROLOG) badState("entity");
@@ -514,8 +554,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Creates a Writer for a given file path.
-     * @param filePath the file path
+     * 
+     * @param filePath
+     *            the file path
      * @return the Writer
+     * @throws WAXIOException
+     *             if the named file exists but is a directory rather than a
+     *             regular file, does not exist but cannot be created, or cannot
+     *             be opened for any other reason.
      */
     private static Writer makeWriter(String filePath) {
         try {
@@ -539,10 +585,20 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Writes a namespace declaration in the start tag of the current element.
      * To define the default namespace, use one of the defaultNamespace methods.
+     *
      * @param prefix the namespace prefix
      * @param uri the namespace URI
      * @param schemaPath the path to the XML Schema
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             unless we have a start tag open, for writing XML attributes.
+     * @throws IllegalArgumentException
+     *             if <code>prefix</code> is not a valid XML name token, or
+     *             if <code>uri</code> or <code>schemaPath</code> are not a
+     *             valid URIs, or
+     *             when one attempts to define the same namespace
+     *             <code>prefix</code> more than once within the same start XML
+     *             <code>Element</code>.
      */
     public StartTagWAX namespace(
         String prefix, String uri, String schemaPath) {
@@ -634,9 +690,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a processing instruction.
+     *
      * @param target the processing instruction target
      * @param data the processing instruction data
      * @return the calling object to support chaining
+     * @throws IllegalArgumentException
+     *             if <code>target</code> is not a valid XML name token.
      */
     public PrologOrElementWAX processingInstruction(
         String target, String data) {
@@ -669,6 +728,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * Passing "" causes elements to be output on separate lines,
      * but not indented.
      * Passing null causes all output to be on a single line.
+     *
+     * @throws IllegalArgumentException
+     *             if the <code>indent</code> string does not follow the rules
+     *             above
+     *             <i>(and the "trust me" flag isn't <code>true</code>)</i>.
      */
     public void setIndent(String indent) {
         if (checkMe) {
@@ -698,7 +762,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * Sets the number of spaces to use for indentation.
      * The number must be >= 0 and <= 4.
      * This defaults to 2.
+     *
      * @param numSpaces the number of spaces
+     * @throws IllegalArgumentException
+     *             if <code>numSpaces</code> is negative or more than four.
      */
     public void setIndent(int numSpaces) {
         if (numSpaces < 0) {
@@ -725,7 +792,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Sets the line separator characters to be used.
+     *
      * @param lineSeparator the line separator characters
+     * @throws IllegalStateException
+     *             if data has already been written.
+     * @throws IllegalArgumentException
+     *             if the <code>lineSeparator</code> sequence is not one of the
+     *             recognized (Mac, Unix or Windows) line terminator/separator
+     *             character sequences.
      */
     public void setLineSeparator(String lineSeparator) {
         if (outputStarted) {
@@ -803,9 +877,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes the start tag for a given element name, but doesn't terminate it.
+     *
      * @param prefix the namespace prefix to used on the element
      * @param name the element name
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if the root XML <code>Element</code> has been closed.
      */
     public StartTagWAX start(String prefix, String name) {
         hasContent = hasIndentedContent = true;
@@ -862,9 +939,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes text inside the content of the current element.
+     *
      * @param text the text
      * @param newLine true to output the text on a new line; false otherwise
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if before the beginning or after end of writing the root
+     *             <code>Element</code>.
      */
     public ElementWAX text(String text, boolean newLine) {
         if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
@@ -980,7 +1061,12 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes a string value to the stream.
+     *
      * @param str the String to write
+     * @throws IllegalStateException
+     *             if attempting to write additional XML data after the output
+     *             stream has been closed.
+     * @throws WAXIOException if an I/O error occurs.
      */
     private void write(String str) {
         if (writer == null) {
@@ -1081,7 +1167,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * Writes an XML declaration.
      * Regardless of indentation,
      * a newline is always written after this.
+     *
      * @param version the XML version
+     * @throws IllegalArgumentException
+     *             if <code>version</code> is <code>null</code>.
      */
     private void writeXMLDeclaration(Version version) {
         if (version == null) {
@@ -1110,8 +1199,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Writes an "xml-stylesheet" processing instruction.
+     *
      * @param filePath the path to the XSLT stylesheet
      * @return the calling object to support chaining
+     * @throws IllegalStateException
+     *             if a stylesheet has already been specified, or
+     *             if we have already started writing XML <code>Element</code>s.
+     * @throws IllegalArgumentException
+     *             if <code>filePath</code> is not a valid URI.
      */
     public PrologWAX xslt(String filePath) {
         if (xsltSpecified) {

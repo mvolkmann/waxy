@@ -108,7 +108,11 @@ public class XMLUtil {
 
     /**
      * Determines whether given text is a valid comment.
+     * 
      * @param text the text
+     * @throws IllegalArgumentException
+     *             if <code>text</code> is <code>null</code> or contains two
+     *             sequential dash characters (<code>"--"</code>).
      */
     public static boolean isComment(String text) {
         return (text != null) && !text.contains("--");
@@ -154,8 +158,11 @@ public class XMLUtil {
 
     /**
      * Verifies that the given text is a valid comment.
+     *
      * @param text the text
-     * @throws IllegalArgumentException if it isn't valid
+     * @throws IllegalArgumentException
+     *             if <code>text</code> is <code>null</code> or contains two
+     *             sequential dash characters (<code>"--"</code>).
      */
     public static void verifyComment(String text) {
         if (!isComment(text)) {
@@ -166,8 +173,10 @@ public class XMLUtil {
 
     /**
      * Verifies that the given text is a valid name token.
+     *
      * @param text the text
-     * @throws IllegalArgumentException if it isn't valid
+     * @throws IllegalArgumentException
+     *             if <code>text</code> is not a valid XML name token.
      */
     public static void verifyName(String text) {
         if (!isName(text)) {
