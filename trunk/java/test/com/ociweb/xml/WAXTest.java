@@ -84,7 +84,7 @@ public class WAXTest {
 
     private static IOException getIOException(WAXIOException waxIOException) {
         WAXException waxException = (WAXException) waxIOException;
-        IOException actualIOException = waxException.getIOException();
+        IOException actualIOException = waxIOException.getIOException();
         assertSame(waxException.getCause(), actualIOException);
         return actualIOException;
     }
