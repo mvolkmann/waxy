@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class XMLUtil {
+public final class XMLUtil {
 
     /**
      * The default encoding used in XML declarations.
