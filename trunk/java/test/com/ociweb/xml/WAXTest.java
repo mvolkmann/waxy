@@ -1389,6 +1389,19 @@ public class WAXTest {
     }
 
     @Test
+    public void testNullProcessingInstructionTarget() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        try {
+            wax.processingInstruction(null, "data");
+            fail("Expecting IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("\"null\" is an invalid XML name", //
+                    expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
     public void testPrefix() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);

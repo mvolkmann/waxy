@@ -686,7 +686,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             // Provide special handling for the
             // "xml-stylesheet" processing instruction
             // since starting with "xml" is reserved.
-            if (!target.equals("xml-stylesheet")) XMLUtil.verifyName(target);
+            if (!("xml-stylesheet").equals(target)) XMLUtil.verifyName(target);
         }
         
         hasContent = hasIndentedContent = true;
