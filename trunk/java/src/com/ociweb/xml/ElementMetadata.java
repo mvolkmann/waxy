@@ -29,10 +29,17 @@ import java.util.*;
 
     /**
      * XML Namespace prefixes defined in this XML Element.
+     * <i>(...except for the default namespace.)</i>
      */
     private final Map<String, String> namespacePrefixToURLMap
             = new HashMap<String, String>();
 
+    /**
+     * <code>true</code> when the default namespace has been defined in this
+     * XML <code>Element</code>.
+     */
+    private boolean defaultNamespaceDefined = false;
+    
     /**
      * Set of all attribute names defined in this XML Element. Contains all
      * "qualified" (IE: namespace prefixed) attribute names.
@@ -69,7 +76,7 @@ import java.util.*;
             final String name,
             final boolean checkMe)
     {
-        final boolean hasPrefix = (prefix != null) && (prefix.length() > 0);
+        final boolean hasPrefix = XMLUtil.hasValue(prefix);
 
         if (checkMe) {
             if (hasPrefix)
@@ -102,10 +109,18 @@ import java.util.*;
     }
 
     public void defineNamespace(final String prefix, final String uri) {
-        namespacePrefixToURLMap.put(prefix, uri);
+        final boolean hasPrefix = XMLUtil.hasValue(prefix);
+        if (hasPrefix) {
+            namespacePrefixToURLMap.put(prefix, uri);
+        } else {
+            defaultNamespaceDefined = true;
+        }
     }
 
     /**
+     * Get the URL string value for the given namespace prefix in the current
+     * scope.  Returns <code>null</code> if undefined.
+     *
      * @param prefix
      * @return The URL for the given namespace <code>prefix</code>;
      *         <code>null</code> if this <code>prefix</code> is not defined
@@ -143,23 +158,6 @@ import java.util.*;
         return isCommentElement;
     }
 
-    /**
-     * Verifies that all the pending namespace prefix are currently in scope.
-     * @throws IllegalArgumentException if any aren't in scope
-     */
-    public void verifyOutstandingNamespacePrefixes() {
-        verifyElementNamespaceUsage();
-        verifyAttributeNamesWithinStartTag();
-    }
-
-    private void verifyElementNamespaceUsage() {
-        final int colonIndex = elementQualifiedName.indexOf(':');
-        if (colonIndex > 0) {
-            final String prefix = elementQualifiedName.substring(0, colonIndex);
-            getRequiredNamespaceURL(prefix);
-        }
-    }
-
     private void verifyAttributeNamesWithinStartTag() {
         final Set<String> expandedAttributeNames = new HashSet<String>();
 
@@ -181,5 +179,46 @@ import java.util.*;
                 }
             }
         }
+    }
+
+    private void verifyElementNamespaceUsage() {
+        final int colonIndex = elementQualifiedName.indexOf(':');
+        if (colonIndex > 0) {
+            final String prefix = elementQualifiedName.substring(0, colonIndex);
+            getRequiredNamespaceURL(prefix);
+        }
+    }
+
+    public void verifyNamespaceData(
+            final String prefix,
+            final String uri,
+            final String schemaPath)
+    {
+        final boolean hasPrefix = XMLUtil.hasValue(prefix);
+        if (hasPrefix) XMLUtil.verifyName(prefix);
+        XMLUtil.verifyURI(uri);
+        if (schemaPath != null) XMLUtil.verifyURI(schemaPath);
+    
+        // Verify that the prefix isn't already defined
+        // on the current element.
+        if (hasPrefix) {
+            if (containsNamespacePrefix(prefix)) {
+                throw new IllegalArgumentException(
+                    "The namespace prefix \"" + prefix +
+                    "\" is already defined on the current element.");
+            }
+        } else if (defaultNamespaceDefined) {
+            throw new IllegalArgumentException("The default namespace " +
+                "is already defined on the current element.");
+        }
+    }
+
+    /**
+     * Verifies that all the pending namespace prefix are currently in scope.
+     * @throws IllegalArgumentException if any aren't in scope
+     */
+    public void verifyOutstandingNamespacePrefixes() {
+        verifyElementNamespaceUsage();
+        verifyAttributeNamesWithinStartTag();
     }
 }

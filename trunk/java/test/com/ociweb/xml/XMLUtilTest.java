@@ -85,6 +85,14 @@ public class XMLUtilTest {
     }
 
     @Test
+    public void testHasValue() {
+        assertFalse("'null' is not a 'value'.", XMLUtil.hasValue(null));
+        assertFalse("'empty string' is not a 'value'.", XMLUtil.hasValue(""));
+        assertTrue("'x' is a 'value'.", XMLUtil.hasValue("x"));
+        assertTrue("'abc' is a 'value'.", XMLUtil.hasValue("abc"));
+    }
+
+    @Test
     public void testIsComment() {
         assertTrue(XMLUtil.isComment("one two"));
         assertTrue(XMLUtil.isComment("one - two"));

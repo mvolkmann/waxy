@@ -107,6 +107,16 @@ public final class XMLUtil {
     }
 
     /**
+     * @param value
+     * @return <code>true</code> if the given <code>String value</code> has a
+     *         non-<code>null</code> non-empty value.<br/>
+     *         <code>false</code> if <code>null</code> or empty.
+     */
+    public static boolean hasValue(final String value) {
+        return (value != null) && (value.length() > 0);
+    }
+
+    /**
      * Determines whether given text is a valid comment.
      * 
      * @param text the text

@@ -66,7 +66,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean attrOnNewLine;
     private boolean checkMe = true;
     private boolean closeStream = true;
-    private boolean defaultNSOnCurrentElement;
     private boolean dtdSpecified;
     private boolean escape = true;
     private boolean hasContent;
@@ -605,26 +604,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         if (state != State.IN_START_TAG) badState("namespace");
 
-        boolean hasPrefix = (prefix != null) && (prefix.length() > 0);
         ElementMetadata currentElementMetadata = elementStack.peek();
 
         if (checkMe) {
-            if (hasPrefix) XMLUtil.verifyName(prefix);
-            XMLUtil.verifyURI(uri);
-            if (schemaPath != null) XMLUtil.verifyURI(schemaPath);
-
-            // Verify that the prefix isn't already defined
-            // on the current element.
-            if (hasPrefix) {
-                if (currentElementMetadata.containsNamespacePrefix(prefix)) {
-                    throw new IllegalArgumentException(
-                        "The namespace prefix \"" + prefix +
-                        "\" is already defined on the current element.");
-                }
-            } else if (defaultNSOnCurrentElement) {
-                throw new IllegalArgumentException("The default namespace " +
-                    "is already defined on the current element.");
-            }
+            currentElementMetadata.verifyNamespaceData(prefix, uri, schemaPath);
         }
 
         if (willIndent()) {
@@ -634,19 +617,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         }
         
         write("xmlns");
-        if (hasPrefix) write(':' + prefix);
+        if (XMLUtil.hasValue(prefix)) write(':' + prefix);
         write("=\"" + uri + "\"");
         
         if (schemaPath != null) {
             namespaceURIToSchemaPathMap.put(uri, schemaPath);
         }
 
-        if (hasPrefix) {
-            // Add this prefix to the list of those in scope for this element.
-            currentElementMetadata.defineNamespace(prefix, uri);
-        } else {
-            defaultNSOnCurrentElement = true;
-        }
+        // Add this prefix to the list of those in scope for this element.
+        currentElementMetadata.defineNamespace(prefix, uri);
 
         attrOnNewLine = true; // for the next attribute
 
@@ -908,7 +887,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         write(qualifiedName);
 
         elementStack.push(elementMetadata);
-        defaultNSOnCurrentElement = false;
         
         state = State.IN_START_TAG;
 
