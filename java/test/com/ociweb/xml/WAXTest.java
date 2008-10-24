@@ -608,8 +608,11 @@ public class WAXTest {
             new WAX(filePath);
             fail("Expected [WAX]IOException.");
         } catch (WAXIOException waxIOException) {
-            assertEquals("Unexpected IOException: . (Access is denied)",
-                    waxIOException.getMessage());
+            final String expectedMessagePrefix = "Unexpected IOException: ";
+            final String actualMessage = waxIOException.getMessage();
+            assertTrue("Expecting exception message <" + actualMessage
+                    + "> to start with <" + expectedMessagePrefix + ">",
+                    actualMessage.startsWith(expectedMessagePrefix));
         }
     }
 
