@@ -20,8 +20,7 @@ public class CharRangeTest {
         final CharRange a = new CharRange('a', 'z');
         final CharRange b = new CharRange('a', 'z');
         final CharRange c = new CharRange('x', 'z');
-        final CharRange d = new CharRange('a', 'z') {
-        };
+        final CharRange d = new CharRange('a', 'z') { };
 
         new EqualsTester(a, b, c, d);
     }
@@ -31,8 +30,7 @@ public class CharRangeTest {
         final CharRange a = new CharRange('a', 'z');
         final CharRange b = new CharRange('a', 'z');
         final CharRange c = new CharRange('a', 'x');
-        final CharRange d = new CharRange('a', 'z') {
-        };
+        final CharRange d = new CharRange('a', 'z') { };
 
         new EqualsTester(a, b, c, d);
     }
@@ -63,24 +61,26 @@ public class CharRangeTest {
             final CharRange firstRange = charRanges[firstIndex];
             final Comparable<CharRange> firstComparable = firstRange;
 
-            assertEquals("Expecting " + firstComparable + " to equal itself.", //
+            assertEquals("Expecting " + firstComparable + " to equal itself.",
                     0, firstComparable.compareTo(firstRange));
 
-            for (int secondIndex = firstIndex + 1; secondIndex < charRanges.length; secondIndex++) {
+            for (int secondIndex = firstIndex + 1;
+                 secondIndex < charRanges.length;
+                 secondIndex++) {
                 final CharRange secondRange = charRanges[secondIndex];
                 final Comparable<CharRange> secondComparable = secondRange;
 
                 {
-                    final int firstComparedToSecond = firstComparable
-                            .compareTo(secondRange);
+                    final int firstComparedToSecond =
+                        firstComparable.compareTo(secondRange);
                     assertTrue("Expecting " + firstRange + " < " + secondRange
                             + " -- result = " + firstComparedToSecond,
                             firstComparedToSecond < 0);
                 }
 
                 {
-                    final int secondCompareToFirst = secondComparable
-                            .compareTo(firstRange);
+                    final int secondCompareToFirst =
+                        secondComparable.compareTo(firstRange);
                     assertTrue("Expecting " + firstRange + " > " + secondRange
                             + " -- result = " + secondCompareToFirst,
                             secondCompareToFirst > 0);
@@ -88,5 +88,4 @@ public class CharRangeTest {
             }
         }
     }
-
 }

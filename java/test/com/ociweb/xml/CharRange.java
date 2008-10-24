@@ -24,18 +24,10 @@ public class CharRange implements Comparable<CharRange> {
 
     @Override
     public boolean equals(final Object obj) {
-
-        if (obj == this)
-            return true;
-
-        if (obj == null)
-            return false;
-
-        if (this.getClass() != obj.getClass())
-            return false;
-
+        if (obj == this) return true;
+        if (obj == null) return false;
+        if (this.getClass() != obj.getClass()) return false;
         final CharRange that = (CharRange) obj;
-
         return (this.start == that.start) && (this.end == that.end);
     }
 
@@ -47,9 +39,8 @@ public class CharRange implements Comparable<CharRange> {
 	// Java 6: @Override
     public int compareTo(final CharRange obj) {
         final CharRange that = (CharRange) obj;
-        final int startDiff = (this.start - that.start);
-        if (startDiff != 0)
-            return startDiff;
-        return (this.end - that.end);
+        final int startDiff = this.start - that.start;
+        if (startDiff != 0) return startDiff;
+        return this.end - that.end;
     }
 }

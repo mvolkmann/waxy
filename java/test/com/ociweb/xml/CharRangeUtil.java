@@ -15,19 +15,23 @@ public class CharRangeUtil {
 
         final List<CharRange> charRanges = new ArrayList<CharRange>();
 
-        final ICharRangeRecognizer oneCharacterRecognizer = new OneCharacterRecognizer();
-        final ICharRangeRecognizer mulipleCharacterRangeRecognizer = new MultipleCharacterRangeRecognizer();
+        final ICharRangeRecognizer oneCharacterRecognizer =
+            new OneCharacterRecognizer();
+        final ICharRangeRecognizer mulipleCharacterRangeRecognizer =
+            new MultipleCharacterRangeRecognizer();
 
-        final String[] characterRangeSpecifications = xmlStandardCharacterRanges
-                .split(Pattern.quote("|") + "|" + ",");
-        for (int specIdx = 0; specIdx < characterRangeSpecifications.length; ++specIdx) {
-            final String rangeSpec = characterRangeSpecifications[specIdx]
-                    .trim();
+        final String[] characterRangeSpecifications =
+            xmlStandardCharacterRanges.split(Pattern.quote("|") + "|" + ",");
+        for (int specIdx = 0;
+             specIdx < characterRangeSpecifications.length;
+             ++specIdx) {
+            final String rangeSpec =
+                characterRangeSpecifications[specIdx].trim();
 
-            final CharRange oneCharacterRange = oneCharacterRecognizer
-                    .recognize(rangeSpec);
-            final CharRange multipleCharacterRange = mulipleCharacterRangeRecognizer
-                    .recognize(rangeSpec);
+            final CharRange oneCharacterRange =
+                oneCharacterRecognizer.recognize(rangeSpec);
+            final CharRange multipleCharacterRange =
+                mulipleCharacterRangeRecognizer.recognize(rangeSpec);
 
             if (oneCharacterRange != null) {
                 charRanges.add(oneCharacterRange);
@@ -75,7 +79,8 @@ public class CharRangeUtil {
         return new IllegalArgumentException(message);
     }
 
-    private static class OneCharacterRecognizer implements ICharRangeRecognizer {
+    private static class OneCharacterRecognizer
+    implements ICharRangeRecognizer {
 
         private final Pattern pattern = Pattern.compile("" //
                 + BEGIN //
@@ -111,11 +116,11 @@ public class CharRangeUtil {
         }
     }
 
-    private static class MultipleCharacterRangeRecognizer implements
-            ICharRangeRecognizer {
+    private static class MultipleCharacterRangeRecognizer
+    implements ICharRangeRecognizer {
 
-        private static final String singleCharacterSpecRegEx = capturingGroup(".|"
-                + nonCapturingGroup("#x[0-9A-F]{2,4}"));
+        private static final String singleCharacterSpecRegEx =
+            capturingGroup(".|" + nonCapturingGroup("#x[0-9A-F]{2,4}"));
 
         private static final Pattern pattern = Pattern.compile("" //
                 + BEGIN //
