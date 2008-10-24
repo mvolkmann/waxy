@@ -39,10 +39,11 @@ import java.util.*;
      * XML <code>Element</code>.
      */
     private boolean defaultNamespaceDefined = false;
-    
+
     /**
      * Set of all attribute names defined in this XML Element. Contains all
-     * "qualified" (IE: namespace prefixed) attribute names.
+     * "qualified" (IE: namespace prefixed) attribute names. Cleared to empty at
+     * the end of the start Element.
      */
     private final Set<String> definedAttributeNames = new HashSet<String>();
 
@@ -179,6 +180,8 @@ import java.util.*;
                 }
             }
         }
+
+        definedAttributeNames.clear();
     }
 
     private void verifyElementNamespaceUsage() {
