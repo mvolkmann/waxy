@@ -9,7 +9,6 @@ import org.junit.Test;
 
 public class CharRangeUtilTest {
 
-    //
     // TODO:
     // From:
     // http://www.w3.org/TR/2006/REC-xml11-20060816/#charsets
@@ -86,7 +85,8 @@ public class CharRangeUtilTest {
     public void testMultipleCharacterRanges() {
         final CharRange[] expectedCharRanges = new CharRange[] {
                 new CharRange('-'), new CharRange('0', '9'),
-                new CharRange('\u00B7'), new CharRange('\u0300', '\u036F') };
+                new CharRange('\u00B7'), new CharRange('\u0300', '\u036F')
+        };
         assertArrayEquals(expectedCharRanges,
                 toCharRanges("'-' | [0-9] | #xB7 | [#x0300-#x036F]"));
     }
@@ -104,10 +104,10 @@ public class CharRangeUtilTest {
             toCharRanges("");
 
             fail("Expected IllegalArgumentException.");
-        } catch (final IllegalArgumentException expectedIllegalArgumentException) {
+        } catch (final IllegalArgumentException expectedException) {
             assertEquals(
                     "Argument index <0> is not a character or range of characters:  <>",
-                    expectedIllegalArgumentException.getMessage());
+                    expectedException.getMessage());
         }
     }
 
@@ -117,10 +117,10 @@ public class CharRangeUtilTest {
             toCharRanges("'-' | [0-9] | bad | [a-z] | '?'");
 
             fail("Expected IllegalArgumentException.");
-        } catch (final IllegalArgumentException expectedIllegalArgumentException) {
+        } catch (final IllegalArgumentException expectedException) {
             assertEquals(
                     "Argument index <2> is not a character or range of characters:  <bad>",
-                    expectedIllegalArgumentException.getMessage());
+                    expectedException.getMessage());
         }
     }
 }

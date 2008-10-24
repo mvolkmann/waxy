@@ -20,5 +20,4 @@ public class WAXExceptionTest {
             private static final long serialVersionUID = 1L;
         };
     }
-
 }

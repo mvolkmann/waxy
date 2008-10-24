@@ -12,7 +12,8 @@ public class ElementMetadataTest {
     private final boolean checkMe = true;
 
     @Test
-    public void testClearAttributeDataWhenStartElementIsVerified() throws Exception {
+    public void testClearAttributeDataWhenStartElementIsVerified()
+    throws Exception {
         final ElementMetadata elementMetadata = newElementMetadata("Element");
         assertEquals(0, getDefinedAttributeNamesSet(elementMetadata).size());
         elementMetadata.defineAttribute("ns", "attr1", true);
@@ -38,12 +39,11 @@ public class ElementMetadataTest {
     }
 
     private ElementMetadata newElementMetadata(final String name) {
-
         final String prefix = null;
         final boolean isCommentElement = false;
         final ElementMetadata parent = null;
 
-        return new ElementMetadata(prefix, name, isCommentElement, parent,
-                checkMe);
+        return new ElementMetadata(
+                prefix, name, isCommentElement, parent, checkMe);
     }
 }
