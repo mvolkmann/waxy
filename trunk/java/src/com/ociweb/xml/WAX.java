@@ -50,7 +50,16 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     private final List<String> entityDefs = new ArrayList<String>();
 
-    // Using a TreeMap so keys are kept in sorted order.
+    /**
+     * A <code>Map</code> of namespace URI strings to the schema path that would
+     * validate each. This map is used and contains useful data for the duration
+     * of a start tag -- IE: when <code>state == IN_START_TAG</code>. It is
+     * cleared at the end of each start tag.
+     * <p>
+     * Implementation Note: A TreeMap is used so that the 'xsi:schemaLocation'
+     * will be written in sorted order.
+     * </p>
+     */
     private final Map<String, String> namespaceURIToSchemaPathMap =
         new TreeMap<String, String>();
 
