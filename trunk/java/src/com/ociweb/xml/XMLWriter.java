@@ -54,7 +54,6 @@ import java.util.List;
 
     private String lineSeparator;
     private String indent = "  ";
-    private int indentionLevel = 0;
 
     private boolean attrOnNewLine;
     private boolean closeStream = true;
@@ -64,6 +63,8 @@ import java.util.List;
     private boolean outputStarted;
     private boolean spaceInEmptyElements;
     private boolean verifyUsage;
+
+    private int indentionLevel = 0;
 
     public XMLWriter(final Writer writer, final boolean verifyUsage) {
         this.writer = writer;
@@ -78,7 +79,6 @@ import java.util.List;
      *         <code>stringToCopy</code> concatinated together.
      */
     private static String nCopies(final int count, final String stringToCopy) {
-
         final int capacity = count * stringToCopy.length();
 
         final StringBuilder sb = new StringBuilder(capacity);
@@ -180,7 +180,7 @@ import java.util.List;
      * @return true if XML should be indented; false otherwise.
      */
     public boolean isIndentDefined() {
-        return (indent != null);
+        return indent != null;
     }
 
     /**
@@ -232,7 +232,9 @@ import java.util.List;
      */
     public void setIndent(final String indent) {
         if (verifyUsage) {
-            boolean valid = indent == null || indent.length() == 0
+            boolean valid =
+                indent == null
+                || indent.length() == 0
                 || "\t".equals(indent);
 
             if (!valid) {
@@ -338,8 +340,7 @@ import java.util.List;
     }
 
     public void writeComment(final String text, final boolean newLine) {
-        if (indentionLevel > 0)
-            writeLineBreakAndFullIndent();
+        if (indentionLevel > 0) writeLineBreakAndFullIndent();
 
         if (newLine && isIndentDefined()) {
             write("<!--");
@@ -353,8 +354,7 @@ import java.util.List;
             write(" -->");
         }
 
-        if (indentionLevel == 0 && isIndentDefined())
-            writeln();
+        if (indentionLevel == 0 && isIndentDefined()) writeln();
 
         hasContent = hasIndentedContent = true;
     }
@@ -367,8 +367,8 @@ import java.util.List;
 
         write("<!DOCTYPE " + rootElementName);
         if (doctypePublicId != null) {
-            write(" PUBLIC \"" + doctypePublicId + "\" \"" + doctypeSystemId
-                + '"');
+            write(" PUBLIC \"" + doctypePublicId + "\" \""
+                + doctypeSystemId + '"');
         } else if (doctypeSystemId != null) {
             write(" SYSTEM \"" + doctypeSystemId + '"');
         }
@@ -381,14 +381,12 @@ import java.util.List;
                 write("<!ENTITY " + entityDef + '>');
             }
 
-            if (isIndentDefined())
-                writeln();
+            if (isIndentDefined()) writeln();
             write(']');
         }
 
         write('>');
-        if (isIndentDefined())
-            writeln();
+        if (isIndentDefined()) writeln();
     }
 
     public void writeEndTag(final String qualifiedName,
@@ -399,13 +397,11 @@ import java.util.List;
             write('>');
 
         if (hasContent || verbose) {
-            if (hasIndentedContent)
-                writeLineBreakAndFullIndent();
+            if (hasIndentedContent) writeLineBreakAndFullIndent();
             write("</");
             write(qualifiedName);
         } else {
-            if (spaceInEmptyElements)
-                write(' ');
+            if (spaceInEmptyElements) write(' ');
             write('/');
         }
 
@@ -450,40 +446,31 @@ import java.util.List;
         final Object value, final boolean escape) {
         write(qualifiedName);
 
-        write('=');
-
-        write('"');
-        if (escape) {
-            write(XMLUtil.escape(value));
-        } else {
-            write(value.toString());
-        }
+        write("=\"");
+        write(escape ? XMLUtil.escape(value) : value.toString());
         write('"');
     }
 
-    public void writeNamespaceDeclaration(final String prefix, final String uri) {
+    public void writeNamespaceDeclaration(
+        final String prefix, final String uri) {
+
         writeWhiteSpaceBreak();
 
         write("xmlns");
-        if (XMLUtil.hasValue(prefix))
-            write(':' + prefix);
-        write('=');
-        write('"');
-        write(uri);
-        write('"');
+        if (XMLUtil.hasValue(prefix)) write(':' + prefix);
+        write("=\"" + uri + '"');
 
         attrOnNewLine = true; // for the next attribute
     }
 
-    public void writeProcessingInstruction(final String target,
-        final String data) {
-        if (indentionLevel > 0)
-            writeLineBreakAndFullIndent();
+    public void writeProcessingInstruction(
+        final String target, final String data) {
+
+        if (indentionLevel > 0) writeLineBreakAndFullIndent();
 
         write("<?" + target + ' ' + data + "?>");
 
-        if (indentionLevel == 0 && isIndentDefined())
-            writeln();
+        if (indentionLevel == 0 && isIndentDefined()) writeln();
 
         hasContent = hasIndentedContent = true;
     }
@@ -499,31 +486,21 @@ import java.util.List;
      * @param qualifiedName
      * @param inCommentedStart
      */
-    public void writeStartTagOpen(final String qualifiedName,
-        final boolean inCommentedStart) {
-        if (indentionLevel > 0)
-            writeLineBreakAndFullIndent();
+    public void writeStartTagOpen(
+        final String qualifiedName, final boolean inCommentedStart) {
 
-        if (inCommentedStart) {
-            write("<!--");
-        } else {
-            write('<');
-        }
+        if (indentionLevel > 0) writeLineBreakAndFullIndent();
+        write(inCommentedStart ? "<!--" : "<");
         write(qualifiedName);
 
         ++indentionLevel;
     }
 
-    public void writeText(final String text, final boolean newLine,
-        final boolean escape) {
+    public void writeText(
+        final String text, final boolean newLine, final boolean escape) {
         if (text != null && text.length() > 0) {
-            if (newLine)
-                writeLineBreakAndFullIndent();
-
-            if (escape)
-                write(XMLUtil.escape(text));
-            else
-                write(text);
+            if (newLine) writeLineBreakAndFullIndent();
+            write(escape ? XMLUtil.escape(text) : text);
         } else if (newLine) {
             writeln();
         }
@@ -552,15 +529,11 @@ import java.util.List;
         // Also, many uses might expect WAX to use UTF-8 encoding
         // regardless of the value of that property.
 
-        final String encoding;
-        if (writer instanceof OutputStreamWriter) {
-            encoding = ((OutputStreamWriter) writer).getEncoding();
-        } else {
-            encoding = XMLUtil.DEFAULT_ENCODING;
-        }
+        final String encoding = writer instanceof OutputStreamWriter ?
+            ((OutputStreamWriter) writer).getEncoding() :
+            XMLUtil.DEFAULT_ENCODING;
 
-        writeln("<?xml version=\"" + versionString + "\" encoding=\""
-            + encoding + "\"?>");
+        writeln("<?xml version=\"" + versionString
+            + "\" encoding=\"" + encoding + "\"?>");
     }
-
 }

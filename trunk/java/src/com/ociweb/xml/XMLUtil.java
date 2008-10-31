@@ -74,17 +74,17 @@ public final class XMLUtil {
      * "Basic Multilingual Plane (BMP)".
      */
     private static final String NAME_START_CHAR_CLASS_RANGES = ""
-            + "A-Z" + "_" + "a-z"
-            + "\u00C0-\u00D6" + "\u00D8-\u00F6" + "\u00F8-\u02FF"
-            + "\u0370-\u037D" + "\u037F-\u1FFF" + "\u200C-\u200D"
-            + "\u2070-\u218F" + "\u2C00-\u2FEF" + "\u3001-\uD7FF"
-            + "\uF900-\uFDCF" + "\uFDF0-\uFFFD";
+        + "A-Z" + "_" + "a-z"
+        + "\u00C0-\u00D6" + "\u00D8-\u00F6" + "\u00F8-\u02FF"
+        + "\u0370-\u037D" + "\u037F-\u1FFF" + "\u200C-\u200D"
+        + "\u2070-\u218F" + "\u2C00-\u2FEF" + "\u3001-\uD7FF"
+        + "\uF900-\uFDCF" + "\uFDF0-\uFFFD";
 
     private static final String NAME_CHAR_CLASS_RANGES = ""
-            + "-" // Must be first character of character class regex.
-            + NAME_START_CHAR_CLASS_RANGES
-            + Pattern.quote(".") + "0-9"
-            + "\u00B7" + "\u0300-\u036F" + "\u203F-\u2040";
+        + "-" // Must be first character of character class regex.
+        + NAME_START_CHAR_CLASS_RANGES
+        + Pattern.quote(".") + "0-9"
+        + "\u00B7" + "\u0300-\u036F" + "\u203F-\u2040";
 
     /**
      * Element and attribute names must be name tokens.
@@ -92,7 +92,8 @@ public final class XMLUtil {
      * is a valid XML "name token" using any valid Unicode characters.
      */
     public static final Pattern FULL_NAME_PATTERN = Pattern.compile(
-        "^[" + NAME_START_CHAR_CLASS_RANGES + "][" + NAME_CHAR_CLASS_RANGES + "]*$");
+        "^[" + NAME_START_CHAR_CLASS_RANGES + "]["
+        + NAME_CHAR_CLASS_RANGES + "]*$");
 
     public static final String XMLSCHEMA_INSTANCE_NS =
         "http://www.w3.org/1999/XMLSchema-instance";

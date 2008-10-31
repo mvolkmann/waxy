@@ -51,9 +51,9 @@ import java.util.List;
  */
 /* package */ class DocType {
 
+    private final List<String> entityDefs = new ArrayList<String>();
     private String publicId;
     private String systemId;
-    private final List<String> entityDefs = new ArrayList<String>();
 
     public DocType(final String publicId, final String systemId) {
         this.publicId = publicId;
@@ -61,12 +61,11 @@ import java.util.List;
     }
 
     public void write(final XMLWriter out, final String rootElementName) {
-        out.writeDocType(rootElementName, publicId, systemId,
-                entityDefs);
+        out.writeDocType(
+            rootElementName, publicId, systemId, entityDefs);
     }
 
     public void entityDef(final String name, final String value) {
         entityDefs.add(name + " \"" + value + '"');
     }
-
 }

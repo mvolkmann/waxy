@@ -50,7 +50,7 @@ public class WAXIOException extends WAXException {
 
     public WAXIOException(final IOException ioException) {
         super("Unexpected IOException: " + ioException.getMessage(),
-                ioException);
+            ioException);
     }
 
     public IOException getIOException() {

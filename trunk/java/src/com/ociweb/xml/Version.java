@@ -72,7 +72,6 @@ public enum Version {
      */
     V1_2("1.2");
 
-
     private final String versionNumberString;
 
     private Version(final String versionNumberString) {
