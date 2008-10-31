@@ -170,14 +170,16 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @throws IllegalStateException
      *             unless we have a start tag open, for writing XML attributes.
      */
-    public StartTagWAX attr(String prefix, String name, Object value,
-            boolean newLine) {
+    public StartTagWAX attr(
+        String prefix, String name, Object value, boolean newLine) {
         attr(prefix, name, value, newLine, true);
         return this;
     }
 
-    private void attr(String prefix, String name, Object value,
-            boolean newLine, boolean escape) {
+    private void attr(
+        String prefix, String name, Object value,
+        boolean newLine, boolean escape) {
+
         if (state != State.IN_START_TAG) badState("attr");
 
         currentElementMetadata.writeAttributeEqualsValue(prefix, name, value,
@@ -232,8 +234,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
         final String start = "<![CDATA[";
         final String end = "]]>";
-        final String middle = text.replaceAll(Pattern.quote(end),
-                "]]" + end + start + ">");
+        final String middle = text.replaceAll(
+            Pattern.quote(end), "]]" + end + start + ">");
         text(start + middle + end, newLine, false);
         return this;
     }
@@ -297,7 +299,6 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (state != State.IN_START_TAG) return;
 
         currentElementMetadata.closeStartTag();
-
         state = State.IN_ELEMENT;
     }
 
@@ -418,11 +419,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (docType != null) {
             throw new IllegalStateException("can't specify more than one DTD");
         }
+
         if (state != State.IN_PROLOG) badState("dtd");
+
         if (systemId == null) {
             throw new IllegalArgumentException(
                     "DTD 'system identifier' parameter must not be null.");
         }
+
         if (verifyUsage) XMLUtil.verifyURI(systemId);
 
         docType = new DocType(publicId, systemId);
@@ -458,6 +462,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
             badState("end");
         }
+
         if (state == State.IN_START_TAG) {
             verifyOutstandingNamespacePrefixes();
         }
@@ -465,7 +470,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         currentElementMetadata.writeEndTag(verbose);
 
         currentElementMetadata = currentElementMetadata.getParent();
-        state = (currentElementMetadata == null) ? State.AFTER_ROOT : State.IN_ELEMENT;
+        state = currentElementMetadata == null ?
+            State.AFTER_ROOT : State.IN_ELEMENT;
         return this;
     }
 
@@ -481,9 +487,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public PrologWAX entityDef(String name, String value) {
         if (state != State.IN_PROLOG) badState("entity");
 
-        if (docType == null) {
-            docType = new DocType(null, null);
-        }
+        if (docType == null) docType = new DocType(null, null);
         docType.entityDef(name, value);
         return this;
     }
@@ -585,10 +589,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public StartTagWAX namespace(
         String prefix, String uri, String schemaPath) {
+
         if (state != State.IN_START_TAG) badState("namespace");
 
-        currentElementMetadata.writeNamespaceDeclaration(prefix, uri,
-                schemaPath);
+        currentElementMetadata.writeNamespaceDeclaration(
+            prefix, uri, schemaPath);
         return this;
     }
 
@@ -774,8 +779,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         final boolean isTheRootElement = (currentElementMetadata == null);
         if (isTheRootElement) writeDocType(name);
 
-        currentElementMetadata = new ElementMetadata(out, verifyUsage,
-                currentElementMetadata, prefix, name, inCommentedStart);
+        currentElementMetadata = new ElementMetadata(
+            out, verifyUsage, currentElementMetadata,
+            prefix, name, inCommentedStart);
         currentElementMetadata.writeStartTagOpen(inCommentedStart);
 
         state = State.IN_START_TAG;
@@ -892,7 +898,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private void writeDocType(String rootElementName) {
         if (docType != null) {
             docType.write(out, rootElementName);
-            docType = null; // Release memory.
+            docType = null; // release memory
         }
     }
 
@@ -930,11 +936,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (xsltSpecified) {
             throw new IllegalStateException("can't specify more than one XSLT");
         }
+
         if (state != State.IN_PROLOG) badState("xslt");
+
         if (verifyUsage) XMLUtil.verifyURI(filePath);
 
         xsltSpecified = true;
-        return processingInstruction("xml-stylesheet",
-            "type=\"text/xsl\" href=\"" + filePath + "\"");
+        return processingInstruction(
+            "xml-stylesheet", "type=\"text/xsl\" href=\"" + filePath + "\"");
     }
 }

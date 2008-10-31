@@ -77,7 +77,8 @@ import java.util.*;
      * the same as this class.
      * </p>
      */
-    private final Map<String, String> namespacePrefixToURLMap = new HashMap<String, String>();
+    private final Map<String, String> namespacePrefixToURLMap =
+        new HashMap<String, String>();
 
     private final XMLWriter out;
 
@@ -118,13 +119,17 @@ import java.util.*;
      * Cleared to empty at the end of the start Element.
      * </p>
      */
-    private final Map<String, String> namespaceURIToSchemaPathMap = new TreeMap<String, String>();
+    private final Map<String, String> namespaceURIToSchemaPathMap =
+        new TreeMap<String, String>();
 
     private boolean verifyUsage;
 
-    /* package */ ElementMetadata(final XMLWriter out,
-        final boolean verifyUsage, final ElementMetadata parent,
-        final String prefix, final String name, final boolean isCommentElement) {
+    /* package */ ElementMetadata(
+        final XMLWriter out, final boolean verifyUsage,
+        final ElementMetadata parent,
+        final String prefix, final String name,
+        final boolean isCommentElement) {
+
         this.verifyUsage = verifyUsage;
         this.out = out;
 
@@ -150,12 +155,11 @@ import java.util.*;
         final boolean hasPrefix = XMLUtil.hasValue(prefix);
 
         if (verifyUsage) {
-            if (hasPrefix)
-                XMLUtil.verifyName(prefix);
+            if (hasPrefix) XMLUtil.verifyName(prefix);
             XMLUtil.verifyName(name);
         }
 
-        return (hasPrefix) ? (prefix + ':' + name) : name;
+        return hasPrefix ? (prefix + ':' + name) : name;
     }
 
     public void closeStartTag() {
@@ -197,6 +201,7 @@ import java.util.*;
         final String namespaceURL = namespacePrefixToURLMap.get(prefix);
         if (namespaceURL == null && parent != null)
             return parent.getNamespaceUrl(prefix);
+
         return namespaceURL;
     }
 
@@ -217,13 +222,13 @@ import java.util.*;
             throw new IllegalArgumentException("The namespace prefix \""
                 + prefix + "\" isn't in scope.");
         }
+
         return namespaceURL;
     }
 
     public void setTrustMe(final boolean trustMe) {
         this.verifyUsage = !trustMe;
-        if (parent != null)
-            parent.setTrustMe(trustMe);
+        if (parent != null) parent.setTrustMe(trustMe);
     }
 
     private void verifyAttributeNamesWithinStartTag() {
@@ -232,10 +237,10 @@ import java.util.*;
         for (final String qualifiedAttributeName : definedAttributeNames) {
             final int colonIndex = qualifiedAttributeName.indexOf(':');
             if (colonIndex > 0) {
-                final String prefix = qualifiedAttributeName.substring(0,
-                    colonIndex);
-                final String name = qualifiedAttributeName
-                    .substring(colonIndex + 1);
+                final String prefix =
+                    qualifiedAttributeName.substring(0, colonIndex);
+                final String name =
+                    qualifiedAttributeName.substring(colonIndex + 1);
                 final String namespaceURL = getRequiredNamespaceURL(prefix);
 
                 final String expandedName = namespaceURL + ':' + name;
@@ -260,8 +265,9 @@ import java.util.*;
         }
     }
 
-    private void verifyNamespaceData(final String prefix, final String uri,
-        final String schemaPath) {
+    private void verifyNamespaceData(
+        final String prefix, final String uri, final String schemaPath) {
+
         final boolean hasPrefix = XMLUtil.hasValue(prefix);
         if (hasPrefix) XMLUtil.verifyName(prefix);
         XMLUtil.verifyURI(uri);
@@ -290,10 +296,12 @@ import java.util.*;
         verifyAttributeNamesWithinStartTag();
     }
 
-    public String writeAttributeEqualsValue(final String prefix,
-        final String name, final Object value, final boolean newLine,
-        final boolean escape) {
+    public String writeAttributeEqualsValue(
+        final String prefix, final String name, final Object value,
+        final boolean newLine, final boolean escape) {
+
         final String qualifiedAttributeName = buildQualifiedName(prefix, name);
+
         if (definedAttributeNames.contains(qualifiedAttributeName)) {
             throw new IllegalArgumentException("The attribute \""
                 + qualifiedAttributeName
@@ -302,8 +310,8 @@ import java.util.*;
 
         definedAttributeNames.add(qualifiedAttributeName);
 
-        out.writeAttributeEqualsValue(qualifiedAttributeName, value, newLine,
-            escape);
+        out.writeAttributeEqualsValue(
+            qualifiedAttributeName, value, newLine, escape);
 
         return qualifiedAttributeName;
     }
@@ -315,9 +323,7 @@ import java.util.*;
 
     public void writeNamespaceDeclaration(final String prefix,
         final String uri, final String schemaPath) {
-        if (verifyUsage) {
-            verifyNamespaceData(prefix, uri, schemaPath);
-        }
+        if (verifyUsage) verifyNamespaceData(prefix, uri, schemaPath);
 
         out.writeNamespaceDeclaration(prefix, uri);
 
@@ -340,8 +346,7 @@ import java.util.*;
      * schema locations.
      */
     private void writeSchemaLocations() {
-        if (namespaceURIToSchemaPathMap.isEmpty())
-            return;
+        if (namespaceURIToSchemaPathMap.isEmpty()) return;
 
         // Write the attributes needed to associate XML Schemas
         // with this XML.
@@ -358,5 +363,4 @@ import java.util.*;
     public void writeStartTagOpen(final boolean inCommentedStart) {
         out.writeStartTagOpen(qualifiedName, inCommentedStart);
     }
-
 }
