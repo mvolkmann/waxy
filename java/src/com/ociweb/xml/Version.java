@@ -44,8 +44,35 @@ package com.ociweb.xml;
  */
 public enum Version {
 
-    UNSPECIFIED(null), V1_0("1.0"), V1_1("1.1"), V1_2("1.2");
-    
+    /**
+     * Disables writing of the "<?xml version=... ?>" specification)
+     */
+    UNSPECIFIED(null),
+
+    /**
+     * Either
+     * <a href="http://www.w3.org/TR/2006/REC-xml-20060816/">XML 1.0, Forth Edition</a>
+     * or
+     * <a href="http://www.w3.org/TR/2008/PER-xml-20080205/">XML 1.0, Fifth Edition</a>
+     */
+    V1_0("1.0"),
+
+    /**
+     * <a href="http://www.w3.org/TR/2006/REC-xml11-20060816/">XML 1.1, Second Edition</a>
+     */
+    V1_1("1.1"),
+
+    /**
+     * There is currently no standard document for "XML 1.2".
+     * <p>
+     * <i>(Nor is there likey to be one in the forseeable future -- given the
+     * current pragmatic approach illustrated by "XML 1.0, Fith Edition"
+     * changes.)</i>
+     * </p>
+     */
+    V1_2("1.2");
+
+
     private final String versionNumberString;
 
     private Version(final String versionNumberString) {

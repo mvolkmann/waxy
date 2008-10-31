@@ -82,14 +82,14 @@ public class CharRangeUtil {
     private static class OneCharacterRecognizer
     implements ICharRangeRecognizer {
 
-        private final Pattern pattern = Pattern.compile("" //
-                + BEGIN //
-                + capturingGroup("" //
-                        + nonCapturingGroup("'.'") //
-                        + "|" //
-                        + nonCapturingGroup("#x[0-9A-F]{2,4}") //
-                ) //
-                + END //
+        private final Pattern pattern = Pattern.compile(""
+                + BEGIN
+                + capturingGroup(""
+                        + nonCapturingGroup("'.'")
+                        + "|"
+                        + nonCapturingGroup("#x[0-9A-F]{2,4}")
+                )
+                + END
         );
 
         public CharRange recognize(final String rangeSpec) {
@@ -122,12 +122,12 @@ public class CharRangeUtil {
         private static final String singleCharacterSpecRegEx =
             capturingGroup(".|" + nonCapturingGroup("#x[0-9A-F]{2,4}"));
 
-        private static final Pattern pattern = Pattern.compile("" //
-                + BEGIN //
-                + quote('[') //
-                + singleCharacterSpecRegEx + "-" + singleCharacterSpecRegEx //
-                + quote(']') //
-                + END //
+        private static final Pattern pattern = Pattern.compile(""
+                + BEGIN
+                + quote('[')
+                + singleCharacterSpecRegEx + "-" + singleCharacterSpecRegEx
+                + quote(']')
+                + END
         );
 
         public CharRange recognize(final String rangeSpec) {
