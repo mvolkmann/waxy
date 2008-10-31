@@ -1,7 +1,6 @@
 package com.ociweb.xml;
 
 import java.io.*;
-import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -65,41 +64,35 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     private enum State { IN_PROLOG, IN_START_TAG, IN_ELEMENT, AFTER_ROOT }
 
-    private final List<String> entityDefs = new ArrayList<String>();
+    private final XMLWriter out;
 
     /**
-     * A <code>Map</code> of namespace URI strings to the schema path that would
-     * validate each. This map is used and contains useful data for the duration
-     * of a start tag -- IE: when <code>state == IN_START_TAG</code>. It is
-     * cleared at the end of each start tag.
-     * <p>
-     * Implementation Note: A TreeMap is used so that the 'xsi:schemaLocation'
-     * will be written in sorted order.
-     * </p>
+     * Metadata about the XML Element we are currently writing. Has the value
+     * <code>null</code> when outside the root element -- IE:
+     * <code>state == IN_PROLOG</code> or <code>AFTER_ROOT</code>.
      */
-    private final Map<String, String> namespaceURIToSchemaPathMap =
-        new TreeMap<String, String>();
+    private ElementMetadata currentElementMetadata;
 
-    private final Stack<ElementMetadata> elementStack =
-        new Stack<ElementMetadata>();
+    /**
+     * Holds DTD information for writing "<code>&lt;!DOCTYPE</code> ...
+     * <code>&gt;</code>" document type declarations. Is <code>null</code> until
+     * DTD or entity type information is specified, and is set back to
+     * <code>null</code>, to release memory, when this information is written --
+     * at the start of the root Element.
+     */
+    private DocType docType;
 
     private State state = State.IN_PROLOG;
-    private String doctypePublicId;
-    private String doctypeSystemId;
-    private String indent = "  ";
-    private String lineSeparator;
-    private Writer writer;
-    private boolean attrOnNewLine;
-    private boolean checkMe = true;
-    private boolean closeStream = true;
-    private boolean dtdSpecified;
-    private boolean escape = true;
-    private boolean hasContent;
-    private boolean hasIndentedContent;
-    private boolean inCommentedStart;
-    private boolean outputStarted;
-    private boolean spaceInEmptyElements;
+
+    /**
+     * <code>true</code> if the XML stylesheet has been specified, by writing an
+     * "xml-stylesheet" processing instruction. This flag is used to prevent
+     * writing more than one "xml-stylesheet" processing instruction to the
+     * output stream.
+     */
     private boolean xsltSpecified;
+
+    private boolean verifyUsage = true;
 
     /**
      * Creates a WAX that writes to stdout.
@@ -107,7 +100,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     public WAX() { this(Version.UNSPECIFIED); }
     public WAX(Version version) {
         this(System.out, version);
-        closeStream = false;
+        out.doNotCloseOutputStream(); // Don't close 'System.out'.
     }
 
     /**
@@ -141,9 +134,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public WAX(Writer writer) { this(writer, Version.UNSPECIFIED); }
     public WAX(Writer writer, Version version) {
-        this.writer = writer;
-        lineSeparator = System.getProperty("line.separator");
-
+        out = new XMLWriter(writer, verifyUsage);
         writeXMLDeclaration(version);
     }
 
@@ -165,7 +156,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public StartTagWAX attr(String prefix, String name, Object value) {
-        return attr(prefix, name, value, attrOnNewLine);
+        return attr(prefix, name, value, out.isAttrOnNewLine());
     }
 
     /**
@@ -179,26 +170,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @throws IllegalStateException
      *             unless we have a start tag open, for writing XML attributes.
      */
-    public StartTagWAX attr(
-        String prefix, String name, Object value, boolean newLine) {
+    public StartTagWAX attr(String prefix, String name, Object value,
+            boolean newLine) {
+        attr(prefix, name, value, newLine, true);
+        return this;
+    }
 
+    private void attr(String prefix, String name, Object value,
+            boolean newLine, boolean escape) {
         if (state != State.IN_START_TAG) badState("attr");
 
-        ElementMetadata currentElementMetadata = elementStack.peek();
-        String qualifiedName = currentElementMetadata.defineAttribute(
-                prefix, name, checkMe);
-
-        if (newLine) {
-            writeIndent();
-        } else {
-            write(' ');
-        }
-
-        if (escape) value = XMLUtil.escape(value);
-
-        write(qualifiedName + "=\"" + value + "\"");
-
-        return this;
+        currentElementMetadata.writeAttributeEqualsValue(prefix, name, value,
+                newLine, escape);
     }
 
     /**
@@ -247,13 +230,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             badState("cdata");
         }
 
-        escape = false;
         final String start = "<![CDATA[";
         final String end = "]]>";
         final String middle = text.replaceAll(Pattern.quote(end),
                 "]]" + end + start + ">");
-        text(start + middle + end, newLine);
-        escape = true;
+        text(start + middle + end, newLine, false);
         return this;
     }
     
@@ -294,25 +275,30 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @throws WAXIOException if an I/O error occurs.
      */
     public void close() {
-        if (writer == null) throw new IllegalStateException("already closed");
+        if (out.isClosed()) throw new IllegalStateException("already closed");
 
-        // Verify that a root element has been written.
+        // Verify that a root element has been written and not yet ended.
         if (state == State.IN_PROLOG) badState("close");
 
         // End all the unended elements.
-        while (elementStack.size() > 0) end();
-
-        try {
-            if (closeStream) {
-                writer.close();
-            } else {
-                writer.flush();
-            }
-        } catch (IOException ioException) {
-            throw new WAXIOException(ioException);
+        while (currentElementMetadata != null) {
+            end();
         }
 
-        writer = null;
+        out.close();
+    }
+
+    /**
+     * Closes the start tag, with &gt; or /&gt;, that had been kept open
+     * waiting for more namespace declarations and attributes.
+     */
+    private void closeStartTag() {
+        verifyOutstandingNamespacePrefixes();
+        if (state != State.IN_START_TAG) return;
+
+        currentElementMetadata.closeStartTag();
+
+        state = State.IN_ELEMENT;
     }
 
     /**
@@ -336,31 +322,13 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public PrologOrElementWAX comment(String text, boolean newLine) {
         // Comments can be output in any state.
+        if (verifyUsage) XMLUtil.verifyComment(text);
 
-        if (checkMe) XMLUtil.verifyComment(text);
-        
-        hasContent = hasIndentedContent = true;
-        terminateStart();
-        if (elementStack.size() > 0) writeIndent();
-
-        if (newLine && willIndent()) {
-            write("<!--");
-            writeIndent();
-            write(indent);
-            write(text);
-            writeIndent();
-            write("-->");
-        } else {
-            write("<!-- ");
-            write(text);
-            write(" -->");
-        }
-
-        if (willIndent() && elementStack.empty()) write(lineSeparator);
-
+        closeStartTag();
+        out.writeComment(text, newLine);
         return this;
     }
-    
+
     /**
      * Writes a commented start tag for a given element name,
      * but doesn't terminate it.
@@ -379,9 +347,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the calling object to support chaining
      */
     public StartTagWAX commentedStart(String prefix, String name) {
-        inCommentedStart = true;
-        start(prefix, name);
-        inCommentedStart = false;
+        start(prefix, name, true);
         return this;
     }
 
@@ -449,15 +415,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      *             if <code>systemId</code> is not a valid URI.
      */
     public PrologWAX dtd(String publicId, String systemId) {
-        if (dtdSpecified) {
+        if (docType != null) {
             throw new IllegalStateException("can't specify more than one DTD");
         }
         if (state != State.IN_PROLOG) badState("dtd");
-        if (checkMe) XMLUtil.verifyURI(systemId);
+        if (systemId == null) {
+            throw new IllegalArgumentException(
+                    "DTD 'system identifier' parameter must not be null.");
+        }
+        if (verifyUsage) XMLUtil.verifyURI(systemId);
 
-        doctypePublicId = publicId;
-        doctypeSystemId = systemId;
-        dtdSpecified = true;
+        docType = new DocType(publicId, systemId);
         return this;
     }
 
@@ -490,28 +458,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
             badState("end");
         }
-
-        verifyOutstandingNamespacePrefixes();
-
-        writeSchemaLocations();
-
-        ElementMetadata elementMetadata = elementStack.pop();
-
-        if (hasContent || verbose) {
-            if (verbose) write('>');
-            if (hasIndentedContent) writeIndent();
-            write("</");
-            write(elementMetadata.getQualifiedName());
-        } else {
-            if (spaceInEmptyElements) write(' ');
-            write('/');
+        if (state == State.IN_START_TAG) {
+            verifyOutstandingNamespacePrefixes();
         }
-        write(elementMetadata.isCommentElement() ? "-->" : ">");
 
-        hasContent = hasIndentedContent = true; // new setting for parent
+        currentElementMetadata.writeEndTag(verbose);
 
-        state = elementStack.empty() ? State.AFTER_ROOT : State.IN_ELEMENT;
-
+        currentElementMetadata = currentElementMetadata.getParent();
+        state = (currentElementMetadata == null) ? State.AFTER_ROOT : State.IN_ELEMENT;
         return this;
     }
 
@@ -526,7 +480,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public PrologWAX entityDef(String name, String value) {
         if (state != State.IN_PROLOG) badState("entity");
-        entityDefs.add(name + " \"" + value + '"');
+
+        if (docType == null) {
+            docType = new DocType(null, null);
+        }
+        docType.entityDef(name, value);
         return this;
     }
 
@@ -548,7 +506,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the indentation characters
      */
     public String getIndent() {
-        return indent;
+        return out.getIndent();
     }
 
     /**
@@ -556,7 +514,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return the line separator characters
      */
     public String getLineSeparator() {
-        return lineSeparator;
+        return out.getLineSeparator();
     }
 
     /**
@@ -565,7 +523,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return true if a space is added; false otherwise
      */
     public boolean isSpaceInEmptyElements() {
-        return spaceInEmptyElements;
+        return out.isSpaceInEmptyElements();
     }
 
     /**
@@ -574,7 +532,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @return true if error checking is disabled; false if enabled
      */
     public boolean isTrustMe() {
-        return !checkMe;
+        return !verifyUsage;
     }
 
     /**
@@ -627,34 +585,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public StartTagWAX namespace(
         String prefix, String uri, String schemaPath) {
-
         if (state != State.IN_START_TAG) badState("namespace");
 
-        ElementMetadata currentElementMetadata = elementStack.peek();
-
-        if (checkMe) {
-            currentElementMetadata.verifyNamespaceData(prefix, uri, schemaPath);
-        }
-
-        if (willIndent()) {
-            writeIndent();
-        } else {
-            write(' ');
-        }
-        
-        write("xmlns");
-        if (XMLUtil.hasValue(prefix)) write(':' + prefix);
-        write("=\"" + uri + "\"");
-        
-        if (schemaPath != null) {
-            namespaceURIToSchemaPathMap.put(uri, schemaPath);
-        }
-
-        // Add this prefix to the list of those in scope for this element.
-        currentElementMetadata.defineNamespace(prefix, uri);
-
-        attrOnNewLine = true; // for the next attribute
-
+        currentElementMetadata.writeNamespaceDeclaration(prefix, uri,
+                schemaPath);
         return this;
     }
 
@@ -704,24 +638,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public PrologOrElementWAX processingInstruction(
         String target, String data) {
+        // Processing instructions can go anywhere
+        // except inside element start tags and attribute values.
 
-        if (checkMe) {
-            // Processing instructions can go anywhere
-            // except inside element start tags and attribute values.
-
-            // Provide special handling for the
-            // "xml-stylesheet" processing instruction
-            // since starting with "xml" is reserved.
-            if (!("xml-stylesheet").equals(target)) XMLUtil.verifyName(target);
+        // Provide special handling for the
+        // "xml-stylesheet" processing instruction
+        // since starting with "xml" is reserved.
+        if (verifyUsage && !("xml-stylesheet").equals(target)) {
+            XMLUtil.verifyName(target);
         }
         
-        hasContent = hasIndentedContent = true;
-        terminateStart();
-        if (elementStack.size() > 0) writeIndent();
-
-        write("<?" + target + ' ' + data + "?>");
-        if (willIndent() && elementStack.empty()) write(lineSeparator);
-
+        closeStartTag();
+        out.writeProcessingInstruction(target, data);
         return this;
     }
 
@@ -740,27 +668,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      *             <i>(and the "trust me" flag isn't <code>true</code>)</i>.
      */
     public void setIndent(String indent) {
-        if (checkMe) {
-            boolean valid =
-                indent == null || indent.length() == 0 || "\t".equals(indent);
-            
-            if (!valid) {
-                // It can only be valid now if every character is a space.
-                valid = true; // assume
-                for (int i = 0; i < indent.length(); ++i) {
-                    if (indent.charAt(i) != ' ') {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-            
-            if (!valid || (indent != null && indent.length() > 4)) {
-                throw new IllegalArgumentException("invalid indent value");
-            }
-        }
-        
-        this.indent = indent;
+        out.setIndent(indent);
     }
 
     /**
@@ -773,18 +681,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      *             if <code>numSpaces</code> is negative or more than four.
      */
     public void setIndent(int numSpaces) {
-        if (numSpaces < 0) {
-            throw new IllegalArgumentException(
-                "can't indent a negative number of spaces");
-        }
-
-        if (checkMe && numSpaces > 4) {
-            throw new IllegalArgumentException(
-                numSpaces + " is an unreasonable indentation");
-        }
-
-        indent = "";
-        for (int i = 0; i < numSpaces; i++) indent += ' ';
+        out.setIndent(numSpaces);
     }
 
     /**
@@ -807,23 +704,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      *             character sequences.
      */
     public void setLineSeparator(String lineSeparator) {
-        if (outputStarted) {
-            throw new IllegalStateException(
-                "can't change CR characters after output has started");
-        }
-
-        if (checkMe) {
-            boolean valid =
-                MAC_LINE_SEPARATOR.equals(lineSeparator) ||
-                UNIX_LINE_SEPARATOR.equals(lineSeparator) ||
-                WINDOWS_LINE_SEPARATOR.equals(lineSeparator);
-            if (!valid) {
-                throw new IllegalArgumentException(
-                    "invalid line separator characters");
-            }
-        }
-
-        this.lineSeparator = lineSeparator;
+        out.setLineSeparator(lineSeparator);
     }
 
     /**
@@ -835,7 +716,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param spaceInEmptyElements true to include a space; false otherwise
      */
     public void setSpaceInEmptyElements(boolean spaceInEmptyElements) {
-        this.spaceInEmptyElements = spaceInEmptyElements;
+        out.setSpaceInEmptyElements(spaceInEmptyElements);
     }
 
     /**
@@ -855,20 +736,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param trustMe true to disable error checking; false to enable it
      */
     public void setTrustMe(boolean trustMe) {
-        this.checkMe = !trustMe;
-    }
-
-    /**
-     * @param elementStack Possibly empty <code>Stack</code>, which will
-     *     <b>not</b> be modified.
-     * @return the object at the top of this stack, if there is one, else
-     *     <code>null</code>.
-     */
-    private static ElementMetadata softPeek(Stack<ElementMetadata> elementStack) {
-        if (elementStack.empty())
-            return null;
-        else
-            return elementStack.peek();
+        this.verifyUsage = !trustMe;
+        out.setTrustMe(trustMe);
+        if (currentElementMetadata != null)
+            currentElementMetadata.setTrustMe(trustMe);
     }
 
     /**
@@ -890,46 +761,24 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      *             if the root XML <code>Element</code> has been closed.
      */
     public StartTagWAX start(String prefix, String name) {
-        hasContent = hasIndentedContent = true;
-        terminateStart();
-        hasContent = hasIndentedContent = false;
-
-        if (state == State.AFTER_ROOT) badState("start");
-
-        ElementMetadata elementMetadata = new ElementMetadata(prefix, name,
-                inCommentedStart, softPeek(elementStack), checkMe);
-        String qualifiedName = elementMetadata.getQualifiedName();
-
-        // If this is the root element ...
-        if (state == State.IN_PROLOG) writeDocType(name);
-
-        if (elementStack.size() > 0) writeIndent();
-
-        if (inCommentedStart) {
-            write("<!--");
-        } else {
-            write('<');
-        }
-        write(qualifiedName);
-
-        elementStack.push(elementMetadata);
-        
-        state = State.IN_START_TAG;
-
+        start(prefix, name, false);
         return this;
     }
 
-    /**
-     * Closes the start tag, with &gt; or /&gt;, that had been kept open
-     * waiting for more namespace declarations and attributes.
-     */
-    private void terminateStart() {
-        verifyOutstandingNamespacePrefixes();
-        if (state != State.IN_START_TAG) return;
-        writeSchemaLocations();
-        write('>');
-        attrOnNewLine = false; // reset
-        state = State.IN_ELEMENT;
+    private void start(String prefix, String name, boolean inCommentedStart) {
+        closeStartTag();
+        out.resetContentFlags();
+
+        if (state == State.AFTER_ROOT) badState("start");
+
+        final boolean isTheRootElement = (currentElementMetadata == null);
+        if (isTheRootElement) writeDocType(name);
+
+        currentElementMetadata = new ElementMetadata(out, verifyUsage,
+                currentElementMetadata, prefix, name, inCommentedStart);
+        currentElementMetadata.writeStartTagOpen(inCommentedStart);
+
+        state = State.IN_START_TAG;
     }
 
     /**
@@ -952,23 +801,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      *             <code>Element</code>.
      */
     public ElementWAX text(String text, boolean newLine) {
+        text(text, newLine, true);
+        return this;
+    }
+
+    private void text(String text, boolean newLine, boolean escape) {
         if (state == State.IN_PROLOG || state == State.AFTER_ROOT) {
             badState("text");
         }
 
-        hasContent = true;
-        hasIndentedContent = newLine;
-        terminateStart();
-
-        if (text != null && text.length() > 0) {
-            if (newLine) writeIndent();
-            if (escape) text = XMLUtil.escape(text);
-            write(text);
-        } else if (newLine) {
-            write(lineSeparator);
-        }
-
-        return this;
+        closeStartTag();
+        out.writeText(text, newLine, escape);
     }
 
     /**
@@ -1008,16 +851,14 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public StartTagWAX unescapedAttr(
         String prefix, String name, Object value, boolean newLine) {
-        escape = false;
-        attr(prefix, name, value, newLine);
-        escape = true;
+        attr(prefix, name, value, newLine, false);
         return this;
     }
 
     /**
      * Same as the text method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
-     * @see #text(String)
+     * @see #unescapedText(String)
      * @param text the text
      * @return the calling object to support chaining
      */
@@ -1028,61 +869,19 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     /**
      * Same as the text method, but special characters in the value
      * aren't escaped.  This allows entity references to be embedded.
-     * @see #text(String, boolean)
+     * @see #unescapedText(String, boolean)
      * @param text the text
      * @param newLine true to output the text on a new line; false otherwise
      * @return the calling object to support chaining
      */
     public ElementWAX unescapedText(String text, boolean newLine) {
-        escape = false;
-        text(text, newLine);
-        escape = true;
+        text(text, newLine, false);
         return this;
     }
 
     private void verifyOutstandingNamespacePrefixes() {
-        if (checkMe && elementStack.size() > 0) {
-            ElementMetadata currentElementMetadata = elementStack.peek();
+        if (verifyUsage && currentElementMetadata != null) {
             currentElementMetadata.verifyOutstandingNamespacePrefixes();
-        }
-    }
-
-    /**
-     * Determines whether XML should be indented.
-     * @return true if XML should be indented; false otherwise.
-     */
-    private boolean willIndent() {
-        return indent != null;
-    }
-
-    /**
-     * Writes a character value to the stream.
-     * @param chr the character to write
-     */
-    private void write(char chr) {
-        write(String.valueOf(chr));
-    }
-
-    /**
-     * Writes a string value to the stream.
-     *
-     * @param str the String to write
-     * @throws IllegalStateException
-     *             if attempting to write additional XML data after the output
-     *             stream has been closed.
-     * @throws WAXIOException if an I/O error occurs.
-     */
-    private void write(String str) {
-        if (writer == null) {
-            throw new IllegalStateException(
-                "attempting to write XML after close has been called");
-        }
-
-        try {
-            writer.write(str);
-            outputStarted = true;
-        } catch (IOException ioException) {
-            throw new WAXIOException(ioException);
         }
     }
 
@@ -1091,80 +890,10 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      * @param rootElementName the root element name
      */
     private void writeDocType(String rootElementName) {
-        if (doctypeSystemId == null && entityDefs.isEmpty()) return;
-
-        write("<!DOCTYPE " + rootElementName);
-        if (doctypePublicId != null) {
-            write(" PUBLIC \"" + doctypePublicId + "\" \"" +
-                doctypeSystemId + '"');
-        } else if (doctypeSystemId != null) {
-            write(" SYSTEM \"" + doctypeSystemId + '"');
+        if (docType != null) {
+            docType.write(out, rootElementName);
+            docType = null; // Release memory.
         }
-
-        if (!entityDefs.isEmpty()) {
-            write(" [");
-
-            for (String entityDef : entityDefs) {
-                if (willIndent()) write(lineSeparator + indent);
-                write("<!ENTITY " + entityDef + '>');
-            }
-
-            if (willIndent()) write(lineSeparator);
-            write(']');
-
-            entityDefs.clear();
-        }
-
-        write('>');
-        if (willIndent()) write(lineSeparator);
-    }
-
-    /**
-     * Writes the proper amount of indentation
-     * given the current nesting of elements.
-     */
-    private void writeIndent() {
-        if (!willIndent()) return;
-
-        write(lineSeparator);
-        int size = elementStack.size();
-        for (int i = 0; i < size; ++i) write(indent);
-    }
-
-    /**
-     * Writes the namespace declaration for the XMLSchema-instance namespace
-     * and writes the schemaLocation attribute
-     * which associates namespace URIs with schema locations.
-     */
-    private void writeSchemaLocations() {
-        if (namespaceURIToSchemaPathMap.isEmpty()) return;
-
-        // Write the attributes needed to associate XML Schemas
-        // with this XML.
-        StringBuilder schemaLocation = new StringBuilder();
-        for (String uri : namespaceURIToSchemaPathMap.keySet()) {
-            String path = namespaceURIToSchemaPathMap.get(uri);
-            
-            // If not the first pair output ...
-            if (schemaLocation.length() > 0) {
-                if (willIndent()) {
-                    schemaLocation.append(lineSeparator);
-                    int size = elementStack.size();
-                    for (int i = 0; i <= size; ++i) {
-                        schemaLocation.append(indent);
-                    }
-                } else {
-                    schemaLocation.append(' ');
-                }
-            }
-            
-            schemaLocation.append(uri + ' ' + path);
-        }
-        
-        namespace("xsi", XMLUtil.XMLSCHEMA_INSTANCE_NS);
-        attr("xsi", "schemaLocation", schemaLocation, willIndent());
-        attrOnNewLine = true; // for the next attribute
-        namespaceURIToSchemaPathMap.clear();
     }
 
     /**
@@ -1181,24 +910,9 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             throw new IllegalArgumentException("unsupported XML version");
         }
         
-        if (version == Version.UNSPECIFIED) return;
-
-        String versionString = version.getVersionNumberString();
-
-        // We could also consider using the value of
-        // the "file.encoding" system property.
-        // However, if we did that then users would have to remember to
-        // set that property back to the same value when reading the XML later.
-        // Also, many uses might expect WAX to use UTF-8 encoding
-        // regardless of the value of that property.
-
-        String encoding = XMLUtil.DEFAULT_ENCODING;
-        if (writer instanceof OutputStreamWriter) {
-            encoding = ((OutputStreamWriter) writer).getEncoding();
+        if (version != Version.UNSPECIFIED) {
+            out.writeXMLDeclaration(version.getVersionNumberString());
         }
-
-        write("<?xml version=\"" + versionString +
-            "\" encoding=\"" + encoding + "\"?>" + lineSeparator);
     }
 
     /**
@@ -1217,7 +931,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
             throw new IllegalStateException("can't specify more than one XSLT");
         }
         if (state != State.IN_PROLOG) badState("xslt");
-        if (checkMe) XMLUtil.verifyURI(filePath);
+        if (verifyUsage) XMLUtil.verifyURI(filePath);
 
         xsltSpecified = true;
         return processingInstruction("xml-stylesheet",

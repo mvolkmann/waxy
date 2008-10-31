@@ -55,28 +55,35 @@ public final class XMLUtil {
 
     /*
      * From http://www.w3.org/TR/2006/REC-xml11-20060816/#charsets
-     *
+     * 
      * Names and Tokens
-     *
-     * [4]  NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
-     *
-     * [4a] NameChar      ::= NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
-     *
-     * Note:  The following regular expression implementations of the XML naming standards, these changes have been made:
-     *  1. The colon character (":") is not allowed in WAX names because namespace prefixes are managed directly through the WAX API method parameters.
-     *  2. "[#x10000-#xEFFFF]" is excluded because Java 5 offers only 16-bit Unicode support.  IE: Only the "Basic Multilingual Plane (BMP)".
+     * 
+     * [4] NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] |
+     * [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] |
+     * [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] |
+     * [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
+     * 
+     * [4a] NameChar ::= NameStartChar | "-" | "." | [0-9] | #xB7 |
+     * [#x0300-#x036F] | [#x203F-#x2040]
+     * 
+     * Note: The following regular expression implementations of the XML naming
+     * standards, these changes have been made: 1. The colon character (":") is
+     * not allowed in WAX names because namespace prefixes are managed directly
+     * through the WAX API method parameters. 2. "[#x10000-#xEFFFF]" is excluded
+     * because Java 5 offers only 16-bit Unicode support. IE: Only the
+     * "Basic Multilingual Plane (BMP)".
      */
-    private static final String NAME_START_CHAR_CLASS_RANGES = "" //
-            + "A-Z" + "_" + "a-z" //
+    private static final String NAME_START_CHAR_CLASS_RANGES = ""
+            + "A-Z" + "_" + "a-z"
             + "\u00C0-\u00D6" + "\u00D8-\u00F6" + "\u00F8-\u02FF"
             + "\u0370-\u037D" + "\u037F-\u1FFF" + "\u200C-\u200D"
             + "\u2070-\u218F" + "\u2C00-\u2FEF" + "\u3001-\uD7FF"
             + "\uF900-\uFDCF" + "\uFDF0-\uFFFD";
 
-    private static final String NAME_CHAR_CLASS_RANGES = "" //
+    private static final String NAME_CHAR_CLASS_RANGES = ""
             + "-" // Must be first character of character class regex.
-            + NAME_START_CHAR_CLASS_RANGES //
-            + Pattern.quote(".") + "0-9" //
+            + NAME_START_CHAR_CLASS_RANGES
+            + Pattern.quote(".") + "0-9"
             + "\u00B7" + "\u0300-\u036F" + "\u203F-\u2040";
 
     /**
@@ -94,7 +101,8 @@ public final class XMLUtil {
      * Creating instances of this class is not allowed
      * since all methods are static.
      */
-    private XMLUtil() {}
+    private XMLUtil() {
+    }
 
     /**
      * Escapes special characters in XML text.

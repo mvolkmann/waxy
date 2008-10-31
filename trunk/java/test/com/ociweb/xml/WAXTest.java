@@ -66,9 +66,9 @@ public class WAXTest {
         final String expectedSubstring,
         final String actualStringValue) {
 
-        final String assertionErrorMessage = "Expected string\n" //
-                + "   <" + actualStringValue + ">\n" //
-                + " to contain the substring\n" //
+        final String assertionErrorMessage = "Expected string\n"
+                + "   <" + actualStringValue + ">\n"
+                + " to contain the substring\n"
                 + "   <" + expectedSubstring + ">";
         assertTrue(assertionErrorMessage,
             actualStringValue.indexOf(expectedSubstring) > -1);
@@ -151,19 +151,19 @@ public class WAXTest {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
         wax.noIndentsOrLineSeparators();
-        wax.start("x").namespace("n1", "http://www.w3.org/1") //
-                .namespace("n2", "http://www.w3.org/2");
+        wax.start("x").namespace("n1", "http://www.w3.org/1")
+            .namespace("n2", "http://www.w3.org/2");
         wax.start("good").attr("n1", "a", "1");
         // Assertion: The following call is OK; it does NOT throw an
         // IllegalArgumentException.
         wax.attr("n2", "a", "2");
-        //
+
         wax.close();
         assertEquals(
-                "<x xmlns:n1=\"http://www.w3.org/1\" xmlns:n2=\"http://www.w3.org/2\">"
-                        + "<good n1:a=\"1\" n2:a=\"2\"/>" //
-                        + "</x>", //
-                sw.toString());
+            "<x xmlns:n1=\"http://www.w3.org/1\" xmlns:n2=\"http://www.w3.org/2\">"
+                + "<good n1:a=\"1\" n2:a=\"2\"/>"
+                + "</x>",
+            sw.toString());
     }
 
     @Test
@@ -359,9 +359,9 @@ public class WAXTest {
         } catch (WAXIOException waxIOException) {
             IOException actualIOException = getIOException(waxIOException);
             assertSame(testIOException, actualIOException);
-            assertEquals( //
-                    "Unexpected IOException: " + testExceptionMessage, //
-                    waxIOException.getMessage());
+            assertEquals(
+                "Unexpected IOException: " + testExceptionMessage,
+                waxIOException.getMessage());
         }
     }
 
@@ -854,6 +854,37 @@ public class WAXTest {
     }
 
     @Test
+    public void testCommentsBeforeRootElement() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.comment("comment #1").comment("comment #2").start("root").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<!-- comment #1 -->" + lineSeparator +
+            "<!-- comment #2 -->" + lineSeparator +
+            "<root/>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testCommentsInsideRootElement() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.start("root").comment("comment #1").comment("comment #2").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<root>" + lineSeparator +
+            "  <!-- comment #1 -->" + lineSeparator +
+            "  <!-- comment #2 -->" + lineSeparator +
+            "</root>";
+
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testCommentWithNewLines() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -884,10 +915,10 @@ public class WAXTest {
         wax.setIndent(null);
         wax.comment("comment #1", true).comment("comment #2", true);
         wax.start("root").comment("comment #3", true).close();
-        assertEquals( //
-                "<!-- comment #1 --><!-- comment #2 -->"
-                        + "<root><!-- comment #3 --></root>", //
-                sw.toString());
+        assertEquals(
+            "<!-- comment #1 --><!-- comment #2 -->"
+                + "<root><!-- comment #3 --></root>",
+            sw.toString());
     }
 
     @Test
@@ -989,6 +1020,43 @@ public class WAXTest {
             " xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\"" +
             " xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>",
             sw.toString());
+    }
+
+    @Test
+    public void testDTDAfterRootElement() {
+        // Testing with the ids for the strict form of XHTML.
+        String publicId = "-//W3C//DTD XHTML 1.0 Strict//EN";
+        String systemId = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
+
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.dtd(publicId, systemId);
+        wax.start("root");
+        try {
+            wax.dtd(publicId, systemId);
+            fail("Expected IllegalStateException.");
+        } catch (IllegalStateException expectedIllegalStateException) {
+            assertEquals("can't call dtd when state is IN_START_TAG",
+                    expectedIllegalStateException.getMessage());
+        }
+    }
+
+    @Test
+    public void testDTDDuplicated() {
+        // Testing with the ids for the strict form of XHTML.
+        String publicId = "-//W3C//DTD XHTML 1.0 Strict//EN";
+        String systemId = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
+
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.dtd(publicId, systemId);
+        try {
+            wax.dtd(publicId, systemId);
+            fail("Expected IllegalStateException.");
+        } catch (IllegalStateException expectedIllegalStateException) {
+            assertEquals("can't specify more than one DTD",
+                    expectedIllegalStateException.getMessage());
+        }
     }
 
     @Test
@@ -1127,6 +1195,21 @@ public class WAXTest {
     }
 
     @Test
+    public void testEntityDefWithDefaultIndent() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.entityDef("name", "value").start("root").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<!DOCTYPE root [" + lineSeparator +
+            "  <!ENTITY name \"value\">" + lineSeparator +
+            "]>" + lineSeparator +
+            "<root/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testEscape() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -1234,6 +1317,22 @@ public class WAXTest {
         String xml =
             "<root>" + lineSeparator +
             " <child>text</child>" + lineSeparator +
+            "</root>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testIndentToEmptyString() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+
+        wax.setIndent(""); // empty string
+        wax.start("root").child("child", "text").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<root>" + lineSeparator +
+            "<child>text</child>" + lineSeparator +
             "</root>";
         assertEquals(xml, sw.toString());
     }
@@ -1412,6 +1511,33 @@ public class WAXTest {
     }
 
     @Test
+    public void testNullDTDSystemId() throws IOException {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        try {
+            wax.dtd(null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("DTD 'system identifier' parameter must not be null.",
+                expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
+    public void testNullDTDSystemIdWithPublicId() throws IOException {
+        String publicId = "-//W3C//DTD XHTML 1.0 Strict//EN";
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        try {
+            wax.dtd(publicId, null);
+            fail("Expected IllegalArgumentException.");
+        } catch (IllegalArgumentException expectedIllegalArgumentException) {
+            assertEquals("DTD 'system identifier' parameter must not be null.",
+                expectedIllegalArgumentException.getMessage());
+        }
+    }
+
+    @Test
     public void testNullProcessingInstructionTarget() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
@@ -1419,8 +1545,8 @@ public class WAXTest {
             wax.processingInstruction(null, "data");
             fail("Expecting IllegalArgumentException.");
         } catch (IllegalArgumentException expectedIllegalArgumentException) {
-            assertEquals("\"null\" is an invalid XML name", //
-                    expectedIllegalArgumentException.getMessage());
+            assertEquals("\"null\" is an invalid XML name",
+                expectedIllegalArgumentException.getMessage());
         }
     }
 
