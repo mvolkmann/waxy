@@ -84,6 +84,12 @@ import java.util.*;
     /**
      * <code>ElementMetadata</code> for the XML Element that contains this
      * Element in the XML output stream.
+     * <p>
+     * Lifetime: This value is used throughout the lifetime of this object.
+     * It's last used just after <code>writeEndTag</code> is called, when
+     * <code>getParent()</code> is called to unlink this object from the list,
+     * making it available for garbage collection.
+     * </p>
      */
     private final ElementMetadata parent;
 
