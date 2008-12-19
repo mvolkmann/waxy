@@ -17,7 +17,8 @@ Version 1.0.0
 * 46, 50, 52, 53, 54, 55
 
 Version 1.0.1
-- addresses issue 56
+- addresses the following issues:
+* 56
 
 Issues that won't be fixed:
 * 12, 32
