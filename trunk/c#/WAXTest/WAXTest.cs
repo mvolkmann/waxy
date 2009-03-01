@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using WAXNamespace;
-using NUnit.Framework;
+using Xunit;
 
 namespace WaxTest
 {
@@ -27,37 +27,36 @@ namespace WaxTest
      * 
      * @author R. Mark Volkmann, Object Computing, Inc.
      */
-    [TestFixture]
     public class WAXTest
     {
         private string TEMP_XML_FILE_PATH = System.Environment.GetEnvironmentVariable("TEMP") + "/temp.xml";
 
-        [Test]
+        [Fact]
         public void testAttributes() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
             wax.SetIndent(null);
             wax.Start("root").Attr("a1", "v1").Attr("a2", 2).Close();
 
-            Assert.AreEqual("<root a1=\"v1\" a2=\"2\"/>", sw.ToString());
+            Assert.Equal("<root a1=\"v1\" a2=\"2\"/>", sw.ToString());
         }
         
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadAttributeName() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.Start("root").Attr("1a", "value").Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"1a\" is an invalid NMTOKEN", ex.Message);
+                Assert.Equal("\"1a\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadCDATA() {
             try {
                 StringWriter sw = new StringWriter();
@@ -65,15 +64,15 @@ namespace WaxTest
                 // Can't call cdata while in prologue section.
                 wax.CData("text").Close();
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call cdata when state is IN_PROLOG", ex.Message);
+                Assert.Equal("can't call cdata when state is IN_PROLOG", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadChild() {
             try {
                 StringWriter sw = new StringWriter();
@@ -82,30 +81,30 @@ namespace WaxTest
                 wax.End();
                 wax.Child("child", "text"); // can't call child after root is closed
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call child when state is AFTER_ROOT", ex.Message);
+                Assert.Equal("can't call child when state is AFTER_ROOT", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadCloseWithoutRoot() /* throws IOException */ {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.Close(); // didn't write anything yet
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call close when state is IN_PROLOG", ex.Message);
+                Assert.Equal("can't call close when state is IN_PROLOG", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadCloseAlreadyClosed() /* throws IOException */ {
             try {
                 StringWriter sw = new StringWriter();
@@ -114,15 +113,15 @@ namespace WaxTest
                 wax.Close();
                 wax.Close(); // already closed
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("already closed", ex.Message);
+                Assert.Equal("already closed", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadCloseThenWrite() /* throws IOException */ {
             try {
                 StringWriter sw = new StringWriter();
@@ -131,30 +130,30 @@ namespace WaxTest
                 wax.Close();
                 wax.Start("more"); // already closed
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call start when state is AFTER_ROOT", ex.Message);
+                Assert.Equal("can't call start when state is AFTER_ROOT", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadComment() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.Start("root").Comment("foo--bar").Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"foo--bar\" is an invalid comment", ex.Message);
+                Assert.Equal("\"foo--bar\" is an invalid comment", ex.Message);
             }
         }
 
-        [Test] //(expected=RuntimeException.class)
+        [Fact] //(expected=RuntimeException.class)
         public void testBadDTDAfterRoot() /* throws IOException */ {
             try {
                 StringWriter sw = new StringWriter();
@@ -162,105 +161,105 @@ namespace WaxTest
                 wax.Start("root");
                 wax.Dtd("root.dtd"); // can't specify DTD after root element
 
-                Assert.Fail("Expecting IOException (in Exception)");
+                Assert.True(false, "Expecting IOException (in Exception)");
             }
             catch (Exception ex)
             {
-                Assert.AreEqual("can't call dtd when state is IN_START_TAG", ex.Message);
+                Assert.Equal("can't call dtd when state is IN_START_TAG", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadElementName() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.Start("1root").Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"1root\" is an invalid NMTOKEN", ex.Message);
+                Assert.Equal("\"1root\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadEnd() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.End(); // haven't called start yet
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call end when state is IN_PROLOG", ex.Message);
+                Assert.Equal("can't call end when state is IN_PROLOG", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadIndentBadChars() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.SetIndent("abc"); // must be null, "", spaces or a single tab
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("invalid indent value", ex.Message);
+                Assert.Equal("invalid indent value", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadIndentNegative() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.SetIndent(-1); // must be >= 0
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("can't indent a negative number of spaces", ex.Message);
+                Assert.Equal("can't indent a negative number of spaces", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadIndentMultipleTabs() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.SetIndent("\t\t"); // more than one tab
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("invalid indent value", ex.Message);
+                Assert.Equal("invalid indent value", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadIndentTooLarge() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.SetIndent(5); // must be <= 4
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("5 is an unreasonable indentation", ex.Message);
+                Assert.Equal("5 is an unreasonable indentation", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadNamespaceDuplicatePrefix() {
             try {
                 StringWriter sw = new StringWriter();
@@ -271,15 +270,15 @@ namespace WaxTest
                    .Namespace("tns", "http://www.ociweb.com/tns")
                    .Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("The namespace prefix \"tns\" is already in scope.", ex.Message);
+                Assert.Equal("The namespace prefix \"tns\" is already in scope.", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadNamespaceMultipleDefault() {
             try {
                 StringWriter sw = new StringWriter();
@@ -290,15 +289,15 @@ namespace WaxTest
                    .Namespace("http://www.ociweb.com/tns2")
                    .Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("The namespace prefix \"\" is already in scope.", ex.Message);
+                Assert.Equal("The namespace prefix \"\" is already in scope.", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testBadPrefix() {
             try {
                 StringWriter sw = new StringWriter();
@@ -311,30 +310,30 @@ namespace WaxTest
                 wax.Child("foo", "child2", "two");
                 wax.Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("The namespace prefix \"foo\" isn't in scope.", ex.Message);
+                Assert.Equal("The namespace prefix \"foo\" isn't in scope.", ex.Message);
             }
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testBadText() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.Text("text"); // haven't called start yet
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call text when state is IN_PROLOG", ex.Message);
+                Assert.Equal("can't call text when state is IN_PROLOG", ex.Message);
             }
         }
 
-        [Test] //(expected=RuntimeException.class)
+        [Fact] //(expected=RuntimeException.class)
         public void testBadWrite() /* throws IOException */ {
             try {
                 string filePath = TEMP_XML_FILE_PATH;
@@ -345,29 +344,29 @@ namespace WaxTest
                 File.Delete(filePath);
                 wax.Close(); // attempting to write more after the Writer was closed
 
-                Assert.Fail("Expecting IOException (in Exception)");
+                Assert.True(false, "Expecting IOException (in Exception)");
             } catch (Exception ex) {
-                Assert.AreEqual("Cannot access a closed file.", ex.Message);
+                Assert.Equal("Cannot access a closed file.", ex.Message);
             }
         }
 
-        [Test] //(expected=RuntimeException.class)
+        [Fact] //(expected=RuntimeException.class)
         public void testBadWriteFile() /* throws IOException */ {
             try {
                 string filePath = "."; // the current directory, not a file
                 new WAX(filePath);
 
-                Assert.Fail("Expecting IOException (in Exception)");
+                Assert.True(false, "Expecting IOException (in Exception)");
             }
             catch (Exception ex)
             {
                 // TODO: Fix this test, and its assertion:
-                Assert.IsTrue(ex.Message.StartsWith("Access to the path '"));
-                Assert.IsTrue(ex.Message.EndsWith("' is denied."));
+                Assert.True(ex.Message.StartsWith("Access to the path '"));
+                Assert.True(ex.Message.EndsWith("' is denied."));
             }
         }
 
-        [Test] //(expected=RuntimeException.class)
+        [Fact] //(expected=RuntimeException.class)
         public void testBadXSLTAfterRoot() /* throws IOException */ {
             try {
                 StringWriter sw = new StringWriter();
@@ -375,15 +374,15 @@ namespace WaxTest
                 wax.Start("root");
                 wax.Xslt("root.xslt"); // can't write pi after root element
 
-                Assert.Fail("Expecting IOException (in Exception)");
+                Assert.True(false, "Expecting IOException (in Exception)");
             }
             catch (Exception ex)
             {
-                Assert.AreEqual("can't call xslt when state is IN_START_TAG", ex.Message);
+                Assert.Equal("can't call xslt when state is IN_START_TAG", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testBig() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -399,10 +398,10 @@ namespace WaxTest
                 + "  text #2\n" + "  <child2 a1=\"v1\"/>\n" + "  text #3\n"
                 + "</root>";
 
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testBlankLine() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -412,10 +411,10 @@ namespace WaxTest
                 "<root>\n" +
                 "\n" +
                 "</root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
         
-        [Test]
+        [Fact]
         public void testCDATA() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -425,10 +424,10 @@ namespace WaxTest
                 "<root>\n" +
                 "  <![CDATA[1<2>3&4'5\"6]]>\n" +
                 "</root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testComment() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -442,10 +441,10 @@ namespace WaxTest
                 "  <!-- comment #3 -->\n" +
                 "</root>";
 
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testDTD() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -457,20 +456,20 @@ namespace WaxTest
                 "<!DOCTYPE root SYSTEM \"http://www.ociweb.com/xml/root.dtd\">\n" +
                 "<root/>";
 
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testEmpty() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
             wax.SetIndent(null);
             wax.Start("root").Close();
 
-            Assert.AreEqual("<root/>", sw.ToString());
+            Assert.Equal("<root/>", sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testEntityDef() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -478,10 +477,10 @@ namespace WaxTest
             wax.EntityDef("name", "value").Start("root").Close();
 
             string xml = "<!DOCTYPE root [<!ENTITY name \"value\">]><root/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testExternalEntityDef() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -489,10 +488,10 @@ namespace WaxTest
             wax.ExternalEntityDef("name", "value").Start("root").Close();
 
             string xml = "<!DOCTYPE root [<!ENTITY name SYSTEM \"value\">]><root/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testEscape() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -501,10 +500,10 @@ namespace WaxTest
 
             string xml =
                 "<root>abc&lt;def&gt;ghi&apos;jkl&quot;mno&amp;pqr</root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testExtraEnd() {
             try {
                 StringWriter sw = new StringWriter();
@@ -512,34 +511,34 @@ namespace WaxTest
                 wax.SetIndent(null);
                 wax.Start("root").End().End().Close();
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call end when state is AFTER_ROOT", ex.Message);
+                Assert.Equal("can't call end when state is AFTER_ROOT", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testGetIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
-            Assert.AreEqual("  ", wax.GetIndent());
+            Assert.Equal("  ", wax.GetIndent());
 
             wax.SetIndent("    ");
-            Assert.AreEqual("    ", wax.GetIndent());
+            Assert.Equal("    ", wax.GetIndent());
 
             wax.SetIndent("\t");
-            Assert.AreEqual("\t", wax.GetIndent());
+            Assert.Equal("\t", wax.GetIndent());
 
             wax.SetIndent(null);
-            Assert.AreEqual(null, wax.GetIndent());
+            Assert.Equal(null, wax.GetIndent());
 
             wax.SetIndent("");
-            Assert.AreEqual("", wax.GetIndent());
+            Assert.Equal("", wax.GetIndent());
         }
 
-        [Test]
+        [Fact]
         public void testIndentByNum() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -547,10 +546,10 @@ namespace WaxTest
             wax.Start("root").Child("child", "text").Close();
 
             string xml = "<root>\n" + "  <child>text</child>\n" + "</root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testIndentBystring() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -558,10 +557,10 @@ namespace WaxTest
             wax.Start("root").Child("child", "text").Close();
 
             string xml = "<root>\n" + "  <child>text</child>\n" + "</root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testnamespace_() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -576,10 +575,10 @@ namespace WaxTest
                 " xmlns=\"http://www.ociweb.com/tns1\"" +
                 " xmlns:tns2=\"http://www.ociweb.com/tns2\"" +
                 " xmlns:tns3=\"http://www.ociweb.com/tns3\"/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testNoArgCtor() {
             TextWriter oldConsoleOut = Console.Out;
             StringWriter sw = new StringWriter();
@@ -588,7 +587,7 @@ namespace WaxTest
             {
                 WAX wax = new WAX();
                 wax.Start("root").Close();
-                Assert.AreEqual("<root/>", sw.ToString());
+                Assert.Equal("<root/>", sw.ToString());
             }
             finally
             {
@@ -596,7 +595,7 @@ namespace WaxTest
             }
         }
 
-        [Test]
+        [Fact]
         public void testNewInstanceNoArg()
         {
             TextWriter oldConsoleOut = Console.Out;
@@ -605,7 +604,7 @@ namespace WaxTest
             try
             {
                 WAX.NewInstance().Start("root").Close();
-                Assert.AreEqual("<root/>", sw.ToString());
+                Assert.Equal("<root/>", sw.ToString());
             }
             finally
             {
@@ -613,7 +612,7 @@ namespace WaxTest
             }
         }
 
-        [Test]
+        [Fact]
         public void testNoIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -621,25 +620,25 @@ namespace WaxTest
             wax.Start("root").Child("child", "text").Close();
 
             string xml = "<root><child>text</child></root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test] //(expected=IllegalStateException.class)
+        [Fact] //(expected=IllegalStateException.class)
         public void testNoRoot() {
             try {
                 StringWriter sw = new StringWriter();
                 WAX wax = new WAX(sw);
                 wax.Close();
 
-                Assert.Fail("Expected InvalidOperationException.");
+                Assert.True(false, "Expected InvalidOperationException.");
             }
             catch (InvalidOperationException ex)
             {
-                Assert.AreEqual("can't call close when state is IN_PROLOG", ex.Message);
+                Assert.Equal("can't call close when state is IN_PROLOG", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testProcessingInstructionInPrologue() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -651,10 +650,10 @@ namespace WaxTest
             string xml =
                 "<?xml-stylesheet type=\"text/xsl\" href=\"http://www.ociweb.com/foo.xslt\"?>\n" +
                 "<root/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testProcessingInstructionAfterPrologue() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -664,10 +663,10 @@ namespace WaxTest
             wax.Close();
 
             string xml = "<root><?target data?></root>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testPrefix() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -681,10 +680,10 @@ namespace WaxTest
 
             string xml = "<foo:root bar=\"baz\" " +
                 "xmlns:foo=\"http://www.ociweb.com/foo\"/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testSchemasWithIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -700,10 +699,10 @@ namespace WaxTest
                 "  xsi:schemaLocation=\"http://www.ociweb.com/tns1 tns1.xsd\n" +
                 "    http://www.ociweb.com/tns2 tns2.xsd" +
                 "\"/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testSchemasWithoutIndent() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -721,20 +720,20 @@ namespace WaxTest
                 "http://www.ociweb.com/tns1 tns1.xsd " +
                 "http://www.ociweb.com/tns2 tns2.xsd" +
                 "\"/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testText() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
 
-            Assert.AreEqual("<root>text</root>", sw.ToString());
+            Assert.Equal("<root>text</root>", sw.ToString());
         }
 
-        [Test] //(expected=IllegalArgumentException.class)
+        [Fact] //(expected=IllegalArgumentException.class)
         public void testTrustMeFalse() {
             try {
                 StringWriter sw = new StringWriter();
@@ -744,15 +743,15 @@ namespace WaxTest
                 // element names must be valid and text is escaped.
                 wax.Start("123").Text("<>&'\"").Close();
 
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"123\" is an invalid NMTOKEN", ex.Message);
+                Assert.Equal("\"123\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testTrustMeTrue() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw);
@@ -762,57 +761,57 @@ namespace WaxTest
             // invalid element names and unescaped text are allowed.
             wax.Start("123").Text("<>&'\"").Close();
 
-            Assert.AreEqual("<123><>&'\"</123>", sw.ToString());
+            Assert.Equal("<123><>&'\"</123>", sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testWriteFile() /* throws IOException */ {
             string filePath = TEMP_XML_FILE_PATH;
             WAX wax = new WAX(filePath);
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
-            Assert.AreEqual("<root>text</root>", getFileFirstLine(filePath));
+            Assert.Equal("<root>text</root>", getFileFirstLine(filePath));
             File.Delete(filePath);
         }
 
-        [Test]
+        [Fact]
         public void testNewInstanceFile() /* throws IOException */ {
             string filePath = TEMP_XML_FILE_PATH;
             WAX wax = WAX.NewInstance(filePath) as WAX;
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
-            Assert.AreEqual("<root>text</root>", getFileFirstLine(filePath));
+            Assert.Equal("<root>text</root>", getFileFirstLine(filePath));
             File.Delete(filePath);
         }
 
-        [Test]
+        [Fact]
         public void testWriteStream() /* throws IOException */ {
             MemoryStream ms = new MemoryStream();
             WAX wax = new WAX(ms);
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
-            Assert.AreEqual("<root>text</root>", ToString(ms));
+            Assert.Equal("<root>text</root>", ToString(ms));
         }
 
-        [Test]
+        [Fact]
         public void testNewInstanceStream() /* throws IOException */ {
             MemoryStream ms = new MemoryStream();
             WAX wax = WAX.NewInstance(ms) as WAX;
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
-            Assert.AreEqual("<root>text</root>", ToString(ms));
+            Assert.Equal("<root>text</root>", ToString(ms));
         }
 
-        [Test]
+        [Fact]
         public void testNewInstanceWriter() /* throws IOException */ {
             StringWriter sw = new StringWriter();
             WAX wax = WAX.NewInstance(sw) as WAX;
             wax.SetIndent(null);
             wax.Start("root").Text("text").Close();
-            Assert.AreEqual("<root>text</root>", sw.ToString());
+            Assert.Equal("<root>text</root>", sw.ToString());
         }
 
-        [Test]
+        [Fact]
         public void testXMLDeclaration() {
             StringWriter sw = new StringWriter();
             WAX wax = new WAX(sw, WAX.Version.V1_0);
@@ -820,7 +819,7 @@ namespace WaxTest
             wax.Start("root").Close();
 
             string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root/>";
-            Assert.AreEqual(xml, sw.ToString());
+            Assert.Equal(xml, sw.ToString());
         }
 
         // TODO: Tests for 'NewInstance' methods.

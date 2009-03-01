@@ -1,104 +1,103 @@
 using System;
 using WAXNamespace;
-using NUnit.Framework;
+using Xunit;
 
 namespace WaxTest
 {
-    [TestFixture]
     public class XMLUtilTest
     {
-        [Test]
+        [Fact]
         public void testBadComment()
         {
             try {
                 XMLUtil.VerifyComment("one -- two");
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"one -- two\" is an invalid comment", ex.Message);
+                Assert.Equal("\"one -- two\" is an invalid comment", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testBadNMToken()
         {
             try
             {
                 XMLUtil.VerifyNMToken("1a");
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"1a\" is an invalid NMTOKEN", ex.Message);
+                Assert.Equal("\"1a\" is an invalid NMTOKEN", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testBadVersion()
         {
             try
             {
                 XMLUtil.VerifyVersion("1.3");
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\"1.3\" is an invalid XML version", ex.Message);
+                Assert.Equal("\"1.3\" is an invalid XML version", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testBadURI()
         {
             try
             {
                 XMLUtil.VerifyURI(":junk");
-                Assert.Fail("Expected ArgumentException.");
+                Assert.True(false, "Expected ArgumentException.");
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("\":junk\" is an invalid URI", ex.Message);
+                Assert.Equal("\":junk\" is an invalid URI", ex.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testEscape() {
-            Assert.AreEqual("&lt;", XMLUtil.Escape("<"));
-            Assert.AreEqual("&gt;", XMLUtil.Escape(">"));
-            Assert.AreEqual("&amp;", XMLUtil.Escape("&"));
-            Assert.AreEqual("&apos;", XMLUtil.Escape("'"));
-            Assert.AreEqual("&quot;", XMLUtil.Escape("\""));
-            Assert.AreEqual("1&lt;2&gt;3&amp;4&apos;5&quot;6", XMLUtil.Escape("1<2>3&4'5\"6"));
+            Assert.Equal("&lt;", XMLUtil.Escape("<"));
+            Assert.Equal("&gt;", XMLUtil.Escape(">"));
+            Assert.Equal("&amp;", XMLUtil.Escape("&"));
+            Assert.Equal("&apos;", XMLUtil.Escape("'"));
+            Assert.Equal("&quot;", XMLUtil.Escape("\""));
+            Assert.Equal("1&lt;2&gt;3&amp;4&apos;5&quot;6", XMLUtil.Escape("1<2>3&4'5\"6"));
         }
 
-        [Test]
+        [Fact]
         public void testIsComment() {
-            Assert.IsTrue(XMLUtil.IsComment("one two"));
-            Assert.IsTrue(XMLUtil.IsComment("one - two"));
-            Assert.IsTrue(!XMLUtil.IsComment("one -- two"));
-            Assert.IsTrue(!XMLUtil.IsComment("-- one two"));
-            Assert.IsTrue(!XMLUtil.IsComment("one two --"));
+            Assert.True(XMLUtil.IsComment("one two"));
+            Assert.True(XMLUtil.IsComment("one - two"));
+            Assert.True(!XMLUtil.IsComment("one -- two"));
+            Assert.True(!XMLUtil.IsComment("-- one two"));
+            Assert.True(!XMLUtil.IsComment("one two --"));
         }
 
-        [Test]
+        [Fact]
         public void testIsNMToken() {
-            Assert.IsTrue(XMLUtil.IsNMToken("a1"));
-            Assert.IsTrue(!XMLUtil.IsNMToken("1a"));
+            Assert.True(XMLUtil.IsNMToken("a1"));
+            Assert.True(!XMLUtil.IsNMToken("1a"));
         }
 
-        [Test]
+        [Fact]
         public void testIsURI() {
-            Assert.IsTrue(XMLUtil.IsURI("http://www.ociweb.com/foo"));
-            Assert.IsTrue(!XMLUtil.IsURI(":junk"));
+            Assert.True(XMLUtil.IsURI("http://www.ociweb.com/foo"));
+            Assert.True(!XMLUtil.IsURI(":junk"));
         }
 
-        [Test]
+        [Fact]
         public void testIsVersion() {
-            Assert.IsTrue(XMLUtil.IsVersion("1.0"));
-            Assert.IsTrue(XMLUtil.IsVersion("1.1"));
-            Assert.IsTrue(XMLUtil.IsVersion("1.2"));
-            Assert.IsTrue(!XMLUtil.IsVersion("1.3"));
+            Assert.True(XMLUtil.IsVersion("1.0"));
+            Assert.True(XMLUtil.IsVersion("1.1"));
+            Assert.True(XMLUtil.IsVersion("1.2"));
+            Assert.True(!XMLUtil.IsVersion("1.3"));
         }
     }
 }
