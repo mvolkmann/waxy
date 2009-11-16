@@ -350,7 +350,10 @@ import java.util.*;
 
         // Write the attributes needed to associate XML Schemas
         // with this XML.
-        writeNamespaceDeclaration("xsi", XMLUtil.XMLSCHEMA_INSTANCE_NS, null);
+        String xmlSchemaVersion = out.getSchemaVersion();
+        String ns_uri = "http://www.w3.org/" + xmlSchemaVersion +
+            "/XMLSchema-instance";
+        writeNamespaceDeclaration("xsi", ns_uri, null);
         writeAttributeEqualsValue("xsi", "schemaLocation",
             formatSchemaLocationString(), out.isIndentDefined(), false);
 

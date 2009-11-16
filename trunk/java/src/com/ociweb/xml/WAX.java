@@ -522,6 +522,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     }
 
     /**
+     * Gets the part of the xsi namespace URI that specifies
+     * the version of XML Schema being used.
+     * Typically it will be "1999" or "2001"
+     */
+    public String getSchemaVersion() {
+        return out.getSchemaVersion();
+    }
+
+    /**
      * Indicates whether a space is added before the slash in empty elements.
      * @see #setSpaceInEmptyElements(boolean)
      * @return true if a space is added; false otherwise
@@ -710,6 +719,15 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
      */
     public void setLineSeparator(String lineSeparator) {
         out.setLineSeparator(lineSeparator);
+    }
+
+    /**
+     * Sets the part of the xsi namespace URI that specifies
+     * the version of XML Schema being used.
+     * @param version typically "1999" or "2001"
+     */
+    public void setSchemaVersion(String version) {
+        out.setSchemaVersion(version);
     }
 
     /**
