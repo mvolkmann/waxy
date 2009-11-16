@@ -88,7 +88,7 @@
     <zip destfile="build/${ant.project.name}_${version}.jar">
       <fileset dir="${classes.dir}">
         <exclude name="*.class"/>
-        <exclude name="**/*Test.class"/>
+        <exclude name="**/*Test*.class"/>
       </fileset>
     </zip>
   </target>
@@ -108,6 +108,11 @@
     <echo>clients also need retroweaver-rt-2.0.6.jar in classpath</echo>
   </target>
 
+  <target name="playground" depends="compile"
+    description="runs the Playground application">
+    <java classname="Playground" classpathref="classpath" fork="true"/>
+  </target>
+
   <target name="test" depends="clean.test, compile"
    description="runs all JUnit tests">
     <mkdir dir="${test.dir}"/>
@@ -120,11 +125,11 @@
       </batchtest>
       <formatter type="xml"/>
 
-      <!-- Set EMMA-specifice properties. -->
+      <!-- Set EMMA-specific properties. -->
       <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma"/>
       <jvmarg value="-Demma.coverage.out.merge=true"/>
 
-      <!-- Set Cobertura-specifice properties. -->
+      <!-- Set Cobertura-specific properties. -->
       <jvmarg value="-Dnet.sourceforge.cobertura.datafile=${cobertura.datafile}"/>
     </junit>
 

@@ -54,6 +54,7 @@ import java.util.List;
 
     private String lineSeparator;
     private String indent = "  ";
+    private String schemaVersion = "1999";
 
     private boolean attrOnNewLine;
     private boolean closeStream = true;
@@ -146,6 +147,15 @@ import java.util.List;
 
     public String getLineSeparator() {
         return lineSeparator;
+    }
+
+    /**
+     * Gets the part of the xsi namespace URI that specifies
+     * the version of XML Schema being used.
+     * Typically it will be "1999" or "2001"
+     */
+    public String getSchemaVersion() {
+        return schemaVersion;
     }
 
     /**
@@ -274,6 +284,15 @@ import java.util.List;
         }
 
         this.lineSeparator = lineSeparator;
+    }
+
+    /**
+     * Sets the part of the xsi namespace URI that specifies
+     * the version of XML Schema being used.
+     * @param version typically "1999" or "2001"
+     */
+    public void setSchemaVersion(String schemaVersion) {
+        this.schemaVersion = schemaVersion;
     }
 
     /**

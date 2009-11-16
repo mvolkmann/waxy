@@ -95,8 +95,8 @@ public final class XMLUtil {
         "^[" + NAME_START_CHAR_CLASS_RANGES + "]["
         + NAME_CHAR_CLASS_RANGES + "]*$");
 
-    public static final String XMLSCHEMA_INSTANCE_NS =
-        "http://www.w3.org/1999/XMLSchema-instance";
+    //public static final String XMLSCHEMA_INSTANCE_NS =
+    //    "http://www.w3.org/1999/XMLSchema-instance";
 
     /**
      * Creating instances of this class is not allowed

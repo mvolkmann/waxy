@@ -12,6 +12,14 @@ Version 0.9.9
 - addresses the following issues:
   30, 31, 34, 39, 40, 41, 42, 43, 44, 45
 
+Version 1.0.0
+- addresses the following issues:
+  46, 50, 52, 53, 54, 55
+
+Version 1.0.1
+- addresses the following issues:
+  56
+
 Issues that won't be fixed
   12, 32
 
@@ -19,4 +27,4 @@ Non-Java issues
   3, 4, 5, 33, 35, 36, 37
 
 Outstanding issues
-  9, 26, 27, 38
+  9, 26, 27, 38, 47, 48, 49, 51

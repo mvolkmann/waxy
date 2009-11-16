@@ -1651,6 +1651,26 @@ public class WAXTest {
     }
 
     @Test
+    public void testSetSchemaVersion() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw);
+        wax.setIndent(null);
+
+        String schemaVersion = "2001";
+        wax.setSchemaVersion(schemaVersion);
+        assertEquals(schemaVersion, wax.getSchemaVersion());
+
+        wax.start("root")
+           .defaultNamespace("http://www.ociweb.com/tns", "tns.xsd")
+           .close();
+        String xml =
+            "<root xmlns=\"http://www.ociweb.com/tns\" " +
+            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+            "xsi:schemaLocation=\"http://www.ociweb.com/tns tns.xsd\"/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
     public void testSpaceInEmptyElements() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw);
