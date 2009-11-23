@@ -4,7 +4,7 @@ package com.ociweb.xml;
  * This interface defines the methods that can be called
  * after the beginning of a start tag has been output, but
  * before it has been terminated with an end tag or the shorthand way (/>).
- * 
+ *
  * <p>
  *   Copyright (c) 2008, R. Mark Volkmann<br />
  *   All rights reserved.
@@ -62,6 +62,11 @@ public interface ElementWAX extends CommonWAX {
     ElementWAX cdata(String text, boolean newLine);
 
     /**
+     * @see WAX#child(String)
+     */
+    ElementWAX child(String name);
+
+   /**
      * @see WAX#child(String, String)
      */
     ElementWAX child(String name, String text);
@@ -105,4 +110,5 @@ public interface ElementWAX extends CommonWAX {
      * @see WAX#unescapedText(String, boolean)
      */
     ElementWAX unescapedText(String unescapedText, boolean newLine);
+
 }
