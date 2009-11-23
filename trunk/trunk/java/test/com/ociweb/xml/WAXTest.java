@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 
 /**
  * This class provides unit test methods for WAX.
- * 
+ *
  * <p>
  *   Copyright (c) 2008, R. Mark Volkmann<br />
  *   All rights reserved.
@@ -103,7 +103,7 @@ public class WAXTest {
     }
 
     private static IOException getIOException(WAXIOException waxIOException) {
-        WAXException waxException = (WAXException) waxIOException;
+        WAXException waxException = waxIOException;
         IOException actualIOException = waxIOException.getIOException();
         assertSame(waxException.getCause(), actualIOException);
         return actualIOException;
@@ -174,7 +174,7 @@ public class WAXTest {
         String xml = "<root a=\"1&amp;2\"/>";
         assertEquals(xml, sw.toString());
     }
-    
+
     @Test
     public void testAttributeWithoutEscape() {
         StringWriter sw = new StringWriter();
@@ -676,7 +676,7 @@ public class WAXTest {
 
         assertEquals(xml, sw.toString());
     }
-    
+
     @Test
     public void testBlankLine() {
         StringWriter sw = new StringWriter();
@@ -752,7 +752,7 @@ public class WAXTest {
 
     @Test
     public void testCloseThrowsIOException() {
-        final IOException testIOException = 
+        final IOException testIOException =
             new IOException("JUnit test exception");
 
         StringWriter sw = new StringWriter() {
@@ -762,7 +762,7 @@ public class WAXTest {
                 throw testIOException;
             }
         };
-        
+
         WAX wax = new WAX(sw);
         wax.noIndentsOrLineSeparators();
         wax.start("root");
@@ -813,7 +813,7 @@ public class WAXTest {
             "    <grandchild>some text</grandchild>" + lineSeparator +
             "  </foo:child-->" + lineSeparator +
             "</root>";
-        
+
         assertEquals(xml, sw.toString());
     }
 
@@ -952,6 +952,7 @@ public class WAXTest {
      * string is not marking the end of a <a
      * href="http://www.w3.org/TR/2008/PER-xml-20080205/#dt-cdsection">CDATA
      * section</a>."
+     * @throws Exception if there's a problem.
      */
     @Test
     public void testCompatibilityQuoteForCdataEndMarker() throws Exception {
@@ -1810,7 +1811,7 @@ public class WAXTest {
             "<root/>";
         assertEquals(xml, sw.toString());
     }
-    
+
     @Test
     public void testXMLVersionNull() {
         StringWriter sw = new StringWriter();
@@ -1836,6 +1837,32 @@ public class WAXTest {
             "<?xml-stylesheet type=\"text/xsl\" href=\"root.xslt\"?>" + lineSeparator +
             "<root/>";
 
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testEmptyChild() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw, Version.V1_1);
+        wax.child("root").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
+            "<root/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testFinalNewline() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw, Version.V1_1).includeFinalNewline();
+        wax.child("root").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
+            "<root/>\n";
         assertEquals(xml, sw.toString());
     }
 }
