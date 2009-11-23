@@ -1841,7 +1841,7 @@ public class WAXTest {
     }
 
     @Test
-    public void testEmptyChild() {
+    public void testEmptyRoot() {
         StringWriter sw = new StringWriter();
         WAX wax = new WAX(sw, Version.V1_1);
         wax.child("root").close();
@@ -1850,6 +1850,20 @@ public class WAXTest {
         String xml =
             "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
             "<root/>";
+        assertEquals(xml, sw.toString());
+    }
+
+    @Test
+    public void testEmptyChild() {
+        StringWriter sw = new StringWriter();
+        WAX wax = new WAX(sw, Version.V1_1);
+        wax.start("root")
+                .child("foo").close();
+
+        String lineSeparator = wax.getLineSeparator();
+        String xml =
+            "<?xml version=\"1.1\" encoding=\"UTF-8\"?>" + lineSeparator +
+            "<root>" + lineSeparator + "  <foo/>" + lineSeparator + "</root>";
         assertEquals(xml, sw.toString());
     }
 
