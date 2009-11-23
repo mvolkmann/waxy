@@ -40,7 +40,6 @@ package com.ociweb.test;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import junit.framework.Assert;
 
 
@@ -50,13 +49,13 @@ import junit.framework.Assert;
  * B.equals(A) is also true. It also specifies that if A.equals(B) is true then
  * A.hashCode() will equals B.hashCode().
  * <p>
- * 
+ *
  * It is also common practice to implement equals using an instanceof check
  * which will result in false positives in some cases. Specifically, it will
  * result in false positives when comparing against a subclass with the same
  * values. For an in-depth discussion of the common problems when implementing
  * the equals contract, refer to the book "Practical Java" by Peter Haggar
- * 
+ *
  * <pre>
  * // WRONG way of implementing equals
  * public boolean equals( final Object object ) {
@@ -66,9 +65,9 @@ import junit.framework.Assert;
  *     return false;
  * }
  * </pre>
- * 
+ *
  * The correct way to implement equals is as follows
- * 
+ *
  * <pre>
  * public boolean equals(final Object object) {
  * 	if (object != null &amp;&amp; object.getClass() == this.getClass()) {
@@ -77,11 +76,11 @@ import junit.framework.Assert;
  * 	return false;
  * }
  * </pre>
- * 
+ *
  * EqualsTester ensures that the equals() and hashCode() methods have been
  * implemented correctly.
  * <p>
- * 
+ *
  * <pre>
  * final Object a = new Foo(4); // original object
  * final Object b = new Foo(4); // another object that has the same values as the original
@@ -90,7 +89,7 @@ import junit.framework.Assert;
  * }; // a subclass of Foo with the same values as the original
  * new EqualsTester(a, b, c, d);
  * </pre>
- * 
+ *
  * @version $Revision: 1.4 $
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  */
@@ -99,7 +98,7 @@ public class EqualsTester extends Assert {
 	/**
 	 * Perform the test. The act of instantiating one of these will run the
 	 * test.
-	 * 
+	 *
 	 * @param a
 	 *            The object to be tested
 	 * @param b
@@ -190,7 +189,7 @@ public class EqualsTester extends Assert {
 	/**
 	 * C may not be null if it has a public non-default constructor or any
 	 * setXX() methods
-	 * 
+	 *
 	 * @param clazz
 	 */
 	private void assertCAllowedToBeNull(final Class<?> clazz) {

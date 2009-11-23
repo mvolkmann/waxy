@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  *   easy, fast and efficient in terms of memory utilization.
  * </p>
  * <p>A WAX object should not be used from multiple threads!</p>
- * 
+ *
  * <p>For more information, see <a href="http://www.ociweb.com/wax/"
  *   target="_blank">http://www.ociweb.com/wax/</a>.</p>
  * <p>
@@ -95,6 +95,11 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
     private boolean verifyUsage = true;
 
     /**
+     * Indicates whether to add a final newline to the output when closing.
+     */
+    private boolean addFinalNewline;
+
+    /**
      * Creates a WAX that writes to stdout.
      */
     public WAX() { this(Version.UNSPECIFIED); }
@@ -137,6 +142,18 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         out = new XMLWriter(writer, verifyUsage);
         writeXMLDeclaration(version);
     }
+
+    /**
+     * Indicate that WAX should add a final newline when closing this WAX.
+     * @return this WAX object.
+     */
+    public WAX includeFinalNewline() { addFinalNewline = true; return this; }
+
+    /**
+     * Indicate that WAX should not add a final newline when closing this WAX.
+     * @return this WAX object.
+     */
+    public WAX excludeFinalNewline() { addFinalNewline = false; return this; }
 
     /**
      * Writes an attribute for the currently open element start tag.
@@ -239,7 +256,17 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         text(start + middle + end, newLine, false);
         return this;
     }
-    
+
+    /**
+     * A convenience method that is a shortcut for
+     * start(name).end().
+     * @param name the child element name
+     * @return the calling object to support chaining
+     */
+    public ElementWAX child(String name) {
+        return start(name).end();
+    }
+
     /**
      * A convenience method that is a shortcut for
      * start(name).text(text).end().
@@ -286,6 +313,8 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         while (currentElementMetadata != null) {
             end();
         }
+
+        if ( addFinalNewline ) { out.writeln(); }
 
         out.close();
     }
@@ -550,7 +579,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
 
     /**
      * Creates a Writer for a given file path.
-     * 
+     *
      * @param filePath
      *            the file path
      * @return the Writer
@@ -661,7 +690,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (verifyUsage && !("xml-stylesheet").equals(target)) {
             XMLUtil.verifyName(target);
         }
-        
+
         closeStartTag();
         out.writeProcessingInstruction(target, data);
         return this;
@@ -933,7 +962,7 @@ public class WAX implements PrologOrElementWAX, StartTagWAX {
         if (version == null) {
             throw new IllegalArgumentException("unsupported XML version");
         }
-        
+
         if (version != Version.UNSPECIFIED) {
             out.writeXMLDeclaration(version.getVersionNumberString());
         }
