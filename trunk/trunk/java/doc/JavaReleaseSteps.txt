@@ -1,5 +1,6 @@
 Steps to create a new WAX for Java release
 
+- update doc/ReleaseNotes.txt
 - change the version property in build.properties
 - open a Terminal window
 - cdwax
