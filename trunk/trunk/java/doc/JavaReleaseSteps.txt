@@ -3,8 +3,8 @@ Steps to create a new WAX for Java release
 - update doc/ReleaseNotes.txt
 - change the version property in build.properties
 - open a Terminal window
-- cdwax
-- cd waxy/java
+- cd wax
+- cd waxy/trunk/java
 - run "ant zip jar jar14 javadoc"
 - rm -rf ~/Documents/VolkmannWebSite/programming/WAX/doc/api
 - cp -r doc/api ~/Documents/VolkmannWebSite/programming/WAX/doc
