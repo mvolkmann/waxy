@@ -111,10 +111,12 @@ public final class XMLUtil {
      * @return the escaped text
      */
     public static String escape(Object value) {
+        if (value == null) return "";
+
         String text = value.toString();
 
         // Escape special characters in text.
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < text.length(); ++i) {
             char c = text.charAt(i);
             if (c == '<') {
