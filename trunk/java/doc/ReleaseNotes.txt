@@ -28,5 +28,22 @@ Version 1.0.1
 ==========================================================================
 Version 1.0.2
 - addresses the following issues:
-58: WAX needs to support appending a final newline to it's generated XML
-59: Provide convenience method to create an empty child without specifying anything for the content of the element
+  58: WAX needs to support appending a final newline to it's generated XML.
+  59: Provide convenience method to create an empty child without
+      specifying anything for the content of the element.
+
+==========================================================================
+Version 1.0.3
+- minor changes to XMLWriter.java to always use UTF-8
+  (needed for RoaDTIMe project)
+
+==========================================================================
+
+Issues that won't be fixed
+  12, 32
+
+Non-Java issues
+  3, 4, 5, 33, 35, 36, 37
+
+Outstanding issues
+  9, 26, 27, 38, 47, 48, 49, 51
