@@ -548,8 +548,10 @@ import java.util.List;
         // Also, many uses might expect WAX to use UTF-8 encoding
         // regardless of the value of that property.
 
-        final String encoding = writer instanceof OutputStreamWriter ?
-            ((OutputStreamWriter) writer).getEncoding() :
+        // This was changed on 7/15 to support the RoaDTIMe project.
+        final String encoding =
+            //writer instanceof OutputStreamWriter ?
+            //((OutputStreamWriter) writer).getEncoding() :
             XMLUtil.DEFAULT_ENCODING;
 
         writeln("<?xml version=\"" + versionString
