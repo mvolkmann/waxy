@@ -14,19 +14,19 @@ Steps to create a new WAX for Java release
 - click the "New Download" link
 - for "Summary", enter "source"
 - press the "Browse..." button
-- select the "WAX_src_{version}.zip" file in WAX/waxy
+- select the "WAX_src_{version}.zip" file in WAX/waxy/trunk
 - press the "Submit File" button
 
 - click the "New Download" link
 - for "Summary", enter "binary for Java 5 and above"
 - press the "Browse..." button
-- select the "WAX_{version}.jar" file in WAX/waxy/java/build
+- select the "WAX_{version}.jar" file in WAX/waxy/trunk/java/build
 - press the "Submit File" button
 
 - click the "New Download" link
 - for "Summary", enter "binary for Java 1.4"
 - press the "Browse..." button
-- select the "WAX14_{version}.jar" file in WAX/waxy/java/build
+- select the "WAX14_{version}.jar" file in WAX/waxy/trunk/java/build
 - press the "Submit File" button
 
 - update Documents/VolkmannWebSite/programming/wax.html if necessary
