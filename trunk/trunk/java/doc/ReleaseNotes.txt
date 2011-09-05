@@ -39,6 +39,21 @@ Version 1.0.3
 
 ==========================================================================
 
+Version 1.0.4
+- fixed encoding of attribute values to correctly handle
+  newline and tab characters
+
+==========================================================================
+
+Version 1.0.5
+- fixed two failing tests in WAXTest.java
+- restored some sanity to that code
+  * no more long exception names, just use "e"
+  * no more 8-space indentation
+  * catch and finally on same line as }
+
+==========================================================================
+
 Issues that won't be fixed
   12, 32
 

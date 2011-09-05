@@ -129,6 +129,10 @@ public final class XMLUtil {
                 sb.append("&quot;");
             } else if (c == '&') {
                 sb.append("&amp;");
+            } else if (c == '\n') {
+                sb.append("&#xA;");
+            } else if (c == '\t') {
+                sb.append("&#x9;");
             } else {
                 sb.append(c);
             }
