@@ -13,7 +13,7 @@
 
   <path id="classpath">
     <pathelement location="${classes.dir}"/>
-    <pathelement location="${junit.jar}"/>
+    <pathelement location="lib/junit-4.8.2.jar"/>
   </path>
 
   <target name="browse" description="opens a file using a web browser">
@@ -46,8 +46,10 @@
   <target name="compile" depends="init"
     description="compiles source files">
     <javac srcdir="src" destdir="${classes.dir}"
+      includeantruntime="false"
       classpathref="classpath" deprecation="on" debug="on"/>
     <javac srcdir="test" destdir="${classes.dir}"
+      includeantruntime="false"
       classpathref="classpath" deprecation="on" debug="on"/>
   </target>
 
@@ -57,7 +59,7 @@
     <findbugs home="${findbugs.dir}"
       output="html" outputFile="build/wax-fb.html">
       <sourcePath path="src"/>
-      <auxClasspath location="${junit.jar}"/>
+      <auxClasspath location="lib/junit-4.8.2.jar"/>
       <class location="${classes.dir}"/>
     </findbugs>
     <antcall target="browse">
@@ -98,8 +100,8 @@
     <taskdef name="retroweaver" 
       classname="net.sourceforge.retroweaver.ant.RetroWeaverTask"> 
       <classpath> 
-        <fileset dir="${retroweaver.dir}/lib" includes="**/*"/> 
-        <fileset dir="${retroweaver.dir}/release" includes="**/*"/> 
+        <fileset dir="lib/retroweaver-2.0.6/lib" includes="**/*"/> 
+        <fileset dir="lib/retroweaver-2.0.6/release" includes="**/*"/> 
       </classpath>
     </taskdef> 
     <retroweaver
@@ -130,7 +132,7 @@
       <jvmarg value="-Demma.coverage.out.merge=true"/>
 
       <!-- Set Cobertura-specific properties. -->
-      <jvmarg value="-Dnet.sourceforge.cobertura.datafile=${cobertura.datafile}"/>
+      <!--jvmarg value="-Dnet.sourceforge.cobertura.datafile=${cobertura.datafile}"/-->
     </junit>
 
     <junitreport toDir="${test.dir}">

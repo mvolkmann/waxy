@@ -13,7 +13,7 @@
   <path id="coverage.classpath">
     <pathelement location="${coverage.classes.dir}"/>
     <pathelement location="${classes.dir}"/>
-    <pathelement location="${junit.jar}"/>
+    <pathelement location="lib/junit-4.8.2.jar}"/>
     <path refid="coverage.path"/>
   </path>
 
