@@ -1,6 +1,6 @@
-#summary One-sentence summary of this page.
+#summary How to install WAX for Maven project builds
 
-= Using WAX in your Maven project =
+= WAX in your Maven project =
 
 WAX is not yet available to Maven central. To use it in your Maven 2 build:
 
