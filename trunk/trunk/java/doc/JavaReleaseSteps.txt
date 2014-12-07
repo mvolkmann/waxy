@@ -8,6 +8,17 @@ Steps to create a new WAX for Java release
 - run "ant zip jar jar14 javadoc"
 - rm -rf ~/Documents/VolkmannWebSite/programming/WAX/doc/api
 - cp -r doc/api ~/Documents/VolkmannWebSite/programming/WAX/doc
+
+- update Documents/VolkmannWebSite/programming/wax.html if necessary
+- open a Terminal window
+- cd Documents/VolkmannWebSite
+- cp programming/wax.html programming/WAX.html
+- ./release
+
+The rest of these steps no longer work because
+Google stopped supporting downloads as of 1/15/14.
+See http://thenextweb.com/google/2013/05/22/google-codes-download-option-deprecated-due-to-misuse-only-existing-project-downloads-to-be-kept-after-january-15/
+
 - browse to http://code.google.com/p/waxy/
 - click the "Downloads" tab
 
@@ -28,9 +39,3 @@ Steps to create a new WAX for Java release
 - press the "Choose File" button
 - select the "wax14_{version}.jar" file in WAX/waxy/trunk/java/build
 - press the "Submit File" button
-
-- update Documents/VolkmannWebSite/programming/wax.html if necessary
-- open a Terminal window
-- cd Documents/VolkmannWebSite
-- cp programming/wax.html programming/WAX.html
-- ./release
