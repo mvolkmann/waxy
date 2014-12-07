@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
  * </p>
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class WAX implements PrologOrElementWAX, StartTagWAX {
+public class WAX implements Closeable, PrologOrElementWAX, StartTagWAX {
 
     public static final String MAC_LINE_SEPARATOR = "\n";
     public static final String UNIX_LINE_SEPARATOR = "\n";
